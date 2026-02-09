@@ -33,45 +33,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     useEffect(() => {
         let mounted = true;
 
-        const fetchSession = async () => {
+        const initAuth = async () => {
+            console.log("AuthContext: Starting session init...");
             try {
-                // Safety timeout to prevent infinite loading
-                const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('Session fetch timeout')), 10000)
-                );
-
-                const user = await Promise.race([
-                    PulseService.getCurrentUser(),
-                    timeoutPromise
-                ]) as UserProfile | null;
-
-                if (mounted) setCurrentUser(user);
+                // 1. Check current session
+                const user = await PulseService.getCurrentUser();
+                if (mounted) {
+                    setCurrentUser(user);
+                    console.log("AuthContext: Initial session loaded", user?.id);
+                }
             } catch (error) {
-                console.error("Error fetching session:", error);
+                console.error("AuthContext: Error initializing session:", error);
             } finally {
                 if (mounted) setLoading(false);
             }
+
+            // 2. Listen for auth changes
+            const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+                console.log(`AuthContext: Auth event ${event}`);
+
+                if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+                    // Only re-fetch if we have a session but no user, or if it changed
+                    if (session?.user) {
+                        const user = await PulseService.getCurrentUser();
+                        if (mounted) setCurrentUser(user);
+                    }
+                } else if (event === 'SIGNED_OUT') {
+                    if (mounted) setCurrentUser(null);
+                    // Ensure we are not loading if signed out
+                    setLoading(false);
+                }
+            });
+
+            return subscription;
         };
 
-        fetchSession();
-
-        // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-                // Optionally ensure loading is valid?
-                // Usually handle via state, but if we want to be safe we can re-fetch
-                if (session?.user) {
-                    const user = await PulseService.getCurrentUser();
-                    if (mounted) setCurrentUser(user);
-                }
-            } else if (event === 'SIGNED_OUT') {
-                if (mounted) setCurrentUser(null);
-            }
-        });
+        const subscriptionPromise = initAuth();
 
         return () => {
             mounted = false;
-            subscription.unsubscribe();
+            subscriptionPromise.then(sub => sub?.unsubscribe());
         };
     }, []);
 

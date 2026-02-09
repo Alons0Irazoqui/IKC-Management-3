@@ -340,11 +340,14 @@ export const PulseService = {
             // BUT registerStudent creates it manually now, so it should be there.
             // For Masters, trigger might be slow.
 
+            console.log("getCurrentUser: Fetching profile for", session.user.id);
             const { data: profile, error: profError } = await supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', session.user.id)
                 .maybeSingle(); // Use maybeSingle to avoid error if not found immediately
+
+            console.log("getCurrentUser: Profile fetch result", { profile, profError });
 
             if (profError) {
                 console.warn("Error fetching profile for current user:", profError);
@@ -396,6 +399,55 @@ export const PulseService = {
             ownerId: data.owner_id,
             ...data.settings
         } as AcademySettings;
+    },
+
+    // --- OPTIMIZED FETCH METHODS (Role-Based) ---
+
+    getStudentById: async (studentId: string): Promise<Student | null> => {
+        if (!studentId) return null;
+        const { data, error } = await supabase
+            .from('students')
+            .select('*')
+            .eq('id', studentId)
+            .single();
+
+        if (error || !data) return null;
+
+        return {
+            id: data.id,
+            userId: data.user_id,
+            academyId: data.academy_id,
+            name: data.name,
+            email: data.email,
+            status: data.status,
+            rankId: data.rank_id,
+            balance: data.balance,
+            attendance: data.attendance_data?.total || 0,
+            attendanceHistory: data.attendance_data?.history || [],
+            ...data.details
+        } as Student;
+    },
+
+    getPaymentsByStudent: async (studentId: string): Promise<TuitionRecord[]> => {
+        if (!studentId) return [];
+        const { data, error } = await supabase
+            .from('payments')
+            .select('*')
+            .eq('student_id', studentId);
+
+        if (error || !data) return [];
+
+        return data.map(row => ({
+            id: row.id,
+            academyId: row.academy_id,
+            studentId: row.student_id,
+            amount: row.amount,
+            status: row.status,
+            dueDate: row.due_date,
+            paymentDate: row.payment_date,
+            concept: row.concept,
+            ...row.details
+        })) as TuitionRecord[];
     },
 
     getStudents: async (academyId?: string): Promise<Student[]> => {

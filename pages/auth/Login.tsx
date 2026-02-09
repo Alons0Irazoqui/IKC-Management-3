@@ -2,12 +2,30 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../../context/StoreContext';
+import { useAuth } from '../../context/AuthContext';
 
 const Login: React.FC = () => {
     const { login } = useStore();
+    const { currentUser, loading: authLoading } = useAuth(); // Enhanced auth check
     const navigate = useNavigate();
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [loading, setLoading] = useState(false);
+
+    // Redirect if already logged in
+    React.useEffect(() => {
+        if (!authLoading && currentUser) {
+            if (currentUser.role === 'master') navigate('/master/dashboard', { replace: true });
+            else navigate('/student/dashboard', { replace: true });
+        }
+    }, [currentUser, authLoading, navigate]);
+
+    if (authLoading) {
+        return (
+            <div className="min-h-screen w-full flex items-center justify-center bg-white">
+                <div className="size-8 border-4 border-red-100 border-t-red-600 rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

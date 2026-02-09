@@ -218,14 +218,24 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             isPollingRef.current = true;
 
             try {
-                // Parallel Fetching
-                const [dbStudents, dbClasses, dbEvents, dbSettings, dbLibrary, dbPayments] = await Promise.all([
-                    PulseService.getStudents(currentUser.academyId),
+                const isStudent = currentUser.role === 'student';
+                const isMaster = currentUser.role === 'master';
+
+                // 1. Determine Students Fetch
+                let studentsPromise: Promise<Student[]> = Promise.resolve([]);
+                if (isMaster) {
+                    studentsPromise = PulseService.getStudents(currentUser.academyId);
+                } else if (isStudent && currentUser.studentId) {
+                    studentsPromise = PulseService.getStudentById(currentUser.studentId).then(s => s ? [s] : []);
+                }
+
+                // 2. Execute parallel fetches (Classes/Events/Library are generally accessible to academy members)
+                const [dbStudents, dbClasses, dbEvents, dbSettings, dbLibrary] = await Promise.all([
+                    studentsPromise,
                     PulseService.getClasses(currentUser.academyId),
                     PulseService.getEvents(currentUser.academyId),
                     PulseService.getAcademySettings(currentUser.academyId),
-                    PulseService.getLibrary(currentUser.academyId),
-                    PulseService.getPayments(currentUser.academyId) // Pre-fetch payments if needed here or just keep separated
+                    PulseService.getLibrary(currentUser.academyId)
                 ]);
 
                 setStudents(prev => {

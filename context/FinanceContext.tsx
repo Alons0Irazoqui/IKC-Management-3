@@ -88,7 +88,18 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const loadFinanceData = useCallback(async () => {
         if (currentUser?.academyId) {
             setIsFinanceLoading(true);
-            const dbRecords = await PulseService.getPayments(currentUser.academyId);
+            let dbRecords: TuitionRecord[] = [];
+
+            if (currentUser.role === 'student' && currentUser.studentId) {
+                dbRecords = await PulseService.getPaymentsByStudent(currentUser.studentId);
+            } else if (currentUser.role === 'master') {
+                dbRecords = await PulseService.getPayments(currentUser.academyId);
+            } else {
+                // Unknown role or incomplete data? Don't fetch potentially restricted data
+                console.warn("FinanceContext: Unknown role or missing ID, skipping load.", currentUser.role);
+                dbRecords = [];
+            }
+
             setRecords(dbRecords);
             setIsFinanceLoading(false);
         } else {
@@ -178,6 +189,11 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     useEffect(() => {
         if (isFinanceLoading || students.length === 0) return;
 
+        // CRITICAL FIX: Only MASTER can update records (set to overdue).
+        // Students should trigger a read-only debt calc or we rely on Master's view to update DB.
+        // We will allow Debt Calculation for students (local), but NOT DB Updates.
+
+        const isMaster = currentUser?.role === 'master';
         const today = getLocalDate();
         let recordsUpdated = false;
 
@@ -193,10 +209,13 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
             return r;
         });
 
-        if (recordsUpdated) {
+        if (recordsUpdated && isMaster) {
             setRecords(processedRecords);
             PulseService.savePayments(processedRecords); // Sync Save
             // return; // Removed return to allow student updates to also run
+        } else if (recordsUpdated) {
+            // For students, we update local state only so they see it red, but don't save to DB (RLS would fail)
+            setRecords(processedRecords);
         }
 
         const studentsToUpdate: Student[] = [];
