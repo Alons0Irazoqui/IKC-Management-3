@@ -31,14 +31,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Initialize Session
     useEffect(() => {
+        let mounted = true;
+
         const fetchSession = async () => {
             try {
-                const user = await PulseService.getCurrentUser();
-                setCurrentUser(user);
+                // Safety timeout to prevent infinite loading
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Session fetch timeout')), 10000)
+                );
+
+                const user = await Promise.race([
+                    PulseService.getCurrentUser(),
+                    timeoutPromise
+                ]) as UserProfile | null;
+
+                if (mounted) setCurrentUser(user);
             } catch (error) {
                 console.error("Error fetching session:", error);
             } finally {
-                setLoading(false);
+                if (mounted) setLoading(false);
             }
         };
 
@@ -47,14 +58,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-                const user = await PulseService.getCurrentUser();
-                setCurrentUser(user);
+                // Optionally ensure loading is valid?
+                // Usually handle via state, but if we want to be safe we can re-fetch
+                if (session?.user) {
+                    const user = await PulseService.getCurrentUser();
+                    if (mounted) setCurrentUser(user);
+                }
             } else if (event === 'SIGNED_OUT') {
-                setCurrentUser(null);
+                if (mounted) setCurrentUser(null);
             }
         });
 
         return () => {
+            mounted = false;
             subscription.unsubscribe();
         };
     }, []);

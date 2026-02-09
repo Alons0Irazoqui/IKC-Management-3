@@ -97,47 +97,44 @@ export const PulseService = {
         const { data: academy, error: acadFetchError } = await supabase
             .from('academies')
             .select('*')
-            .or(`code.eq.${data.academyCode},id.eq.${data.academyCode}`)
+            .eq('code', data.academyCode)
             .single();
 
         if (acadFetchError || !academy) throw new Error("Código de academia inválido.");
 
         const initialAmount = Number(academy.settings?.paymentSettings?.monthlyTuition) || 0;
 
-        // 2. Create Auth User
-        const { data: authData, error: authError } = await supabase.auth.signUp({
-            email: data.email,
-            password: data.password,
-            options: {
-                data: {
-                    display_name: data.name,
-                    role: 'student',
-                    academy_id: academy.id
+        // Prepare Payment Data (if any)
+        let paymentData: any = null;
+        if (initialAmount > 0) {
+            const today = new Date();
+            const monthName = today.toLocaleString('es-ES', { month: 'long' });
+            const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+            const concept = `Mensualidad ${capitalizedMonth}`;
+
+            const lateFeeDay = academy.settings?.paymentSettings?.lateFeeDay || 10;
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(lateFeeDay).padStart(2, '0');
+            const dueDate = `${year}-${month}-${day}`;
+
+            paymentData = {
+                initial_amount: initialAmount,
+                due_date: dueDate,
+                payment_concept: concept,
+                payment_details: {
+                    originalAmount: initialAmount,
+                    penaltyAmount: 0,
+                    type: 'charge',
+                    description: 'Cuota mensual regular',
+                    category: 'Mensualidad',
+                    method: 'System',
+                    canBePaidInParts: false
                 }
-            }
-        });
+            };
+        }
 
-        if (authError) throw authError;
-        if (!authData.user) throw new Error("No se pudo crear el usuario");
-
-        const userId = authData.user.id;
-
-        // 3. Create Profile
-        const { error: profileError } = await supabase
-            .from('profiles')
-            .insert({
-                id: userId,
-                email: data.email,
-                name: data.name,
-                role: 'student',
-                academy_id: academy.id,
-                avatar_url: data.avatarUrl || '',
-                student_id: userId // Linking to self for now as ID is same
-            });
-
-        if (profileError) throw profileError;
-
-        // 4. Create Student Record
+        // Prepare Student Details used in Profile & Student Record
         const studentDetails = {
             age: data.age,
             birthDate: data.birthDate,
@@ -169,66 +166,39 @@ export const PulseService = {
             promotionHistory: []
         };
 
-        const { error: studentError } = await supabase
-            .from('students')
-            .insert({
-                id: userId, // Keep ID consistent
-                user_id: userId,
-                academy_id: academy.id,
-                name: data.name,
-                email: data.email,
-                details: studentDetails,
-                status: initialAmount > 0 ? 'debtor' : 'active',
-                rank_id: academy.settings?.ranks?.[0]?.id || 'white',
-                balance: initialAmount,
-                attendance_data: { total: 0, history: [] }
-            });
-
-        if (studentError) throw studentError;
-
-        // 5. Initial Charge
-        if (initialAmount > 0) {
-            const today = new Date();
-            const monthName = today.toLocaleString('es-ES', { month: 'long' });
-            const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
-            const concept = `Mensualidad ${capitalizedMonth}`;
-
-            const lateFeeDay = academy.settings?.paymentSettings?.lateFeeDay || 10;
-            const year = today.getFullYear();
-            const month = String(today.getMonth() + 1).padStart(2, '0');
-            const day = String(lateFeeDay).padStart(2, '0');
-            const dueDate = `${year}-${month}-${day}`;
-
-            await supabase.from('payments').insert({
-                id: uuid(),
-                academy_id: academy.id,
-                student_id: userId,
-                amount: initialAmount,
-                status: 'pending',
-                due_date: dueDate,
-                concept: concept,
-                details: {
-                    originalAmount: initialAmount,
-                    penaltyAmount: 0,
-                    type: 'charge',
-                    description: 'Cuota mensual regular',
-                    category: 'Mensualidad',
-                    method: 'System',
-                    canBePaidInParts: false
+        // 2. SignUp with Metadata
+        // Since Email Confirmation is ENABLED, we must pass all data to the server
+        // via metadata so a Database Trigger can create the records securely.
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+            email: data.email,
+            password: data.password,
+            options: {
+                data: {
+                    display_name: data.name,
+                    role: 'student',
+                    academy_id: academy.id,
+                    status: initialAmount > 0 ? 'debtor' : 'active',
+                    details: studentDetails,
+                    ...paymentData, // Spread payment fields if they exist
+                    avatarUrl: data.avatarUrl || ''
                 }
-            });
-        }
+            }
+        });
 
-        // Return user profile for context
+        if (authError) throw authError;
+        if (!authData.user) throw new Error("No se pudo crear el usuario");
+
+        // We return a partial profile or indicate success. 
+        // Since session is null, we can't return full profile yet.
         return {
-            id: userId,
+            id: authData.user.id,
             email: data.email,
             name: data.name,
             role: 'student',
             academyId: academy.id,
-            studentId: userId,
-            avatarUrl: data.avatarUrl || ''
-        } as UserProfile;
+            // Flag to UI that verification is needed
+            pendingVerification: !authData.session
+        } as any;
     },
 
     createStudentAccountFromMaster: async (studentData: Student, defaultPassword = 'Pulse123!') => {
@@ -364,20 +334,29 @@ export const PulseService = {
 
         console.log("Session found for user:", session.user.id);
 
-        const { data: profile, error: profError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', session.user.id)
-            .single();
+        try {
+            // Add a timeout or just be safe.
+            // If the user was just created, profile might not exist yet if trigger is slow.
+            // BUT registerStudent creates it manually now, so it should be there.
+            // For Masters, trigger might be slow.
 
-        if (profError) {
-            console.warn("Error fetching profile for current user:", profError);
-            // If RLS blocks read or profile doesn't exist, we might return null or a partial user?
-            // Returning null logs them out effectively in the UI.
-            return null;
-        }
+            const { data: profile, error: profError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .maybeSingle(); // Use maybeSingle to avoid error if not found immediately
 
-        if (profile) {
+            if (profError) {
+                console.warn("Error fetching profile for current user:", profError);
+                return null;
+            }
+
+            if (!profile) {
+                console.warn("Session user exists but Profile not found (yet). Returning null to force re-login or wait.");
+                // Ensure we don't return partial data or hang
+                return null;
+            }
+
             console.log("Profile found:", profile.role);
             return {
                 ...defaultAcademySettings, // Safety fallback for types
@@ -389,8 +368,11 @@ export const PulseService = {
                 avatarUrl: profile.avatar_url,
                 studentId: profile.student_id
             } as UserProfile;
+
+        } catch (e) {
+            console.error("Unexpected error in getCurrentUser:", e);
+            return null;
         }
-        return null;
     },
 
     // --- DATA ACCESS LAYER ---

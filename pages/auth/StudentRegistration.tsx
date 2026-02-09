@@ -117,10 +117,11 @@ const StudentRegistration: React.FC = () => {
   const onSubmit: SubmitHandler<StudentRegistrationForm> = async (data) => {
     setIsSubmitting(true);
     try {
-      const success = await registerStudent(data);
-      if (success) {
-        addToast('Registro completado', 'success');
-        navigate('/student/dashboard');
+      const result: any = await registerStudent(data);
+      if (result) {
+        addToast('Registro exitoso. Por favor revisa tu correo para activar tu cuenta.', 'success');
+        // Redirect to login to verify email
+        setTimeout(() => navigate('/login'), 2500);
       } else {
         addToast('Error al registrar.', 'error');
       }
