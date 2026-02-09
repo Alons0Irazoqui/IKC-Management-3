@@ -55,13 +55,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
                     // Only re-fetch if we have a session but no user, or if it changed
                     if (session?.user) {
-                        const user = await PulseService.getCurrentUser();
-                        if (mounted) setCurrentUser(user);
+                        try {
+                            const user = await PulseService.getCurrentUser();
+                            if (mounted) setCurrentUser(user);
+                        } catch (e) {
+                            console.warn("AuthContext: Silent error fetching user on change", e);
+                        }
                     }
                 } else if (event === 'SIGNED_OUT') {
                     if (mounted) setCurrentUser(null);
                     // Ensure we are not loading if signed out
-                    setLoading(false);
+                    if (mounted) setLoading(false);
                 }
             });
 

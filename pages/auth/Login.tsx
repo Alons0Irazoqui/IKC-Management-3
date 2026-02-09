@@ -35,8 +35,11 @@ const Login: React.FC = () => {
         if (result.success && result.user) {
             if (result.user.role === 'master') navigate('/master/dashboard');
             else navigate('/student/dashboard');
+            // Do NOT call setLoading(false) here, as component unmounts.
+        } else {
+            // Only stop loading if we stay on this page (error case)
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     return (

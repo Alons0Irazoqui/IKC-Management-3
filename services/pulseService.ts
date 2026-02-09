@@ -319,22 +319,22 @@ export const PulseService = {
     },
 
     getCurrentUser: async (): Promise<UserProfile | null> => {
-        console.log("getCurrentUser: checking session...");
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-        if (sessionError) {
-            console.error("Session error:", sessionError);
-            return null;
-        }
-
-        if (!session?.user) {
-            console.log("No active session found.");
-            return null;
-        }
-
-        console.log("Session found for user:", session.user.id);
-
         try {
+            console.log("getCurrentUser: checking session...");
+            const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+            if (sessionError) {
+                console.error("Session error:", sessionError);
+                return null;
+            }
+
+            if (!session?.user) {
+                console.log("No active session found.");
+                return null;
+            }
+
+            console.log("Session found for user:", session.user.id);
+
             // Add a timeout or just be safe.
             // If the user was just created, profile might not exist yet if trigger is slow.
             // BUT registerStudent creates it manually now, so it should be there.
