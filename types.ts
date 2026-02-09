@@ -28,6 +28,17 @@ export interface PaymentSettings {
     lateFeeDay: number;
 }
 
+export interface Expense {
+    id: string;
+    academyId: string;
+    description: string;
+    amount: number;
+    date: string; // ISO DateString
+    category: string;
+    paymentMethod: string;
+    status: 'paid' | 'pending';
+}
+
 export interface AcademySettings {
     id: string;
     name: string;
@@ -94,23 +105,23 @@ export interface Student {
     id: string;
     userId: string;
     academyId: string;
-    
+
     // Auth & Identity
     email: string;
     password?: string;
-    
+
     // Alumno Profile
     name: string;
     age: number;
     birthDate: string;
     cellPhone: string;
     avatarUrl?: string;
-    
+
     // Physical Data
     weight?: number;
     height?: number;
     bloodType?: string; // Added field
-    
+
     // Guardian / Responsible Party
     guardian: GuardianProfile;
 
@@ -121,14 +132,14 @@ export interface Student {
     stripes: number;
     status: StudentStatus;
     program: string;
-    
+
     // Computed / Activity Data
     attendance: number;
     totalAttendance: number;
     lastAttendance?: string;
     attendanceHistory: AttendanceRecord[];
     joinDate: string;
-    balance: number; 
+    balance: number;
     classesId: string[];
     promotionHistory?: PromotionHistoryItem[];
     notes?: Note[];
@@ -170,17 +181,17 @@ export interface CalendarEvent {
     title: string;
     start: Date; // ISO Date Object
     end: Date;   // ISO Date Object
-    
+
     // Core Props
     instructor: string;
     status: 'active' | 'cancelled' | 'rescheduled';
     color: string;
     description?: string;
-    
+
     // Linking to Class System
     classId?: string; // ID of the ClassCategory if this is a generated class instance
-    isRecurring?: boolean; 
-    
+    isRecurring?: boolean;
+
     // Legacy / Extended Support
     instructorName?: string; // Optional for backward compatibility, mapped to instructor
     resourceId?: string;
@@ -189,7 +200,7 @@ export interface CalendarEvent {
     attendees?: string[];
     maxCapacity?: number;
     isCancelled?: boolean; // Legacy flag, mapped to status === 'cancelled'
-    
+
     // UI Helpers (Optional)
     isRegistered?: boolean;
     icon?: string;
@@ -223,30 +234,30 @@ export interface TuitionRecord {
     academyId: string;
     studentId: string;
     studentName?: string; // Denormalized for easier display
-    
+
     concept: string; // "Mensualidad Enero", "Uniforme"
     month?: string; // "2024-01" (Optional context)
-    
+
     amount: number; // Current remaining debt
     originalAmount?: number; // Audit trail: initial debt before partial payments
-    
+
     penaltyAmount: number; // Applied Late fee
     customPenaltyAmount?: number; // Config: Specific penalty for this record if overdue
-    
+
     dueDate: string; // ISO String (YYYY-MM-DD)
     paymentDate: string | null; // ISO String (YYYY-MM-DDTHH:mm:ss) - Frozen on upload
-    
+
     status: TuitionStatus;
     proofUrl: string | null;
     proofType?: string; // 'image/png', 'application/pdf'
-    
+
     method?: 'Efectivo' | 'Transferencia' | 'Tarjeta' | 'System';
 
     // Optional fields for extended functionality
     type?: 'charge' | 'payment';
     description?: string;
     category?: ChargeCategory; // Strongly typed now
-    
+
     // New Fields for Batch & Waterfall Logic
     batchPaymentId?: string; // Links multiple records to one single proof/transaction
     canBePaidInParts: boolean; // Priority flag: False = Must be paid fully (e.g. Tuition)
@@ -255,9 +266,9 @@ export interface TuitionRecord {
 
     // --- ARCHITECTURAL UPDATE: TRANSACTION DETAILS ---
     // Allows storing a breakdown of what was covered in this specific record/payment.
-    details?: { 
-        description: string; 
-        amount: number; 
+    details?: {
+        description: string;
+        amount: number;
     }[];
 
     // --- NEW: Payment History for Partial/Full Tracking ---
@@ -282,9 +293,9 @@ export interface UserProfile {
     role: 'master' | 'student';
     name: string;
     avatarUrl: string;
-    academyId: string; 
-    studentId?: string; 
-    password?: string; 
+    academyId: string;
+    studentId?: string;
+    password?: string;
     paymentMethods?: { id: string; brand: string; last4: string; expMonth: number; expYear: number }[];
 }
 
@@ -335,7 +346,7 @@ export interface Message {
     academyId: string;
     senderId: string;
     senderName: string;
-    recipientId: string | 'all'; 
+    recipientId: string | 'all';
     recipientName: string;
     subject: string;
     content: string;

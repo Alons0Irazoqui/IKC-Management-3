@@ -1,6 +1,6 @@
 
 import { supabase } from '../src/supabaseClient';
-import { Student, ClassCategory, TuitionRecord, UserProfile, LibraryResource, Event, AcademySettings } from '../types';
+import { Student, ClassCategory, TuitionRecord, UserProfile, LibraryResource, Event, AcademySettings, Expense } from '../types';
 import { defaultAcademySettings } from '../mockData';
 
 // Helper for UUID (Client handling if needed, though Supabase Auth handles User IDs)
@@ -534,25 +534,31 @@ export const PulseService = {
                 targetStudentId = studentByUser.id;
             }
 
-            // 2. Query Payments
+            // 2. Query Payments with Student Data
             const { data, error } = await supabase
                 .from('payments')
-                .select('*')
+                .select('*, students(name, first_name, last_name)')
                 .eq('student_id', targetStudentId);
 
             if (error || !data) return [];
 
-            return data.map(row => ({
-                id: row.id,
-                academyId: row.academy_id,
-                studentId: row.student_id,
-                amount: row.amount,
-                status: row.status,
-                dueDate: row.due_date,
-                paymentDate: row.payment_date,
-                concept: row.concept,
-                ...row.details
-            })) as TuitionRecord[];
+            return data.map(row => {
+                const s = row.students as any;
+                const name = s ? (s.first_name ? `${s.first_name} ${s.last_name || ''}`.trim() : s.name) : undefined;
+
+                return {
+                    id: row.id,
+                    academyId: row.academy_id,
+                    studentId: row.student_id,
+                    studentName: name, // MAPPED!
+                    amount: row.amount,
+                    status: row.status,
+                    dueDate: row.due_date,
+                    paymentDate: row.payment_date,
+                    concept: row.concept,
+                    ...row.details
+                } as TuitionRecord;
+            });
         } catch (e) {
             console.warn("getPaymentsByStudent error (swallowed):", e);
             return [];
@@ -569,19 +575,41 @@ export const PulseService = {
 
             if (error || !data) return [];
 
-            return data.map(row => ({
-                id: row.id,
-                userId: row.user_id,
-                academyId: row.academy_id,
-                name: row.name,
-                email: row.email,
-                status: row.status,
-                rankId: row.rank_id,
-                balance: row.balance,
-                attendance: row.attendance_data?.total || 0,
-                attendanceHistory: row.attendance_data?.history || [],
-                ...row.details
-            })) as Student[];
+            return data.map(row => {
+                // Hybrid mapping: check for direct columns or fallback to details
+                // Ideally we migrate completely to columns, but for safety we check both.
+                return {
+                    id: row.id,
+                    userId: row.user_id,
+                    academyId: row.academy_id,
+
+                    // Core Identity
+                    name: row.first_name ? `${row.first_name} ${row.last_name || ''}`.trim() : (row.name || row.details?.name || 'Sin Nombre'),
+                    email: row.email,
+
+                    // Status & Rank
+                    status: row.status,
+                    rankId: row.rank_id,
+                    rank: row.details?.rank || 'White Belt', // Fallback if not relational yet
+                    rankColor: row.details?.rankColor || 'white',
+
+                    // Financials
+                    balance: row.balance,
+
+                    // Attendance
+                    attendance: row.attendance_data?.total || 0,
+                    attendanceHistory: row.attendance_data?.history || [],
+                    lastAttendance: row.details?.lastAttendance,
+
+                    // Details Spread (Legacy support)
+                    ...row.details,
+
+                    // Explicit Overrides to ensure types match
+                    birthDate: row.birth_date || row.details?.birthDate,
+                    cellPhone: row.phone || row.details?.cellPhone,
+                    age: row.details?.age // Calculated or stored
+                } as Student;
+            });
         } catch (e) {
             console.warn("getStudents error (swallowed):", e);
             return [];
@@ -656,24 +684,65 @@ export const PulseService = {
         try {
             const { data, error } = await supabase
                 .from('payments')
-                .select('*')
+                .select('*, students(name, first_name, last_name)')
                 .eq('academy_id', academyId);
 
             if (error || !data) return [];
 
+            return data.map(row => {
+                const s = row.students as any;
+                const name = s ? (s.first_name ? `${s.first_name} ${s.last_name || ''}`.trim() : s.name) : undefined;
+
+                return {
+                    id: row.id,
+                    academyId: row.academy_id,
+                    studentId: row.student_id,
+                    studentName: name, // MAPPED!
+                    amount: row.amount,
+                    status: row.status,
+                    dueDate: row.due_date,
+                    paymentDate: row.payment_date,
+                    concept: row.concept,
+                    ...row.details
+                } as TuitionRecord;
+            });
+        } catch (e) {
+            console.warn("getPayments error (swallowed):", e);
+            return [];
+        }
+    },
+
+    getExpenses: async (academyId?: string): Promise<Expense[]> => {
+        if (!academyId) return [];
+        try {
+            // Check if 'expenses' table exists implies we just try to query it.
+            // If it doesn't, Supabase throws 404 or structure error.
+            const { data, error } = await supabase
+                .from('expenses')
+                .select('*')
+                .eq('academy_id', academyId);
+
+            if (error) {
+                // If table missing, return empty (don't crash)
+                console.warn("getExpenses: Table likely missing or empty", error.message);
+                return [];
+            }
+
+            if (!data) return [];
+
             return data.map(row => ({
                 id: row.id,
                 academyId: row.academy_id,
-                studentId: row.student_id,
+                description: row.description,
                 amount: row.amount,
-                status: row.status,
-                dueDate: row.due_date,
-                paymentDate: row.payment_date,
-                concept: row.concept,
-                ...row.details
-            })) as TuitionRecord[];
+                date: row.date || row.created_at, // Fallback
+                category: row.category || 'General',
+                paymentMethod: row.payment_method || 'Cash',
+                status: row.status || 'paid'
+            })) as Expense[];
+
         } catch (e) {
-            console.warn("getPayments error (swallowed):", e);
+            console.warn("getExpenses error (swallowed):", e);
             return [];
         }
     },
@@ -795,6 +864,32 @@ export const PulseService = {
 
     deletePayment: async (recordId: string) => {
         await supabase.from('payments').delete().eq('id', recordId);
+    },
+
+    saveExpense: async (expense: Expense) => {
+        // Safe Attempt
+        try {
+            await supabase.from('expenses').upsert({
+                id: expense.id,
+                academy_id: expense.academyId,
+                description: expense.description,
+                amount: expense.amount,
+                date: expense.date,
+                category: expense.category,
+                payment_method: expense.paymentMethod,
+                status: expense.status
+            });
+        } catch (e) {
+            console.error("Failed to save expense (table missing?)", e);
+        }
+    },
+
+    deleteExpense: async (id: string) => {
+        try {
+            await supabase.from('expenses').delete().eq('id', id);
+        } catch (e) {
+            console.error("Failed to delete expense", e);
+        }
     },
 
     saveLibrary: async (resources: LibraryResource[]) => {

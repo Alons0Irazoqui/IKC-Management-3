@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
-import { TuitionRecord, ManualChargeData, ChargeCategory, Student, TuitionStatus } from '../types';
+import { TuitionRecord, ManualChargeData, ChargeCategory, Student, TuitionStatus, Expense } from '../types';
 import { PulseService } from '../services/pulseService';
 import { useAuth } from './AuthContext';
 import { useAcademy } from './AcademyContext'; // Need academy settings for billing
@@ -25,6 +25,8 @@ interface FinanceStats {
     pendingCollection: number;
     overdueAmount: number;
     activeStudents: number;
+    totalExpenses: number;
+    netIncome: number;
 }
 
 interface FinanceContextType {
@@ -56,6 +58,11 @@ interface FinanceContextType {
     getStudentPendingDebts: (studentId: string) => TuitionRecord[];
     uploadProof: (recordId: string, file: File) => void;
     markAsPaidByMaster: (recordId: string, amount: number, method: 'Efectivo' | 'Transferencia' | 'Tarjeta', note?: string) => void;
+
+    // Expenses
+    expenses: Expense[];
+    addExpense: (expense: Expense) => void;
+    deleteExpense: (id: string) => void;
 }
 
 const FinanceContext = createContext<FinanceContextType | undefined>(undefined);
@@ -72,6 +79,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     }, [batchUpdateStudents]);
 
     const [records, setRecords] = useState<TuitionRecord[]>([]);
+    const [expenses, setExpenses] = useState<Expense[]>([]);
     const [isFinanceLoading, setIsFinanceLoading] = useState(true);
 
     // Stats State
@@ -81,7 +89,9 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         totalRevenue: 0,
         pendingCollection: 0,
         overdueAmount: 0,
-        activeStudents: 0
+        activeStudents: 0,
+        totalExpenses: 0,
+        netIncome: 0
     });
 
     // --- LOAD DATA ---
@@ -93,17 +103,24 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
             if (currentUser.role === 'student' && currentUser.studentId) {
                 dbRecords = await PulseService.getPaymentsByStudent(currentUser.studentId);
             } else if (currentUser.role === 'master') {
-                dbRecords = await PulseService.getPayments(currentUser.academyId);
+                const [p, e] = await Promise.all([
+                    PulseService.getPayments(currentUser.academyId),
+                    PulseService.getExpenses(currentUser.academyId) // Parallel fetch
+                ]);
+                dbRecords = p;
+                setExpenses(e);
             } else {
                 // Unknown role or incomplete data? Don't fetch potentially restricted data
                 console.warn("FinanceContext: Unknown role or missing ID, skipping load.", currentUser.role);
                 dbRecords = [];
+                setExpenses([]);
             }
 
             setRecords(dbRecords);
             setIsFinanceLoading(false);
         } else {
             setRecords([]);
+            setExpenses([]);
             setIsFinanceLoading(false);
         }
     }, [currentUser]);
@@ -277,11 +294,15 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
             return acc;
         }, 0);
 
+        const totalExpenses = expenses.reduce((acc, e) => acc + e.amount, 0);
+
         setStats({
             totalRevenue,
             pendingCollection: totalPending,
             overdueAmount: totalOverdue,
-            activeStudents: students.filter(s => s.status === 'active').length
+            activeStudents: students.filter(s => s.status === 'active').length,
+            totalExpenses,
+            netIncome: totalRevenue - totalExpenses
         });
 
         const generateRealChartData = () => {
@@ -670,6 +691,18 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         registerBatchPayment([recordId], file, 'Transferencia', 0, []);
     };
 
+    const addExpense = async (expense: Expense) => {
+        setExpenses(prev => [expense, ...prev]);
+        await PulseService.saveExpense(expense);
+        addToast('Gasto registrado', 'success');
+    };
+
+    const deleteExpense = async (id: string) => {
+        setExpenses(prev => prev.filter(e => e.id !== id));
+        await PulseService.deleteExpense(id);
+        addToast('Gasto eliminado', 'info');
+    };
+
     const markAsPaidByMaster = async (recordId: string, amount: number, method: 'Efectivo' | 'Transferencia' | 'Tarjeta', note?: string) => {
         if (currentUser?.role !== 'master') return;
 
@@ -731,7 +764,10 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
             purgeStudentDebts,
             getStudentPendingDebts,
             uploadProof,
-            markAsPaidByMaster
+            markAsPaidByMaster,
+            expenses,
+            addExpense,
+            deleteExpense
         }}>
             {children}
         </FinanceContext.Provider>
