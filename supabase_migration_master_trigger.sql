@@ -90,20 +90,45 @@ WITH CHECK (auth.uid() = user_id);
 DROP POLICY IF EXISTS "Students can view their own record" ON public.students;
 CREATE POLICY "Students can view their own record" 
 ON public.students FOR SELECT 
-USING (auth.uid() = user_id);
+USING (
+  auth.uid() = user_id 
+  OR 
+  EXISTS (
+    SELECT 1 FROM public.profiles 
+    WHERE id = auth.uid() 
+      AND role = 'master' 
+      AND academy_id = public.students.academy_id
+  )
+);
 
 -- 4. PAYMENTS
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 
 -- Allow system to create initial payment for student (Student Registration)
--- Note: This is an insert by the authenticated student user
 DROP POLICY IF EXISTS "Users can insert payments" ON public.payments;
 CREATE POLICY "Users can insert payments" 
 ON public.payments FOR INSERT 
-WITH CHECK (auth.uid() = student_id);
+WITH CHECK (
+  EXISTS (
+    SELECT 1 FROM public.students 
+    WHERE id = student_id AND user_id = auth.uid()
+  )
+);
 
--- Allow students to view their own payments
+-- Allow students to view their own payments via strict relationship
 DROP POLICY IF EXISTS "Students view own payments" ON public.payments;
 CREATE POLICY "Students view own payments" 
 ON public.payments FOR SELECT 
-USING (auth.uid() = student_id);
+USING (
+  EXISTS (
+    SELECT 1 FROM public.students 
+    WHERE id = student_id AND user_id = auth.uid()
+  )
+  OR
+  EXISTS (
+     SELECT 1 FROM public.profiles
+     WHERE id = auth.uid()
+       AND role = 'master'
+       AND academy_id = public.payments.academy_id
+  )
+);

@@ -405,35 +405,85 @@ export const PulseService = {
 
     getStudentById: async (studentId: string): Promise<Student | null> => {
         if (!studentId) return null;
+
+        // If the ID passed is actually a User ID (Auth ID), we might fail to find it if we search by 'id' (Student ID).
+        // Since we are fixing logic to be robust, let's try to match either.
+        // BUT the method name is getStudentById. 
+        // Let's assume the caller MIGHT pass a User ID if they are confused.
+
         const { data, error } = await supabase
             .from('students')
             .select('*')
             .eq('id', studentId)
-            .single();
+            .maybeSingle();
 
-        if (error || !data) return null;
+        if (data) {
+            return {
+                id: data.id,
+                userId: data.user_id,
+                academyId: data.academy_id,
+                name: data.name,
+                email: data.email,
+                status: data.status,
+                rankId: data.rank_id,
+                balance: data.balance,
+                attendance: data.attendance_data?.total || 0,
+                attendanceHistory: data.attendance_data?.history || [],
+                ...data.details
+            } as Student;
+        }
 
-        return {
-            id: data.id,
-            userId: data.user_id,
-            academyId: data.academy_id,
-            name: data.name,
-            email: data.email,
-            status: data.status,
-            rankId: data.rank_id,
-            balance: data.balance,
-            attendance: data.attendance_data?.total || 0,
-            attendanceHistory: data.attendance_data?.history || [],
-            ...data.details
-        } as Student;
+        // Fallback: Try searching by user_id just in case
+        const { data: byUser, error: errByUser } = await supabase
+            .from('students')
+            .select('*')
+            .eq('user_id', studentId)
+            .maybeSingle();
+
+        if (byUser) {
+            return {
+                id: byUser.id,
+                userId: byUser.user_id,
+                academyId: byUser.academy_id,
+                name: byUser.name,
+                email: byUser.email,
+                status: byUser.status,
+                rankId: byUser.rank_id,
+                balance: byUser.balance,
+                attendance: byUser.attendance_data?.total || 0,
+                attendanceHistory: byUser.attendance_data?.history || [],
+                ...byUser.details
+            } as Student;
+        }
+
+        return null;
     },
 
-    getPaymentsByStudent: async (studentId: string): Promise<TuitionRecord[]> => {
-        if (!studentId) return [];
+    getPaymentsByStudent: async (userIdOrStudentId: string): Promise<TuitionRecord[]> => {
+        if (!userIdOrStudentId) return [];
+
+        // 1. Resolve exact Student ID from the User ID (Auth UID)
+        // This fixes the issue where we might be passing an Auth ID to query a Student ID column
+        let targetStudentId = userIdOrStudentId;
+
+        // Try to find a student record where user_id matches given ID
+        const { data: studentByUser } = await supabase
+            .from('students')
+            .select('id')
+            .eq('user_id', userIdOrStudentId)
+            .maybeSingle();
+
+        if (studentByUser) {
+            targetStudentId = studentByUser.id;
+        }
+        // If not found by user_id, we assume the input WAS the student_id or it doesn't exist.
+        // But for safety, we proceed with targetStudentId.
+
+        // 2. Query Payments
         const { data, error } = await supabase
             .from('payments')
             .select('*')
-            .eq('student_id', studentId);
+            .eq('student_id', targetStudentId);
 
         if (error || !data) return [];
 
