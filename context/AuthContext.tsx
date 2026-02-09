@@ -63,9 +63,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                         }
                     }
                 } else if (event === 'SIGNED_OUT') {
-                    if (mounted) setCurrentUser(null);
-                    // Ensure we are not loading if signed out
-                    if (mounted) setLoading(false);
+                    // Immediate cleanup
+                    if (mounted) {
+                        setCurrentUser(null);
+                        setLoading(false);
+                    }
                 }
             });
 
@@ -94,9 +96,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const logout = async () => {
-        await PulseService.logout();
+        // 1. Optimistic Cleanup (Immediate)
         setCurrentUser(null);
+        setLoading(false);
         addToast('Sesión cerrada correctamente', 'info');
+
+        // 2. Server Cleanup (Background)
+        try {
+            await PulseService.logout();
+        } catch (error) {
+            // Ignore network errors on logout, user is already gone locally.
+            console.warn("Supabase signOut error (ignorable):", error);
+        }
     };
 
     const updateUserProfile = async (updates: Partial<UserProfile>) => {

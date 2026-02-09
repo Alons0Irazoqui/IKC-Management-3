@@ -11,6 +11,12 @@ const Login: React.FC = () => {
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [loading, setLoading] = useState(false);
 
+    // Mount Status Ref
+    const isMounted = React.useRef(true);
+    React.useEffect(() => {
+        return () => { isMounted.current = false; };
+    }, []);
+
     // Redirect if already logged in
     React.useEffect(() => {
         if (!authLoading && currentUser) {
@@ -38,7 +44,7 @@ const Login: React.FC = () => {
             // Do NOT call setLoading(false) here, as component unmounts.
         } else {
             // Only stop loading if we stay on this page (error case)
-            setLoading(false);
+            if (isMounted.current) setLoading(false);
         }
     };
 
