@@ -104,31 +104,32 @@ USING (
 -- 4. PAYMENTS
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 
--- Allow system to create initial payment for student (Student Registration)
+-- Allow system/users to create initial payment for student (Student Registration)
+-- Optimized: Check direct ownership via user_id link in students
 DROP POLICY IF EXISTS "Users can insert payments" ON public.payments;
 CREATE POLICY "Users can insert payments" 
 ON public.payments FOR INSERT 
 WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM public.students 
-    WHERE id = student_id AND user_id = auth.uid()
+  auth.uid() IN (
+    SELECT user_id FROM public.students WHERE id = student_id
   )
 );
 
--- Allow students to view their own payments via strict relationship
+-- Allow students to view their own payments
 DROP POLICY IF EXISTS "Students view own payments" ON public.payments;
 CREATE POLICY "Students view own payments" 
 ON public.payments FOR SELECT 
 USING (
-  EXISTS (
-    SELECT 1 FROM public.students 
-    WHERE id = student_id AND user_id = auth.uid()
+  -- Option A: Student owns the payment
+  auth.uid() IN (
+    SELECT user_id FROM public.students WHERE id = student_id
   )
   OR
+  -- Option B: User is a Master of the academy
   EXISTS (
-     SELECT 1 FROM public.profiles
-     WHERE id = auth.uid()
-       AND role = 'master'
-       AND academy_id = public.payments.academy_id
+    SELECT 1 FROM public.profiles
+    WHERE id = auth.uid()
+      AND role = 'master'
+      AND academy_id = public.payments.academy_id
   )
 );

@@ -166,9 +166,8 @@ export const PulseService = {
             promotionHistory: []
         };
 
-        // 2. SignUp with Metadata
-        // Since Email Confirmation is ENABLED, we must pass all data to the server
-        // via metadata so a Database Trigger can create the records securely.
+        // 2. SignUp
+        // We do manual inserts now to avoid RLS/Trigger race conditions.
         const { data: authData, error: authError } = await supabase.auth.signUp({
             email: data.email,
             password: data.password,
@@ -177,10 +176,7 @@ export const PulseService = {
                     display_name: data.name,
                     role: 'student',
                     academy_id: academy.id,
-                    status: initialAmount > 0 ? 'debtor' : 'active',
-                    details: studentDetails,
-                    ...paymentData, // Spread payment fields if they exist
-                    avatarUrl: data.avatarUrl || ''
+                    // We can still pass metadata for context, but we will insert records manually
                 }
             }
         });
@@ -188,15 +184,72 @@ export const PulseService = {
         if (authError) throw authError;
         if (!authData.user) throw new Error("No se pudo crear el usuario");
 
-        // We return a partial profile or indicate success. 
-        // Since session is null, we can't return full profile yet.
+        const userId = authData.user.id;
+        const studentId = uuid();
+
+        try {
+            // A. Insert Profile
+            // RLS Policy: WITH CHECK (auth.uid() = id) - Works if we are logged in as new user?
+            // Actually, signUp auto-logins. So auth.uid() should be set.
+            const { error: profileError } = await supabase.from('profiles').insert({
+                id: userId,
+                email: data.email,
+                name: data.name,
+                role: 'student',
+                academy_id: academy.id,
+                avatar_url: data.avatarUrl || ''
+            });
+            if (profileError) throw profileError;
+
+            // B. Insert Student
+            // RLS Policy: WITH CHECK (auth.uid() = user_id)
+            const details = { ...studentDetails }; // Copy details
+
+            const { error: studentError } = await supabase.from('students').insert({
+                id: studentId,
+                academy_id: academy.id,
+                user_id: userId,
+                name: data.name,
+                email: data.email,
+                status: initialAmount > 0 ? 'debtor' : 'active',
+                rank_id: null,
+                balance: initialAmount > 0 ? initialAmount * -1 : 0,
+                attendance_data: { total: 0, history: [] },
+                details: details
+            });
+            if (studentError) throw studentError;
+
+            // C. Insert Payment (if applicable)
+            // RLS Policy: WITH CHECK (auth.uid() IN (SELECT user_id FROM students WHERE id = student_id))
+            // Since we just inserted the student with user_id = userId (auth.uid()), this should pass.
+            if (paymentData) {
+                const { error: paymentError } = await supabase.from('payments').insert({
+                    academy_id: academy.id,
+                    student_id: studentId,
+                    amount: paymentData.initial_amount,
+                    status: 'pending',
+                    due_date: paymentData.due_date,
+                    concept: paymentData.payment_concept,
+                    details: paymentData.payment_details
+                });
+                if (paymentError) throw paymentError;
+            }
+
+        } catch (insertError) {
+            console.error("Error inserting student data manually:", insertError);
+            // Verify if it was RLS or Duplicate (maybe trigger ran too?)
+            // Ideally we should return error or try to recover?
+            // Since we threw, the UI will catch it.
+            throw insertError;
+        }
+
+        // Return success object
         return {
-            id: authData.user.id,
+            id: userId,
             email: data.email,
             name: data.name,
             role: 'student',
             academyId: academy.id,
-            // Flag to UI that verification is needed
             pendingVerification: !authData.session
         } as any;
     },
