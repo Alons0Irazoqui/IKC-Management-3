@@ -101,35 +101,24 @@ USING (
   )
 );
 
--- 4. PAYMENTS
+-- 4. PAYMENTS (Optimized RLS)
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 
--- Allow system/users to create initial payment for student (Student Registration)
--- Optimized: Check direct ownership via user_id link in students
-DROP POLICY IF EXISTS "Users can insert payments" ON public.payments;
-CREATE POLICY "Users can insert payments" 
-ON public.payments FOR INSERT 
-WITH CHECK (
-  auth.uid() IN (
-    SELECT user_id FROM public.students WHERE id = student_id
-  )
-);
-
--- Allow students to view their own payments
-DROP POLICY IF EXISTS "Students view own payments" ON public.payments;
-CREATE POLICY "Students view own payments" 
+-- Lectura: Estudiantes ven SUS pagos, Maestros ven pagos de SU academia
+DROP POLICY IF EXISTS "View payments based on role" ON public.payments;
+CREATE POLICY "View payments based on role" 
 ON public.payments FOR SELECT 
 USING (
-  -- Option A: Student owns the payment
+  -- Caso A: Soy el estudiante dueño del pago
   auth.uid() IN (
     SELECT user_id FROM public.students WHERE id = student_id
   )
   OR
-  -- Option B: User is a Master of the academy
+  -- Caso B: Soy un maestro de la misma academia
   EXISTS (
     SELECT 1 FROM public.profiles
-    WHERE id = auth.uid()
-      AND role = 'master'
+    WHERE id = auth.uid() 
+      AND role = 'master' 
       AND academy_id = public.payments.academy_id
   )
 );

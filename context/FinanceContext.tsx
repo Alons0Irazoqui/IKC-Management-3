@@ -100,23 +100,20 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
             setIsFinanceLoading(true);
             let dbRecords: TuitionRecord[] = [];
 
-            if (currentUser.role === 'student' && currentUser.studentId) {
-                dbRecords = await PulseService.getPaymentsByStudent(currentUser.studentId);
-            } else if (currentUser.role === 'master') {
-                const [p, e] = await Promise.all([
-                    PulseService.getPayments(currentUser.academyId),
-                    PulseService.getExpenses(currentUser.academyId) // Parallel fetch
-                ]);
-                dbRecords = p;
+            // Unified call for both roles
+            if (currentUser.id && currentUser.role) {
+                dbRecords = await PulseService.getPayments(currentUser.id, currentUser.role);
+            }
+
+            // Parallel fetch for expenses if master
+            if (currentUser.role === 'master') {
+                const e = await PulseService.getExpenses(currentUser.academyId);
                 setExpenses(e);
             } else {
-                // Unknown role or incomplete data? Don't fetch potentially restricted data
-                console.warn("FinanceContext: Unknown role or missing ID, skipping load.", currentUser.role);
-                dbRecords = [];
                 setExpenses([]);
             }
 
-            setRecords(dbRecords);
+            setRecords(dbRecords || []);
             setIsFinanceLoading(false);
         } else {
             setRecords([]);

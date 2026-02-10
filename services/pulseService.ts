@@ -679,13 +679,44 @@ export const PulseService = {
         })) as LibraryResource[];
     },
 
-    getPayments: async (academyId?: string): Promise<TuitionRecord[]> => {
-        if (!academyId) return [];
+    getPayments: async (userId: string, role: string): Promise<TuitionRecord[]> => {
+        if (!userId) return [];
         try {
-            const { data, error } = await supabase
-                .from('payments')
-                .select('*, students(name, first_name, last_name)')
-                .eq('academy_id', academyId);
+            let query = supabase.from('payments').select('*, students(name, first_name, last_name)');
+
+            if (role === 'student') {
+                // Get the real student_id from the students table using the auth user_id
+                const { data: studentData, error: studentError } = await supabase
+                    .from('students')
+                    .select('id')
+                    .eq('user_id', userId)
+                    .single();
+
+                if (studentError || !studentData) {
+                    console.warn("getPayments: Could not find student record for user", userId);
+                    return [];
+                }
+
+                query = query.eq('student_id', studentData.id);
+            } else if (role === 'master') {
+                // Get academy_id from profiles
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('academy_id')
+                    .eq('id', userId)
+                    .single();
+
+                if (profileError || !profile || !profile.academy_id) {
+                    console.warn("getPayments: Master has no academy_id", userId);
+                    return [];
+                }
+
+                query = query.eq('academy_id', profile.academy_id);
+            } else {
+                return [];
+            }
+
+            const { data, error } = await query;
 
             if (error || !data) return [];
 
@@ -697,7 +728,7 @@ export const PulseService = {
                     id: row.id,
                     academyId: row.academy_id,
                     studentId: row.student_id,
-                    studentName: name, // MAPPED!
+                    studentName: name,
                     amount: row.amount,
                     status: row.status,
                     dueDate: row.due_date,
