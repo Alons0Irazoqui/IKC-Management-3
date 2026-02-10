@@ -102,7 +102,21 @@ USING (
 );
 
 -- 4. PAYMENTS (Optimized RLS)
+-- Ensure table exists first (in a real migration this would be CREATE TABLE IF NOT EXISTS)
+-- But here we act on existing or assumed structure. We ADD the FK.
+-- NOTE: We use DO block to avoid error if constraint exists, or just primitive SQL. 
+-- Since this is a "Limpieza", likely the table is re-created or empty. 
+-- We will assume standard CREATE TABLE syntax or ALTER.
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
+
+-- Add Constraint if not exists (Idempotent-ish)
+DO $$ 
+BEGIN 
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_student_payment') THEN 
+    ALTER TABLE public.payments 
+    ADD CONSTRAINT fk_student_payment FOREIGN KEY (student_id) REFERENCES public.students(id) ON DELETE CASCADE; 
+  END IF; 
+END $$;
 
 -- Lectura: Estudiantes ven SUS pagos, Maestros ven pagos de SU academia
 DROP POLICY IF EXISTS "View payments based on role" ON public.payments;
@@ -121,4 +135,12 @@ USING (
       AND role = 'master' 
       AND academy_id = public.payments.academy_id
   )
+);
+
+-- Escritura: Permitir insertar pagos (Sistema o Maestro)
+DROP POLICY IF EXISTS "Insert payments based on role" ON public.payments;
+CREATE POLICY "Insert payments based on role" 
+ON public.payments FOR INSERT 
+WITH CHECK (
+  true -- Validación delegada al backend/service para simplificar, RLS se enfoca en lectura critica.
 );

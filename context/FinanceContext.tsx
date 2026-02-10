@@ -96,17 +96,22 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     // --- LOAD DATA ---
     const loadFinanceData = useCallback(async () => {
-        if (currentUser?.academyId) {
-            setIsFinanceLoading(true);
+        // Validation: Must have a user and checking academyId availability to be safe
+        if (!currentUser || !currentUser.id) return;
+
+        setIsFinanceLoading(true);
+
+        try {
             let dbRecords: TuitionRecord[] = [];
 
             // Unified call for both roles
-            if (currentUser.id && currentUser.role) {
+            // Only attempt if we have a valid role
+            if (currentUser.role) {
                 dbRecords = await PulseService.getPayments(currentUser.id, currentUser.role);
             }
 
             // Parallel fetch for expenses if master
-            if (currentUser.role === 'master') {
+            if (currentUser.role === 'master' && currentUser.academyId) {
                 const e = await PulseService.getExpenses(currentUser.academyId);
                 setExpenses(e);
             } else {
@@ -114,10 +119,11 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
             }
 
             setRecords(dbRecords || []);
-            setIsFinanceLoading(false);
-        } else {
-            setRecords([]);
+        } catch (error) {
+            console.error("FinanceContext loadData failed:", error);
+            setRecords([]); // Fallback to empty to avoid UI crash
             setExpenses([]);
+        } finally {
             setIsFinanceLoading(false);
         }
     }, [currentUser]);

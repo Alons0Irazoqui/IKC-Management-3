@@ -207,7 +207,7 @@ export const PulseService = {
 
             const { error: studentError } = await supabase.from('students').insert({
                 id: studentId,
-                academy_id: academy.id,
+                academy_id: academy.id, // ENSURED
                 user_id: userId,
                 name: data.name,
                 email: data.email,
@@ -221,11 +221,10 @@ export const PulseService = {
 
             // C. Insert Payment (if applicable)
             // RLS Policy: WITH CHECK (auth.uid() IN (SELECT user_id FROM students WHERE id = student_id))
-            // Since we just inserted the student with user_id = userId (auth.uid()), this should pass.
             if (paymentData) {
                 const { error: paymentError } = await supabase.from('payments').insert({
                     academy_id: academy.id,
-                    student_id: studentId,
+                    student_id: studentId, // ENSURED same ID
                     amount: paymentData.initial_amount,
                     status: 'pending',
                     due_date: paymentData.due_date,
@@ -682,35 +681,38 @@ export const PulseService = {
     getPayments: async (userId: string, role: string): Promise<TuitionRecord[]> => {
         if (!userId) return [];
         try {
-            let query = supabase.from('payments').select('*, students(name, first_name, last_name)');
+            let query = supabase.from('payments').select('*, students(first_name, last_name, name, details)');
 
             if (role === 'student') {
-                // Get the real student_id from the students table using the auth user_id
+                // 1. Get Student ID from User ID
                 const { data: studentData, error: studentError } = await supabase
                     .from('students')
                     .select('id')
                     .eq('user_id', userId)
-                    .single();
+                    .maybeSingle(); // Don't throw if missing, just handle it
 
-                if (studentError || !studentData) {
-                    console.warn("getPayments: Could not find student record for user", userId);
-                    return [];
+                if (!studentData) {
+                    console.warn("getPayments: No student record found for user", userId);
+                    return []; // Return empty, don't crash
                 }
 
+                // 2. Filter payments by student_id
                 query = query.eq('student_id', studentData.id);
+
             } else if (role === 'master') {
-                // Get academy_id from profiles
+                // 1. Get Academy ID from Profile
                 const { data: profile, error: profileError } = await supabase
                     .from('profiles')
                     .select('academy_id')
                     .eq('id', userId)
                     .single();
 
-                if (profileError || !profile || !profile.academy_id) {
+                if (profileError || !profile?.academy_id) {
                     console.warn("getPayments: Master has no academy_id", userId);
                     return [];
                 }
 
+                // 2. Filter payments by academy_id
                 query = query.eq('academy_id', profile.academy_id);
             } else {
                 return [];
@@ -718,17 +720,31 @@ export const PulseService = {
 
             const { data, error } = await query;
 
-            if (error || !data) return [];
+            if (error) {
+                console.error("getPayments query error:", error);
+                return [];
+            }
+            if (!data) return [];
 
             return data.map(row => {
                 const s = row.students as any;
-                const name = s ? (s.first_name ? `${s.first_name} ${s.last_name || ''}`.trim() : s.name) : undefined;
+                // Robust Name Construction
+                let studentName = 'Estudiante';
+                if (s) {
+                    if (s.first_name) {
+                        studentName = `${s.first_name} ${s.last_name || ''}`.trim();
+                    } else if (s.name) {
+                        studentName = s.name;
+                    } else if (s.details?.name) {
+                        studentName = s.details.name;
+                    }
+                }
 
                 return {
                     id: row.id,
                     academyId: row.academy_id,
                     studentId: row.student_id,
-                    studentName: name,
+                    studentName: studentName, // Final Mapped Name
                     amount: row.amount,
                     status: row.status,
                     dueDate: row.due_date,
