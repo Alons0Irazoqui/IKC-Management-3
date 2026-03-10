@@ -43,8 +43,7 @@ const MasterRegistration: React.FC = () => {
       password: data.password
     });
     if (success) {
-      alert("Registro exitoso. Por favor revisa tu correo electrónico para verificar tu cuenta y poder iniciar sesión.");
-      navigate('/login');
+      navigate('/check-email');
     } else {
       setError("root", { message: "Error al registrar. Intenta nuevamente." });
     }

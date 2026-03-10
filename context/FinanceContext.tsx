@@ -8,11 +8,14 @@ import { useToast } from './ToastContext';
 import { getLocalDate } from '../utils/dateUtils';
 
 // Helper for ID generation
-const generateId = (prefix: string = 'id') => {
+const generateId = (prefix?: string) => {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-        return `${prefix}-${crypto.randomUUID()}`;
+        return crypto.randomUUID();
     }
-    return `${prefix}-${Date.now()}`;
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 };
 
 interface RevenueData {
@@ -102,6 +105,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setIsFinanceLoading(true);
 
         try {
+            // WRAPPED IN TRY-CATCH FOR SAFETY
             let dbRecords: TuitionRecord[] = [];
 
             // Unified call for both roles
@@ -120,8 +124,9 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
             setRecords(dbRecords || []);
         } catch (error) {
-            console.error("FinanceContext loadData failed:", error);
-            setRecords([]); // Fallback to empty to avoid UI crash
+            // FAIL SAFE: Set empty arrays to allow UI to render (empty state)
+            // No error to console as requested
+            setRecords([]);
             setExpenses([]);
         } finally {
             setIsFinanceLoading(false);
@@ -245,7 +250,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
             const currentRecordsForStudent = (recordsUpdated ? processedRecords : records).filter(r => r.studentId === student.id);
             const debt = currentRecordsForStudent.reduce((acc, r) => {
                 if (['pending', 'overdue', 'partial', 'charged'].includes(r.status)) {
-                    return acc + r.amount + r.penaltyAmount;
+                    return acc + (r.amount || 0) + (r.penaltyAmount || 0);
                 }
                 return acc;
             }, 0);
@@ -288,12 +293,15 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         const pending = records.filter(r => ['pending', 'partial', 'charged', 'in_review'].includes(r.status));
         const overdue = records.filter(r => r.status === 'overdue');
 
-        const totalPending = pending.reduce((acc, r) => acc + r.amount, 0);
-        const totalOverdue = overdue.reduce((acc, r) => acc + r.amount + r.penaltyAmount, 0);
+        const totalPending = pending.reduce((acc, r) => acc + (r.amount || 0) + (r.penaltyAmount || 0), 0);
+        const totalOverdue = overdue.reduce((acc, r) => acc + (r.amount || 0) + (r.penaltyAmount || 0), 0);
 
         const totalRevenue = records.reduce((acc, r) => {
-            if (r.status === 'paid') return acc + (r.originalAmount ?? r.amount);
-            if (r.status === 'partial') return acc + ((r.originalAmount ?? r.amount) - r.amount);
+            if (r.paymentHistory && r.paymentHistory.length > 0) {
+                return acc + r.paymentHistory.reduce((sum, h) => sum + h.amount, 0);
+            }
+            if (r.status === 'paid') return acc + (r.originalAmount ?? (r.amount || 0)) + (r.customPenaltyAmount || 0);
+            if (r.status === 'partial') return acc + ((r.originalAmount ?? (r.amount || 0)) - (r.amount || 0));
             return acc;
         }, 0);
 
@@ -386,14 +394,24 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
             relatedEventId: data.relatedEventId,
             customPenaltyAmount: data.customPenaltyAmount || 0
         };
-        setRecords(prev => [...prev, newRecord]);
-        await PulseService.savePayments([newRecord]);
-        addToast('Cargo generado exitosamente', 'success');
+        try {
+            await PulseService.savePayments([newRecord]);
+            setRecords(prev => [...prev, newRecord]);
+            addToast('Cargo generado exitosamente', 'success');
+        } catch (e: any) {
+            console.error('Failed to create charge:', e);
+            addToast(`Error al generar cargo: ${e.message}`, 'error');
+        }
     };
 
     const createRecord = async (record: TuitionRecord) => {
-        setRecords(prev => [...prev, record]);
-        await PulseService.savePayments([record]);
+        try {
+            await PulseService.savePayments([record]);
+            setRecords(prev => [...prev, record]);
+        } catch (e) {
+            console.error(e);
+            addToast('Error al crear registro', 'error');
+        }
     };
 
     const registerBatchPayment = async (
@@ -410,7 +428,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
         let updatedRecords: TuitionRecord[] = [];
 
-        setRecords(prev => prev.map(r => {
+        const newRecords = records.map(r => {
             if (recordIds.includes(r.id)) {
                 const updated = {
                     ...r,
@@ -427,15 +445,21 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 return updated;
             }
             return r;
-        }));
+        });
 
-        await PulseService.savePayments(updatedRecords);
-        addToast('Pago registrado y enviado a revisión', 'success');
+        try {
+            await PulseService.savePayments(updatedRecords);
+            setRecords(newRecords);
+            addToast('Pago registrado y enviado a revisión', 'success');
+        } catch (e) {
+            console.error(e);
+            addToast('Error al registrar pago', 'error');
+        }
     };
 
     const approvePayment = async (recordId: string, amountPaid?: number) => {
         let updatedRecord: TuitionRecord | null = null;
-        setRecords(prev => prev.map(r => {
+        const newRecords = records.map(r => {
             if (r.id === recordId) {
                 const currentPenalty = r.penaltyAmount || 0;
                 const totalDebt = r.amount + currentPenalty;
@@ -453,7 +477,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
                     ...r,
                     status: isPaidFull ? 'paid' : 'partial',
                     amount: isPaidFull ? 0 : remaining,
-                    originalAmount: isPaidFull ? (r.originalAmount ?? r.amount) + currentPenalty : (r.originalAmount ?? r.amount),
+                    originalAmount: r.originalAmount ?? r.amount,
                     // IMPORTANT: When marking as paid, penaltyAmount becomes 0 (no debt).
                     // We preserve the currentPenalty into customPenaltyAmount so we know this record HAD a penalty.
                     penaltyAmount: 0,
@@ -463,14 +487,20 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 return updatedRecord;
             }
             return r;
-        }));
-        if (updatedRecord) await PulseService.savePayments([updatedRecord]);
-        addToast('Pago aprobado', 'success');
+        });
+        try {
+            if (updatedRecord) await PulseService.savePayments([updatedRecord]);
+            setRecords(newRecords);
+            addToast('Pago aprobado', 'success');
+        } catch (e) {
+            console.error(e);
+            addToast('Error al aprobar pago', 'error');
+        }
     };
 
     const rejectPayment = async (recordId: string) => {
         let updatedRecord: TuitionRecord | null = null;
-        setRecords(prev => prev.map(r => {
+        const newRecords = records.map(r => {
             if (r.id === recordId) {
                 updatedRecord = {
                     ...r,
@@ -482,109 +512,119 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 return updatedRecord;
             }
             return r;
-        }));
-        if (updatedRecord) await PulseService.savePayments([updatedRecord]);
-        addToast('Pago rechazado', 'info');
+        });
+        try {
+            if (updatedRecord) await PulseService.savePayments([updatedRecord]);
+            setRecords(newRecords);
+            addToast('Pago rechazado', 'info');
+        } catch (e) {
+            console.error(e);
+            addToast('Error al rechazar pago', 'error');
+        }
     };
 
     const approveBatchPayment = async (batchId: string, totalAmountPaid: number) => {
         let updatedRecords: TuitionRecord[] = [];
 
-        setRecords(prev => {
-            // Filtrar registros vinculados al lote
-            const batchRecords = prev.filter(r => r.batchPaymentId === batchId);
+        // Filtrar registros vinculados al lote
+        const batchRecords = records.filter(r => r.batchPaymentId === batchId);
 
-            // --- ALGORITMO DE ORDENAMIENTO 'HEAVY DUTY' ---
-            batchRecords.sort((a, b) => {
-                const getPriority = (r: TuitionRecord) => {
-                    const text = (r.concept + (r.category || '')).toLowerCase();
-                    // Peso 0: Mensualidad / Colegiatura (Prioridad Absoluta)
-                    if (text.includes('mensualidad') || text.includes('colegiatura') || r.category === 'Mensualidad') return 0;
-                    // Peso 1: No permiten pagos parciales
-                    if (r.canBePaidInParts === false) return 1;
-                    // Peso 2: Resto (Abonables)
-                    return 2;
-                };
-
-                const pA = getPriority(a);
-                const pB = getPriority(b);
-
-                if (pA !== pB) return pA - pB;
-                // Si pesan lo mismo, FIFO por fecha de vencimiento
-                return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
-            });
-
-            let available = totalAmountPaid;
-            const now = new Date().toISOString();
-
-            // --- DISTRIBUCIÓN DE FONDOS (WATERFALL) ---
-            updatedRecords = batchRecords.map(r => {
+        // --- ALGORITMO DE ORDENAMIENTO 'HEAVY DUTY' ---
+        batchRecords.sort((a, b) => {
+            const getPriority = (r: TuitionRecord) => {
                 const text = (r.concept + (r.category || '')).toLowerCase();
-                const isMandatory = text.includes('mensualidad') || text.includes('colegiatura') || r.category === 'Mensualidad' || r.canBePaidInParts === false;
+                // Peso 0: Mensualidad / Colegiatura (Prioridad Absoluta)
+                if (text.includes('mensualidad') || text.includes('colegiatura') || r.category === 'Mensualidad') return 0;
+                // Peso 1: No permiten pagos parciales
+                if (r.canBePaidInParts === false) return 1;
+                // Peso 2: Resto (Abonables)
+                return 2;
+            };
 
-                const currentPenalty = r.penaltyAmount || 0;
-                const totalDebt = r.amount + currentPenalty;
-                let paid = 0;
+            const pA = getPriority(a);
+            const pB = getPriority(b);
 
-                if (isMandatory) {
-                    // Lógica para Peso 0 y Peso 1: Solo si alcanza para el 100%
-                    if (available >= totalDebt - 0.01) {
-                        paid = totalDebt;
-                        available -= totalDebt;
-                    }
-                } else {
-                    // Lógica para Peso 2: Toma lo que quede disponible
-                    if (available > 0) {
-                        paid = Math.min(available, totalDebt);
-                        available -= paid;
-                    }
-                }
-
-                if (paid > 0) {
-                    const remaining = Math.max(0, totalDebt - paid);
-                    const isPaidFull = remaining < 0.01;
-
-                    const newHistoryItem = {
-                        date: now,
-                        amount: paid,
-                        method: r.method || 'Batch'
-                    };
-
-                    return {
-                        ...r,
-                        status: isPaidFull ? 'paid' : 'partial',
-                        amount: isPaidFull ? 0 : remaining,
-                        originalAmount: isPaidFull ? (r.originalAmount ?? r.amount) + currentPenalty : (r.originalAmount ?? r.amount),
-                        penaltyAmount: 0,
-                        // Preserve penalty info
-                        customPenaltyAmount: currentPenalty > 0 ? currentPenalty : r.customPenaltyAmount,
-                        paymentHistory: [...(r.paymentHistory || []), newHistoryItem]
-                    } as TuitionRecord;
-                }
-
-                // Si no recibió fondos (prioridad baja o fondos insuficientes para colegiatura), vuelve a su estado base
-                return {
-                    ...r,
-                    status: (r.dueDate < getLocalDate() ? 'overdue' : 'pending') as TuitionStatus,
-                    batchPaymentId: undefined // Desvincular del lote procesado
-                } as TuitionRecord;
-            });
-
-            // Sincronizar cambios con la lista global de registros
-            return prev.map(r => {
-                const updated = updatedRecords.find(u => u.id === r.id);
-                return updated || r;
-            });
+            if (pA !== pB) return pA - pB;
+            // Si pesan lo mismo, FIFO por fecha de vencimiento
+            return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
         });
 
-        if (updatedRecords.length > 0) await PulseService.savePayments(updatedRecords);
-        addToast('Pago global distribuido con jerarquía estricta.', 'success');
+        let available = totalAmountPaid;
+        const now = new Date().toISOString();
+
+        // --- DISTRIBUCIÓN DE FONDOS (WATERFALL) ---
+        updatedRecords = batchRecords.map(r => {
+            const text = (r.concept + (r.category || '')).toLowerCase();
+            const isMandatory = text.includes('mensualidad') || text.includes('colegiatura') || r.category === 'Mensualidad' || r.canBePaidInParts === false;
+
+            const currentPenalty = r.penaltyAmount || 0;
+            const totalDebt = (r.amount || 0) + currentPenalty;
+            let paid = 0;
+
+            if (isMandatory) {
+                // Lógica para Peso 0 y Peso 1: Solo si alcanza para el 100%
+                if (available >= totalDebt - 0.01) {
+                    paid = totalDebt;
+                    available -= totalDebt;
+                }
+            } else {
+                // Lógica para Peso 2: Toma lo que quede disponible
+                if (available > 0) {
+                    paid = Math.min(available, totalDebt);
+                    available -= paid;
+                }
+            }
+
+            if (paid > 0) {
+                const remaining = Math.max(0, totalDebt - paid);
+                const isPaidFull = remaining < 0.01;
+
+                const newHistoryItem = {
+                    date: now,
+                    amount: paid,
+                    method: r.method || 'Batch'
+                };
+
+                return {
+                    ...r,
+                    status: isPaidFull ? 'paid' : 'partial',
+                    amount: isPaidFull ? 0 : remaining,
+                    originalAmount: r.originalAmount ?? r.amount,
+                    penaltyAmount: 0,
+                    // Preserve penalty info
+                    customPenaltyAmount: currentPenalty > 0 ? currentPenalty : r.customPenaltyAmount,
+                    paymentHistory: [...(r.paymentHistory || []), newHistoryItem]
+                } as TuitionRecord;
+            }
+
+            // Si no recibió fondos (prioridad baja o fondos insuficientes para colegiatura), vuelve a su estado base
+            return {
+                ...r,
+                status: (r.dueDate < getLocalDate() ? 'overdue' : 'pending') as TuitionStatus,
+                batchPaymentId: undefined // Desvincular del lote procesado
+            } as TuitionRecord;
+        });
+
+        try {
+            if (updatedRecords.length > 0) await PulseService.savePayments(updatedRecords);
+
+            // Sincronizar cambios con la lista global de registros
+            setRecords(prev => prev.map(r => {
+                const updated = updatedRecords.find(u => u.id === r.id);
+                return updated || r;
+            }));
+
+            addToast('Pago global distribuido con jerarquía estricta.', 'success');
+        } catch (e) {
+            console.error(e);
+            addToast('Error al aprobar lote de pagos', 'error');
+        }
     };
 
     const rejectBatchPayment = async (batchId: string) => {
         let updatedRecords: TuitionRecord[] = [];
 
-        setRecords(prev => prev.map(r => {
+        const newRecords = records.map(r => {
             if (r.batchPaymentId === batchId) {
                 const updated = {
                     ...r,
@@ -597,9 +637,15 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 return updated;
             }
             return r;
-        }));
-        if (updatedRecords.length > 0) await PulseService.savePayments(updatedRecords);
-        addToast('Lote de pagos rechazado', 'info');
+        });
+        try {
+            if (updatedRecords.length > 0) await PulseService.savePayments(updatedRecords);
+            setRecords(newRecords);
+            addToast('Lote de pagos rechazado', 'info');
+        } catch (e) {
+            console.error(e);
+            addToast('Error al rechazar lote de pagos', 'error');
+        }
     };
 
     const updateRecordAmount = async (recordId: string, newTotal: number) => {
@@ -710,18 +756,18 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (currentUser?.role !== 'master') return;
 
         let updatedRecord: TuitionRecord | null = null;
-        setRecords(prev => prev.map(r => {
+
+        const newRecords = records.map(r => {
             if (r.id === recordId) {
                 const currentPenalty = r.penaltyAmount || 0;
-                const totalDebt = r.amount + currentPenalty;
-                const amountToApply = amount;
-                const remaining = Math.max(0, totalDebt - amountToApply);
+                const totalDebt = (r.amount || 0) + currentPenalty;
+                const remaining = Math.max(0, totalDebt - amount);
                 const isPaidFull = remaining < 0.01;
                 const now = new Date().toISOString();
 
                 const newHistoryItem = {
                     date: now,
-                    amount: amountToApply,
+                    amount: amount,
                     method: method
                 };
 
@@ -729,7 +775,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
                     ...r,
                     status: isPaidFull ? 'paid' : 'partial',
                     amount: isPaidFull ? 0 : remaining,
-                    originalAmount: isPaidFull ? (r.originalAmount ?? r.amount) + currentPenalty : (r.originalAmount ?? r.amount),
+                    originalAmount: r.originalAmount ?? r.amount,
                     // IMPORTANT: Preserve penalty info in customPenaltyAmount when wiping active penaltyAmount
                     penaltyAmount: 0,
                     customPenaltyAmount: currentPenalty > 0 ? currentPenalty : r.customPenaltyAmount,
@@ -741,9 +787,18 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 return updatedRecord;
             }
             return r;
-        }));
-        if (updatedRecord) await PulseService.savePayments([updatedRecord]);
-        addToast('Movimiento marcado como pagado exitosamente.', 'success');
+        });
+
+        if (updatedRecord) {
+            try {
+                await PulseService.savePayments([updatedRecord]);
+                setRecords(newRecords);
+                addToast('Movimiento marcado como pagado exitosamente.', 'success');
+            } catch (error) {
+                console.error("Error al guardar el pago:", error);
+                addToast('Error al procesar el pago.', 'error');
+            }
+        }
     };
 
     return (

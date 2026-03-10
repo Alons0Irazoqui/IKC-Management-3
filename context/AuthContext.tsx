@@ -48,7 +48,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 if (mounted) setLoading(false);
             }
 
-            // 2. Listen for auth changes
+            // 2. Intercept email confirmation redirects BEFORE processing normal auth state
+            const hash = window.location.hash;
+            const search = window.location.search;
+            if (hash.includes('type=signup') || hash.includes('type=recovery') || search.includes('type=signup')) {
+                console.log("AuthContext: Intercepted email confirmation redirect. Forcing logout.");
+                await PulseService.logout();
+                if (mounted) setLoading(false);
+                // Redirect cleanly to email-confirmed screen
+                setTimeout(() => {
+                    window.location.hash = '#/email-confirmed';
+                }, 100);
+                return;
+            }
+
+            // 3. Listen for auth changes
             const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
                 console.log(`AuthContext: Auth event ${event}`);
 
@@ -104,6 +118,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // 2. Server Cleanup (Background)
         try {
             await PulseService.logout();
+            // We do NOT wait or check for errors here. The user is already "out" locally.
         } catch (error) {
             // Ignore network errors on logout, user is already gone locally.
             console.warn("Supabase signOut error (ignorable):", error);
@@ -138,8 +153,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const registerStudentAction = async (data: any) => {
         try {
             const user = await PulseService.registerStudent(data);
-            setCurrentUser(user);
-            addToast('Cuenta de alumno creada exitosamente', 'success');
+            if (!user.pendingVerification) {
+                // Only log them in if Supabase didn't require email verification
+                setCurrentUser(user);
+            }
+            // Always show success because the UI redirects to login 
+            addToast('Cuenta de alumno creada. Verifica tu correo.', 'success');
             return true;
         } catch (error) {
             addToast(error instanceof Error ? error.message : "Error al registrar", 'error');

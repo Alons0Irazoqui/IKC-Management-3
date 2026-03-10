@@ -109,7 +109,7 @@ const StudentClasses: React.FC = () => {
 
   // Data
   const student = students.find(s => s.id === currentUser?.studentId);
-  const myClasses = classes.filter(c => student?.classesId?.includes(c.id));
+  const myClasses = classes.filter(c => student && c.studentIds?.includes(student.id));
 
   // Logic: Filter Events
   // 1. Registered events (Any date)

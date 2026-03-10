@@ -1,5 +1,5 @@
 
-import { supabase } from '../src/supabaseClient';
+import { supabase, secondarySupabase } from '../src/supabaseClient';
 import { Student, ClassCategory, TuitionRecord, UserProfile, LibraryResource, Event, AcademySettings, Expense } from '../types';
 import { defaultAcademySettings } from '../mockData';
 
@@ -167,7 +167,7 @@ export const PulseService = {
         };
 
         // 2. SignUp
-        // We do manual inserts now to avoid RLS/Trigger race conditions.
+        // We now rely entirely on the Postgres Trigger to handle row creations securely.
         const { data: authData, error: authError } = await supabase.auth.signUp({
             email: data.email,
             password: data.password,
@@ -176,7 +176,11 @@ export const PulseService = {
                     display_name: data.name,
                     role: 'student',
                     academy_id: academy.id,
-                    // We can still pass metadata for context, but we will insert records manually
+                    avatar_url: data.avatarUrl || '',
+                    initial_amount: initialAmount,
+                    payment_due_date: paymentData?.due_date || null,
+                    payment_concept: paymentData?.payment_concept || null,
+                    student_details: studentDetails
                 }
             }
         });
@@ -184,67 +188,9 @@ export const PulseService = {
         if (authError) throw authError;
         if (!authData.user) throw new Error("No se pudo crear el usuario");
 
-        const userId = authData.user.id;
-        const studentId = uuid();
-
-        try {
-            // A. Insert Profile
-            // RLS Policy: WITH CHECK (auth.uid() = id) - Works if we are logged in as new user?
-            // Actually, signUp auto-logins. So auth.uid() should be set.
-            const { error: profileError } = await supabase.from('profiles').insert({
-                id: userId,
-                email: data.email,
-                name: data.name,
-                role: 'student',
-                academy_id: academy.id,
-                avatar_url: data.avatarUrl || ''
-            });
-            if (profileError) throw profileError;
-
-            // B. Insert Student
-            // RLS Policy: WITH CHECK (auth.uid() = user_id)
-            const details = { ...studentDetails }; // Copy details
-
-            const { error: studentError } = await supabase.from('students').insert({
-                id: studentId,
-                academy_id: academy.id, // ENSURED
-                user_id: userId,
-                name: data.name,
-                email: data.email,
-                status: initialAmount > 0 ? 'debtor' : 'active',
-                rank_id: null,
-                balance: initialAmount > 0 ? initialAmount * -1 : 0,
-                attendance_data: { total: 0, history: [] },
-                details: details
-            });
-            if (studentError) throw studentError;
-
-            // C. Insert Payment (if applicable)
-            // RLS Policy: WITH CHECK (auth.uid() IN (SELECT user_id FROM students WHERE id = student_id))
-            if (paymentData) {
-                const { error: paymentError } = await supabase.from('payments').insert({
-                    academy_id: academy.id,
-                    student_id: studentId, // ENSURED same ID
-                    amount: paymentData.initial_amount,
-                    status: 'pending',
-                    due_date: paymentData.due_date,
-                    concept: paymentData.payment_concept,
-                    details: paymentData.payment_details
-                });
-                if (paymentError) throw paymentError;
-            }
-
-        } catch (insertError) {
-            console.error("Error inserting student data manually:", insertError);
-            // Verify if it was RLS or Duplicate (maybe trigger ran too?)
-            // Ideally we should return error or try to recover?
-            // Since we threw, the UI will catch it.
-            throw insertError;
-        }
-
         // Return success object
         return {
-            id: userId,
+            id: authData.user.id,
             email: data.email,
             name: data.name,
             role: 'student',
@@ -253,73 +199,109 @@ export const PulseService = {
         } as any;
     },
 
-    createStudentAccountFromMaster: async (studentData: Student, defaultPassword = 'Pulse123!') => {
-        // This is tricky because Masters can't create Auth Users directly without Admin API or RPC
-        // HOWEVER, we can stick to creating the Student Record in 'students' table 
-        // and maybe a placeholder profile?
-        // OR, since the user requirement is "100% functional", we should try to use the public Signup 
-        // but that logs the curren user out.
-        // Alternative: Use a Supabase Edge Function for admin-creation of users.
-        // BUT, for this migration without Edge Functions setup, we might hit a wall.
-        // STOPGAP: Just create the 'students' record. The Auth User creation might need to be "invited" 
-        // or skipped until they claim it.
-        // Code implies Master creating it. 
-        // Let's assume for now we just create the Student Record. 
-        // If the Master *needs* to generate credentials, we verify if RLS allows it.
-        // Actually, we can't create `auth.users` from client with anon key for *another* user without logging out.
-
-        // Strategy: Create the Student Data Record only. 
-        // If the frontend expects a UserProfile return, we mock it or return the student data.
-
-        // Wait, the prompt says "registerStudent" (self-serve) and "login".
-        // Ensure "createStudentAccountFromMaster" works.
-        // If we cannot create auth user, we might need to store "offline" students.
-
-        // Let's create the Student row.
-        const studentId = studentData.id || uuid();
-
-        const details = {
-            ...studentData,
-            // Remove top-level props that are now columns
-        };
+    createStudentAccountFromMaster: async (studentData: Student, defaultPassword = 'Pulse123!', initialAmount: number = 0) => {
+        // We use the secondary client so we don't log out the Master!
+        const details = { ...studentData };
         delete (details as any).id;
         delete (details as any).name;
         delete (details as any).email;
         delete (details as any).academyId;
         delete (details as any).balance;
         delete (details as any).status;
+        const today = new Date();
+        const monthName = today.toLocaleString('es-ES', { month: 'long' });
+        const capitalizedMonth = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+        const concept = `Mensualidad ${capitalizedMonth}`;
 
-        const { error } = await supabase.from('students').insert({
-            id: studentId,
-            academy_id: studentData.academyId,
-            name: studentData.name,
+        const { data, error } = await secondarySupabase.auth.signUp({
             email: studentData.email,
-            status: studentData.status,
-            balance: studentData.balance,
-            details: details,
-            rank_id: studentData.rankId
+            password: defaultPassword,
+            options: {
+                data: {
+                    role: 'student',
+                    display_name: studentData.name,
+                    academy_id: studentData.academyId,
+                    student_details: details,
+                    // Pass the actual amount configured in the academy settings
+                    initial_amount: initialAmount,
+                    payment_due_date: new Date().toISOString(),
+                    payment_concept: concept
+                }
+            }
         });
 
-        if (error) throw error;
+        if (error) {
+            console.error("Supabase Auth Error creating student:", error);
+            throw error;
+        }
 
-        return {
-            id: studentId,
-            email: studentData.email,
-            name: studentData.name,
-            role: 'student',
-            academyId: studentData.academyId,
-            studentId: studentId
-        } as UserProfile;
+        // The trigger automatically creates the profile and the student row
+        // since rank_id and status might not be set accurately by trigger, we update it immediately:
+        
+        let attempts = 0;
+        let authUserId = data?.user?.id;
+        
+        if (authUserId) {
+            // Because triggers can be slightly asynchronous, we retry finding the student record up to 5 times
+            let studentRecord = null;
+            while (attempts < 5 && !studentRecord) {
+                const { data: fetchStudent } = await supabase
+                    .from('students')
+                    .select('id')
+                    .eq('user_id', authUserId)
+                    .single();
+                    
+                if (fetchStudent) {
+                    studentRecord = fetchStudent;
+                } else {
+                    await new Promise(resolve => setTimeout(resolve, 800));
+                    attempts++;
+                }
+            }
+
+            if (studentRecord) {
+                // Update rank and status to match what the Master chose in the form
+                // But preserve 'debtor' if there's an initial amount!
+                await supabase.from('students').update({
+                    rank_id: studentData.rankId,
+                    status: initialAmount > 0 ? 'debtor' : studentData.status
+                }).eq('id', studentRecord.id);
+            }
+        }
+        
+        return data;
     },
 
     deleteFullStudentData: async (studentId: string) => {
-        // Cascade delete should handle profiles if linked, 
-        // but if we manually delete:
-        const { error } = await supabase.from('students').delete().eq('id', studentId);
-        if (error) return false;
+        // Fetch the student name before deletion so we can stamp it on their retained paid payments
+        const { data: student } = await supabase.from('students').select('name').eq('id', studentId).single();
 
-        // Also delete profile if it exists
-        await supabase.from('profiles').delete().eq('id', studentId);
+        if (student) {
+            const { data: paidPayments } = await supabase.from('payments').select('id, details').eq('student_id', studentId).eq('status', 'paid');
+            
+            if (paidPayments && paidPayments.length > 0) {
+                // Keep a record of who the student was in the 'details' JSON before breaking the relation
+                await Promise.all(paidPayments.map(p => {
+                    const newDetails = { ...(p.details as any || {}), studentName: student.name };
+                    return supabase.from('payments').update({ details: newDetails }).eq('id', p.id);
+                }));
+            }
+        }
+
+        // 1. Delete all payments that are NOT 'paid' (e.g. pending, overdue)
+        await supabase.from('payments').delete().eq('student_id', studentId).neq('status', 'paid');
+
+        // 2. Erase the student via RPC which deletes from auth.users safely cascading the deletion properly.
+        const { error } = await supabase.rpc('delete_student_and_user', { p_student_id: studentId });
+        
+        if (error) {
+            console.error("Error deleting student:", error);
+            // Si quieres que la UI muestre un error y aborte en vez de continuar, puedes retornar false o lanzar un error.
+            // Ojo: En este caso no paramos la ejecución del borrado local si consideramos que se borró al menos de "students".
+            // Sin embargo, podemos lanzar una excepción para ser rígidos.
+            throw error;
+        }
+
         return true;
     },
 
@@ -352,6 +334,11 @@ export const PulseService = {
             throw new Error("Perfil de usuario no encontrado");
         }
 
+        let actualStudentId = profile.student_id; // Just in case it gets added
+        if (profile.role === 'student' && !actualStudentId) {
+            actualStudentId = await PulseService._getStudentId(profile.id) || undefined;
+        }
+
         console.timeEnd('login');
         return {
             ...defaultAcademySettings, // Safety fallback
@@ -361,7 +348,7 @@ export const PulseService = {
             role: profile.role as 'master' | 'student',
             academyId: profile.academy_id,
             avatarUrl: profile.avatar_url,
-            studentId: profile.student_id
+            studentId: actualStudentId
         } as UserProfile;
     },
 
@@ -412,6 +399,11 @@ export const PulseService = {
                 return null;
             }
 
+            let actualStudentId = profile.student_id;
+            if (profile.role === 'student' && !actualStudentId) {
+                actualStudentId = await PulseService._getStudentId(profile.id) || undefined;
+            }
+
             console.log("Profile found:", profile.role);
             return {
                 ...defaultAcademySettings, // Safety fallback for types
@@ -421,11 +413,29 @@ export const PulseService = {
                 role: profile.role as 'master' | 'student',
                 academyId: profile.academy_id,
                 avatarUrl: profile.avatar_url,
-                studentId: profile.student_id
+                studentId: actualStudentId
             } as UserProfile;
 
         } catch (e) {
             console.error("Unexpected error in getCurrentUser:", e);
+            return null;
+        }
+    },
+
+    // --- PRIVATE HELPERS ---
+
+    _getStudentId: async (userId: string): Promise<string | null> => {
+        try {
+            const { data, error } = await supabase
+                .from('students')
+                .select('id')
+                .eq('user_id', userId)
+                .maybeSingle();
+
+            if (error || !data) return null;
+            return data.id;
+        } catch (e) {
+            console.warn("_getStudentId error:", e);
             return null;
         }
     },
@@ -443,13 +453,25 @@ export const PulseService = {
 
         if (error || !data) return defaultAcademySettings;
 
+        const returnedSettings = data.settings || {};
+        
+        // Merge missing crucial settings
+        const mergedSettings = { ...defaultAcademySettings, ...returnedSettings };
+        if (!mergedSettings.ranks || mergedSettings.ranks.length === 0) {
+            mergedSettings.ranks = defaultAcademySettings.ranks;
+        }
+        if (!mergedSettings.paymentSettings || !mergedSettings.paymentSettings.monthlyTuition) {
+            mergedSettings.paymentSettings = { ...defaultAcademySettings.paymentSettings, ...mergedSettings.paymentSettings };
+            // Ensure values aren't 0 if they shouldn't be
+            if (!mergedSettings.paymentSettings.monthlyTuition) mergedSettings.paymentSettings.monthlyTuition = 500;
+        }
+
         return {
-            ...defaultAcademySettings,
+            ...mergedSettings,
             id: data.id,
             name: data.name,
             code: data.code,
-            ownerId: data.owner_id,
-            ...data.settings
+            ownerId: data.owner_id
         } as AcademySettings;
     },
 
@@ -536,26 +558,35 @@ export const PulseService = {
             // 2. Query Payments with Student Data
             const { data, error } = await supabase
                 .from('payments')
-                .select('*, students(name, first_name, last_name)')
+                .select('*, students(first_name, last_name, name, details)')
                 .eq('student_id', targetStudentId);
 
             if (error || !data) return [];
 
             return data.map(row => {
                 const s = row.students as any;
-                const name = s ? (s.first_name ? `${s.first_name} ${s.last_name || ''}`.trim() : s.name) : undefined;
+                let fetchedName: string | undefined = undefined;
+                if (s) {
+                    if (s.first_name) {
+                        fetchedName = `${s.first_name} ${s.last_name || ''}`.trim();
+                    } else if (s.name) {
+                        fetchedName = s.name;
+                    } else if (s.details?.name) {
+                        fetchedName = s.details.name;
+                    }
+                }
 
                 return {
                     id: row.id,
                     academyId: row.academy_id,
                     studentId: row.student_id,
-                    studentName: name, // MAPPED!
                     amount: row.amount,
                     status: row.status,
                     dueDate: row.due_date,
                     paymentDate: row.payment_date,
                     concept: row.concept,
-                    ...row.details
+                    ...row.details,
+                    studentName: fetchedName || row.details?.studentName || 'Estudiante'
                 } as TuitionRecord;
             });
         } catch (e) {
@@ -566,103 +597,91 @@ export const PulseService = {
 
     getStudents: async (academyId?: string): Promise<Student[]> => {
         if (!academyId) return [];
-        try {
-            const { data, error } = await supabase
-                .from('students')
-                .select('*')
-                .eq('academy_id', academyId);
+        const { data, error } = await supabase
+            .from('students')
+            .select('*')
+            .eq('academy_id', academyId);
 
-            if (error || !data) return [];
+        if (error) throw error;
+        if (!data) return [];
 
-            return data.map(row => {
-                // Hybrid mapping: check for direct columns or fallback to details
-                // Ideally we migrate completely to columns, but for safety we check both.
-                return {
-                    id: row.id,
-                    userId: row.user_id,
-                    academyId: row.academy_id,
+        return data.map(row => {
+            // Hybrid mapping: check for direct columns or fallback to details
+            // Ideally we migrate completely to columns, but for safety we check both.
+            return {
+                id: row.id,
+                userId: row.user_id,
+                academyId: row.academy_id,
 
-                    // Core Identity
-                    name: row.first_name ? `${row.first_name} ${row.last_name || ''}`.trim() : (row.name || row.details?.name || 'Sin Nombre'),
-                    email: row.email,
+                // Core Identity
+                name: row.first_name ? `${row.first_name} ${row.last_name || ''}`.trim() : (row.name || row.details?.name || 'Sin Nombre'),
+                email: row.email,
 
-                    // Status & Rank
-                    status: row.status,
-                    rankId: row.rank_id,
-                    rank: row.details?.rank || 'White Belt', // Fallback if not relational yet
-                    rankColor: row.details?.rankColor || 'white',
+                // Status & Rank
+                status: row.status,
+                rankId: row.rank_id,
+                rank: row.details?.rank || 'White Belt', // Fallback if not relational yet
+                rankColor: row.details?.rankColor || 'white',
 
-                    // Financials
-                    balance: row.balance,
+                // Financials
+                balance: row.balance,
 
-                    // Attendance
-                    attendance: row.attendance_data?.total || 0,
-                    attendanceHistory: row.attendance_data?.history || [],
-                    lastAttendance: row.details?.lastAttendance,
+                // Attendance
+                attendance: row.attendance_data?.total || 0,
+                attendanceHistory: row.attendance_data?.history || [],
+                lastAttendance: row.details?.lastAttendance,
 
-                    // Details Spread (Legacy support)
-                    ...row.details,
+                // Details Spread (Legacy support)
+                ...row.details,
 
-                    // Explicit Overrides to ensure types match
-                    birthDate: row.birth_date || row.details?.birthDate,
-                    cellPhone: row.phone || row.details?.cellPhone,
-                    age: row.details?.age // Calculated or stored
-                } as Student;
-            });
-        } catch (e) {
-            console.warn("getStudents error (swallowed):", e);
-            return [];
-        }
+                // Explicit Overrides to ensure types match
+                birthDate: row.birth_date || row.details?.birthDate,
+                cellPhone: row.phone || row.details?.cellPhone,
+                age: row.details?.age // Calculated or stored
+            } as Student;
+        });
     },
 
     getClasses: async (academyId?: string): Promise<ClassCategory[]> => {
         if (!academyId) return [];
-        try {
-            const { data, error } = await supabase
-                .from('classes')
-                .select('*')
-                .eq('academy_id', academyId);
+        const { data, error } = await supabase
+            .from('classes')
+            .select('*')
+            .eq('academy_id', academyId);
 
-            if (error || !data) return [];
+        if (error) throw error;
+        if (!data) return [];
 
-            return data.map(row => ({
-                id: row.id,
-                academyId: row.academy_id,
-                name: row.name,
-                instructor: row.instructor,
-                studentIds: row.enrolled_student_ids || [],
-                ...row.schedule_config
-            })) as ClassCategory[];
-        } catch (e) {
-            console.warn("getClasses error (swallowed):", e);
-            return [];
-        }
+        return data.map(row => ({
+            id: row.id,
+            academyId: row.academy_id,
+            name: row.name,
+            instructor: row.instructor,
+            studentIds: row.enrolled_student_ids || [],
+            ...row.schedule_config
+        })) as ClassCategory[];
     },
 
     getEvents: async (academyId?: string): Promise<Event[]> => {
         if (!academyId) return [];
-        try {
-            const { data, error } = await supabase
-                .from('events')
-                .select('*')
-                .eq('academy_id', academyId);
+        const { data, error } = await supabase
+            .from('events')
+            .select('*')
+            .eq('academy_id', academyId);
 
-            if (error || !data) return [];
+        if (error) throw error;
+        if (!data) return [];
 
-            return data.map(row => ({
-                id: row.id,
-                academyId: row.academy_id,
-                title: row.title,
-                start: new Date(row.start_time),
-                end: new Date(row.end_time),
-                ...row.details,
-                registrants: row.registrant_ids || [],
-                type: row.type
-            })) as Event[];
-        } catch (e) {
-            console.warn("getEvents error (swallowed):", e);
-            return [];
-        }
+        return data.map(row => ({
+            id: row.id,
+            academyId: row.academy_id,
+            title: row.title,
+            start: new Date(row.start_time),
+            end: new Date(row.end_time),
+            ...row.details,
+            registrants: row.registrant_ids || [],
+            type: row.type
+        })) as Event[];
     },
 
     getLibrary: async (academyId?: string): Promise<LibraryResource[]> => {
@@ -680,83 +699,71 @@ export const PulseService = {
 
     getPayments: async (userId: string, role: string): Promise<TuitionRecord[]> => {
         if (!userId) return [];
-        try {
-            let query = supabase.from('payments').select('*, students(first_name, last_name, name, details)');
+        // Fixed: Added 'name' and 'details' to the select so we can map studentName correctly
+        let query = supabase.from('payments').select('*, students(first_name, last_name, group_id, name, details)');
 
-            if (role === 'student') {
-                // 1. Get Student ID from User ID
-                const { data: studentData, error: studentError } = await supabase
-                    .from('students')
-                    .select('id')
-                    .eq('user_id', userId)
-                    .maybeSingle(); // Don't throw if missing, just handle it
+        if (role === 'student') {
+            // 1. Get Student ID from User ID using Helper
+            const studentIdStr = await PulseService._getStudentId(userId);
 
-                if (!studentData) {
-                    console.warn("getPayments: No student record found for user", userId);
-                    return []; // Return empty, don't crash
-                }
-
-                // 2. Filter payments by student_id
-                query = query.eq('student_id', studentData.id);
-
-            } else if (role === 'master') {
-                // 1. Get Academy ID from Profile
-                const { data: profile, error: profileError } = await supabase
-                    .from('profiles')
-                    .select('academy_id')
-                    .eq('id', userId)
-                    .single();
-
-                if (profileError || !profile?.academy_id) {
-                    console.warn("getPayments: Master has no academy_id", userId);
-                    return [];
-                }
-
-                // 2. Filter payments by academy_id
-                query = query.eq('academy_id', profile.academy_id);
-            } else {
+            if (!studentIdStr) {
+                console.warn("getPayments: No student record found for user", userId);
                 return [];
             }
 
-            const { data, error } = await query;
+            // 2. Filter payments by student_id
+            query = query.eq('student_id', studentIdStr);
 
-            if (error) {
-                console.error("getPayments query error:", error);
+        } else if (role === 'master') {
+            // 1. Get Academy ID from Profile
+            const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('academy_id')
+                .eq('id', userId)
+                .single();
+
+            if (profileError || !profile?.academy_id) {
+                console.warn("getPayments: Master has no academy_id", userId);
                 return [];
             }
-            if (!data) return [];
 
-            return data.map(row => {
-                const s = row.students as any;
-                // Robust Name Construction
-                let studentName = 'Estudiante';
-                if (s) {
-                    if (s.first_name) {
-                        studentName = `${s.first_name} ${s.last_name || ''}`.trim();
-                    } else if (s.name) {
-                        studentName = s.name;
-                    } else if (s.details?.name) {
-                        studentName = s.details.name;
-                    }
-                }
-
-                return {
-                    id: row.id,
-                    academyId: row.academy_id,
-                    studentId: row.student_id,
-                    studentName: studentName, // Final Mapped Name
-                    amount: row.amount,
-                    status: row.status,
-                    dueDate: row.due_date,
-                    paymentDate: row.payment_date,
-                    concept: row.concept,
-                    ...row.details
-                } as TuitionRecord;
-            });
-        } catch (e) {
-            console.warn("getPayments error (swallowed):", e);
+            // 2. Filter payments by academy_id
+            query = query.eq('academy_id', profile.academy_id);
+        } else {
             return [];
         }
+
+        const { data, error } = await query;
+
+        if (error) throw error;
+        if (!data) return [];
+
+        return data.map(row => {
+            const s = row.students as any;
+            let studentName: string | undefined = undefined;
+            if (s) {
+                if (s.first_name) {
+                    studentName = `${s.first_name} ${s.last_name || ''}`.trim();
+                } else if (s.name) {
+                    studentName = s.name;
+                } else if (s.details?.name) {
+                    studentName = s.details.name;
+                }
+            }
+
+            return {
+                id: row.id,
+                academyId: row.academy_id,
+                studentId: row.student_id,
+                amount: row.amount,
+                status: row.status,
+                dueDate: row.due_date,
+                paymentDate: row.payment_date,
+                concept: row.concept,
+                ...row.details,
+                studentName: studentName || row.details?.studentName || 'Estudiante' // Forces live relational name
+            } as TuitionRecord;
+        });
     },
 
     getExpenses: async (academyId?: string): Promise<Expense[]> => {
@@ -797,22 +804,20 @@ export const PulseService = {
     // --- WRITE METHODS ---
 
     saveAcademySettings: async (settings: AcademySettings) => {
-        await supabase
+        const { error } = await supabase
             .from('academies')
             .update({
                 name: settings.name,
                 settings: settings
             })
             .eq('id', settings.id);
+        if (error) throw error;
     },
 
     saveStudents: async (students: Student[]) => {
-        // Upsert one by one or bulk. 
-        // Supabase upsert requires matching columns.
-        // Mapped mapping is complex, so we iterate.
-        for (const s of students) {
+        if (!students || students.length === 0) return;
+        const mapped = students.map(s => {
             const details = { ...s };
-            // Clean top level props
             delete (details as any).id;
             delete (details as any).userId;
             delete (details as any).academyId;
@@ -824,23 +829,35 @@ export const PulseService = {
             delete (details as any).attendance;
             delete (details as any).attendanceHistory;
 
-            await supabase.from('students').upsert({
+            const payload: any = {
                 id: s.id,
                 academy_id: s.academyId,
-                user_id: s.userId,
                 name: s.name,
-                email: s.email,
                 status: s.status,
-                rank_id: s.rankId,
+                rank_id: s.rankId || null,
                 balance: s.balance,
                 attendance_data: { total: s.attendance, history: s.attendanceHistory },
                 details: details
-            });
+            };
+
+            // Solamente agregamos user_id y email si existen explícitamente y tienen valor, 
+            // esto previene borrar el user_id de la db si el estado local lo perdió temporalmente
+            if (s.userId) payload.user_id = s.userId;
+            if (s.email) payload.email = s.email;
+
+            return payload;
+        });
+
+        const { error, data } = await supabase.from('students').upsert(mapped).select();
+        if (error) {
+            console.error("Supabase upsert STUDENTS error:", JSON.stringify(error, null, 2));
+            throw error;
         }
     },
 
     saveClasses: async (classes: ClassCategory[]) => {
-        for (const c of classes) {
+        if (!classes || classes.length === 0) return;
+        const mapped = classes.map(c => {
             const config = { ...c };
             delete (config as any).id;
             delete (config as any).academyId;
@@ -848,19 +865,23 @@ export const PulseService = {
             delete (config as any).instructor;
             delete (config as any).studentIds;
 
-            await supabase.from('classes').upsert({
+            return {
                 id: c.id,
                 academy_id: c.academyId,
                 name: c.name,
                 instructor: c.instructor,
                 enrolled_student_ids: c.studentIds,
                 schedule_config: config
-            });
-        }
+            };
+        });
+
+        const { error } = await supabase.from('classes').upsert(mapped);
+        if (error) throw error;
     },
 
     saveEvents: async (events: Event[]) => {
-        for (const e of events) {
+        if (!events || events.length === 0) return;
+        const mapped = events.map(e => {
             const details = { ...e };
             delete (details as any).id;
             delete (details as any).academyId;
@@ -870,7 +891,7 @@ export const PulseService = {
             delete (details as any).type;
             delete (details as any).registrants;
 
-            await supabase.from('events').upsert({
+            return {
                 id: e.id,
                 academy_id: e.academyId,
                 title: e.title,
@@ -879,12 +900,16 @@ export const PulseService = {
                 type: e.type,
                 registrant_ids: e.registrants,
                 details: details
-            });
-        }
+            };
+        });
+
+        const { error } = await supabase.from('events').upsert(mapped);
+        if (error) throw error;
     },
 
     savePayments: async (payments: TuitionRecord[]) => {
-        for (const p of payments) {
+        if (!payments || payments.length === 0) return;
+        const mapped = payments.map(p => {
             const details = { ...p };
             delete (details as any).id;
             delete (details as any).academyId;
@@ -895,7 +920,7 @@ export const PulseService = {
             delete (details as any).paymentDate;
             delete (details as any).concept;
 
-            await supabase.from('payments').upsert({
+            return {
                 id: p.id,
                 academy_id: p.academyId,
                 student_id: p.studentId,
@@ -905,18 +930,22 @@ export const PulseService = {
                 payment_date: p.paymentDate,
                 concept: p.concept,
                 details: details
-            });
-        }
+            };
+        });
+
+        const { error } = await supabase.from('payments').upsert(mapped);
+        if (error) throw error;
     },
 
     deletePayment: async (recordId: string) => {
-        await supabase.from('payments').delete().eq('id', recordId);
+        const { error } = await supabase.from('payments').delete().eq('id', recordId);
+        if (error) throw error;
     },
 
     saveExpense: async (expense: Expense) => {
         // Safe Attempt
         try {
-            await supabase.from('expenses').upsert({
+            const { error } = await supabase.from('expenses').upsert({
                 id: expense.id,
                 academy_id: expense.academyId,
                 description: expense.description,
@@ -926,16 +955,20 @@ export const PulseService = {
                 payment_method: expense.paymentMethod,
                 status: expense.status
             });
+            if (error) throw error;
         } catch (e) {
             console.error("Failed to save expense (table missing?)", e);
+            throw e;
         }
     },
 
     deleteExpense: async (id: string) => {
         try {
-            await supabase.from('expenses').delete().eq('id', id);
+            const { error } = await supabase.from('expenses').delete().eq('id', id);
+            if (error) throw error;
         } catch (e) {
             console.error("Failed to delete expense", e);
+            throw e;
         }
     },
 
@@ -948,7 +981,7 @@ export const PulseService = {
             delete (details as any).category;
             delete (details as any).videoUrl;
 
-            await supabase.from('library').upsert({
+            const { error } = await supabase.from('library').upsert({
                 id: r.id,
                 academy_id: r.academyId,
                 title: r.title,
@@ -956,6 +989,7 @@ export const PulseService = {
                 url: r.videoUrl,
                 details: details
             });
+            if (error) throw error;
         }
     },
 

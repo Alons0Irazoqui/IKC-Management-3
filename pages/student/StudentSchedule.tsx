@@ -498,7 +498,7 @@ const EventDetailModal: React.FC<{
 // --- MAIN COMPONENT ---
 const StudentSchedule: React.FC = () => {
     const { scheduleEvents } = useAcademy();
-    const { currentUser, students, events } = useStore();
+    const { currentUser, students, events, classes } = useStore();
     
     const [view, setView] = useState<ViewType>('agenda'); // Default to Agenda
     const [date, setDate] = useState(new Date());
@@ -518,15 +518,17 @@ const StudentSchedule: React.FC = () => {
         if (!student) return [];
         return scheduleEvents.filter(evt => {
             if (evt.type === 'class' && evt.classId) {
-                return student.classesId?.includes(evt.classId);
+                const targetClass = classes.find(c => c.id === evt.classId);
+                return targetClass?.studentIds?.includes(student.id) || false;
             }
+            
             const sourceEvent = events.find(e => e.id === evt.id);
             if (sourceEvent && sourceEvent.registrants?.includes(student.id)) {
                 return true;
             }
             return false;
         });
-    }, [scheduleEvents, student, events]);
+    }, [scheduleEvents, student, events, classes]);
 
     const handleEventClick = (event: CalendarEvent) => {
         setSelectedEvent(event);

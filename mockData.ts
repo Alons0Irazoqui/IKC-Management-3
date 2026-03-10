@@ -3,14 +3,11 @@ import { Student, ClassSession, ScheduleItem, Message, LibraryResource, AcademyS
 
 // Updated Ranks with granular attendance requirements for testing
 export const defaultRanks = [
-    { id: 'rank-1', name: 'White Belt', color: 'white' as const, order: 1, requiredAttendance: 0 },
-    { id: 'rank-2', name: 'Yellow Belt', color: 'yellow' as const, order: 2, requiredAttendance: 24 },
-    { id: 'rank-3', name: 'Orange Belt', color: 'orange' as const, order: 3, requiredAttendance: 48 },
-    { id: 'rank-4', name: 'Green Belt', color: 'green' as const, order: 4, requiredAttendance: 72 },
-    { id: 'rank-5', name: 'Blue Belt', color: 'blue' as const, order: 5, requiredAttendance: 96 },
-    { id: 'rank-6', name: 'Purple Belt', color: 'purple' as const, order: 6, requiredAttendance: 120 },
-    { id: 'rank-7', name: 'Brown Belt', color: 'brown' as const, order: 7, requiredAttendance: 150 },
-    { id: 'rank-8', name: 'Black Belt', color: 'black' as const, order: 8, requiredAttendance: 200 },
+    { id: 'rank-1', name: 'Blanca', color: 'white' as const, order: 1, requiredAttendance: 0 },
+    { id: 'rank-2', name: 'Amarilla', color: 'yellow' as const, order: 2, requiredAttendance: 24 },
+    { id: 'rank-3', name: 'Verde', color: 'green' as const, order: 3, requiredAttendance: 72 },
+    { id: 'rank-4', name: 'Café', color: 'brown' as const, order: 4, requiredAttendance: 150 },
+    { id: 'rank-5', name: 'Negra', color: 'black' as const, order: 5, requiredAttendance: 200 },
 ];
 
 export const defaultAcademySettings: AcademySettings = {
@@ -26,7 +23,7 @@ export const defaultAcademySettings: AcademySettings = {
     paymentSettings: {
         lateFeeAmount: 150,
         lateFeeGracePeriod: 5,
-        monthlyTuition: 800,
+        monthlyTuition: 500,
         billingDay: 1,
         lateFeeDay: 10
     },

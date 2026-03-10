@@ -9,7 +9,7 @@ import { getLocalDate } from '../../utils/dateUtils';
 import Avatar from '../../components/ui/Avatar';
 
 const StudentDashboard: React.FC = () => {
-    const { currentUser, students, classes, academySettings, events, registerForEvent } = useStore();
+    const { currentUser, students, classes, academySettings, events, registerForEvent, records } = useStore();
     const { scheduleEvents } = useAcademy();
     const { addToast } = useToast();
     const navigate = useNavigate();
@@ -36,12 +36,24 @@ const StudentDashboard: React.FC = () => {
     const progressPercent = required > 0 ? Math.min((current / required) * 100, 100) : 100;
 
     // -- 2. FINANCIAL LOGIC --
-    // Use liveStudent.balance to reflect recent calculations immediately
-    const hasDebt = (liveStudent?.balance || 0) > 0;
+    // Calculate debt directly from records to ensure it's always accurate even if students array sync is lagging
+    const activeRecords = useMemo(() => {
+        return records.filter(r => ['pending', 'overdue', 'charged', 'partial'].includes(r.status));
+    }, [records]);
+
+    const actualDebt = useMemo(() => {
+        return activeRecords.reduce((acc, r) => {
+            const currentAmount = r.status === 'overdue' ? (r.amount || 0) + (r.penaltyAmount || 0) : (r.amount || 0);
+            return acc + currentAmount;
+        }, 0);
+    }, [activeRecords]);
+
+    const hasDebt = actualDebt > 0;
 
     // -- 3. ENROLLED CLASSES LOGIC --
     const myEnrolledClasses = useMemo(() => {
-        return classes.filter(c => liveStudent?.classesId?.includes(c.id));
+        // More robust: Check if the global class list has this student registered
+        return classes.filter(c => c.studentIds?.includes(liveStudent?.id || ''));
     }, [classes, liveStudent]);
 
     // -- 4. NEXT CLASS LOGIC --
@@ -51,7 +63,8 @@ const StudentDashboard: React.FC = () => {
 
         const upcomingClasses = scheduleEvents.filter(evt => {
             if (evt.type !== 'class' || !evt.classId) return false;
-            if (!liveStudent.classesId?.includes(evt.classId)) return false;
+            const targetClass = classes.find(c => c.id === evt.classId);
+            if (!targetClass?.studentIds?.includes(liveStudent.id)) return false;
             if (evt.status === 'cancelled') return false;
             return evt.end > now;
         });
@@ -163,7 +176,7 @@ const StudentDashboard: React.FC = () => {
                         </div>
                         <p className={`text-xs font-bold uppercase tracking-wider ${hasDebt ? 'text-red-600' : 'text-green-600'}`}>Estado de Cuenta</p>
                         <h3 className={`text-2xl font-black ${hasDebt ? 'text-red-900' : 'text-green-900'}`}>
-                            {hasDebt ? `$${liveStudent?.balance.toFixed(2)}` : 'Al Corriente'}
+                            {hasDebt ? `$${actualDebt.toFixed(2)}` : 'Al Corriente'}
                         </h3>
                     </div>
 
@@ -335,13 +348,13 @@ const StudentDashboard: React.FC = () => {
 
                                 {/* Belt Visual */}
                                 <div className={`mt-4 h-12 w-full rounded-lg shadow-sm border flex items-center justify-end pr-3 relative overflow-hidden ${liveStudent.rankColor === 'white' ? 'bg-slate-50 border-slate-200' :
-                                        liveStudent.rankColor === 'yellow' ? 'bg-yellow-300 border-yellow-400' :
-                                            liveStudent.rankColor === 'orange' ? 'bg-orange-400 border-orange-500' :
-                                                liveStudent.rankColor === 'green' ? 'bg-green-600 border-green-700' :
-                                                    liveStudent.rankColor === 'blue' ? 'bg-blue-600 border-blue-700' :
-                                                        liveStudent.rankColor === 'purple' ? 'bg-purple-600 border-purple-700' :
-                                                            liveStudent.rankColor === 'brown' ? 'bg-[#5D4037] border-[#3E2723]' :
-                                                                'bg-gray-900 border-black'
+                                    liveStudent.rankColor === 'yellow' ? 'bg-yellow-300 border-yellow-400' :
+                                        liveStudent.rankColor === 'orange' ? 'bg-orange-400 border-orange-500' :
+                                            liveStudent.rankColor === 'green' ? 'bg-green-600 border-green-700' :
+                                                liveStudent.rankColor === 'blue' ? 'bg-blue-600 border-blue-700' :
+                                                    liveStudent.rankColor === 'purple' ? 'bg-purple-600 border-purple-700' :
+                                                        liveStudent.rankColor === 'brown' ? 'bg-[#5D4037] border-[#3E2723]' :
+                                                            'bg-gray-900 border-black'
                                     }`}>
                                     {/* Texture overlay */}
                                     <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/fabric-of-squares.png')]"></div>
@@ -375,8 +388,8 @@ const StudentDashboard: React.FC = () => {
                     <div className="bg-white rounded-[2rem] w-full max-w-lg shadow-2xl relative overflow-hidden" onClick={e => e.stopPropagation()}>
 
                         <div className={`p-8 pb-12 relative ${selectedEvent.type === 'exam' ? 'bg-gray-900 text-white' :
-                                selectedEvent.type === 'tournament' ? 'bg-orange-500 text-white' :
-                                    'bg-blue-600 text-white'
+                            selectedEvent.type === 'tournament' ? 'bg-orange-500 text-white' :
+                                'bg-blue-600 text-white'
                             }`}>
                             <button onClick={() => setSelectedEvent(null)} className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 rounded-full backdrop-blur-md transition-colors">
                                 <span className="material-symbols-outlined">close</span>

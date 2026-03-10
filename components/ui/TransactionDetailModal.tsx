@@ -47,7 +47,7 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
 
     const remainingDebt = useMemo(() => {
         if (!record) return 0;
-        return record.amount + (record.penaltyAmount || 0);
+        return (record.amount || 0) + (record.penaltyAmount || 0);
     }, [record]);
 
     React.useEffect(() => {
@@ -69,17 +69,23 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
     const totalPaid = (paymentHistory || []).reduce((acc, curr) => acc + curr.amount, 0);
 
     // 2. Current Debt
-    const currentDebt = record.amount + (record.penaltyAmount || 0);
+    const currentDebt = (record.amount || 0) + (record.penaltyAmount || 0);
 
     // 3. Grand Total (Reconstructed Total Value of Transaction)
     const grandTotal = totalPaid + currentDebt;
 
     // 4. Base Amount (Use originalAmount if available, else assume current Grand Total is base)
-    const baseAmount = record.originalAmount !== undefined ? record.originalAmount : grandTotal;
+    let baseAmount = record.originalAmount;
+    if (baseAmount === undefined || baseAmount === null || baseAmount === 0) {
+        baseAmount = grandTotal - (record.penaltyAmount || 0);
+    }
 
     // 5. Implied Penalty (Difference between what it costs now vs original base)
     let impliedPenalty = grandTotal - baseAmount;
-    if (impliedPenalty < 0.01) impliedPenalty = 0;
+    if (impliedPenalty < 0.01) {
+        impliedPenalty = 0;
+        baseAmount = grandTotal;
+    }
 
     const getStatusConfig = (status: string) => {
         switch (status) {

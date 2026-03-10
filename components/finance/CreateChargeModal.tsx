@@ -20,7 +20,7 @@ const CreateChargeModal: React.FC<CreateChargeModalProps> = ({ isOpen, onClose }
     const { addToast } = useToast();
 
     const [studentId, setStudentId] = useState<string>('');
-    const [categoryGroup, setCategoryGroup] = useState<CategoryGroup>('event');
+    const [categoryGroup, setCategoryGroup] = useState<CategoryGroup>('other');
     
     const [selectedEventId, setSelectedEventId] = useState<string>('');
     const [customTitle, setCustomTitle] = useState('');
@@ -91,7 +91,7 @@ const CreateChargeModal: React.FC<CreateChargeModalProps> = ({ isOpen, onClose }
 
     const handleClose = () => {
         setStudentId('');
-        setCategoryGroup('event');
+        setCategoryGroup('other');
         setAmount('');
         setSurcharge(''); // Reset recargo
         setCustomTitle('');

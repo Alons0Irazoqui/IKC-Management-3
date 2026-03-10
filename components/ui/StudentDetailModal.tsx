@@ -30,6 +30,7 @@ const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
     // ESTADOS LOCALES
     const [activeTab, setActiveTab] = useState<'info' | 'payments'>('info');
     const [isEditing, setIsEditing] = useState(false);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [formData, setFormData] = useState<Student | null>(null);
 
     // Sincronizar formData cuando el estudiante cambia o se entra en modo edición
@@ -56,10 +57,17 @@ const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
             message: `¿Deseas eliminar permanentemente a ${student.name}? Esta acción borrará registros de asistencia y deudas.`,
             type: 'danger',
             confirmText: 'Confirmar Eliminación',
-            onConfirm: () => {
-                deleteStudent(student.id);
-                purgeStudentDebts(student.id);
-                onClose();
+            onConfirm: async () => {
+                setIsDeleting(true);
+                try {
+                    await deleteStudent(student.id);
+                    purgeStudentDebts(student.id);
+                    onClose();
+                } catch (e) {
+                    addToast('Ocurrió un error al eliminar.', 'error');
+                } finally {
+                    setIsDeleting(false);
+                }
             }
         });
     };
@@ -252,9 +260,17 @@ const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                                         <button 
                                             onClick={handleDelete}
                                             title="Eliminar Alumno"
-                                            className="p-2.5 rounded-full text-red-400 hover:text-red-600 hover:bg-red-50 transition-all flex items-center justify-center"
+                                            disabled={isDeleting}
+                                            className={`p-2.5 rounded-full transition-all flex items-center justify-center ${isDeleting ? 'text-slate-400 cursor-not-allowed opacity-50' : 'text-red-400 hover:text-red-600 hover:bg-red-50'}`}
                                         >
-                                            <span className="material-symbols-outlined">delete</span>
+                                            {isDeleting ? (
+                                                <svg className="animate-spin h-5 w-5 text-slate-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                            ) : (
+                                                <span className="material-symbols-outlined">delete</span>
+                                            )}
                                         </button>
 
                                         <div className="w-px h-6 bg-slate-200 mx-2"></div>

@@ -48,28 +48,26 @@ export const generateReceipt = (
     // Esto representa cuánto costó el movimiento en total (Base + Recargos) al día de hoy.
     const grandTotal = totalPaidHistory + currentDebt;
 
-    // D. Detectar Recargos (Lógica Híbrida Robusta)
-    // Buscamos si existe un recargo activo (penaltyAmount) o si hubo uno histórico (customPenaltyAmount) que ya se absorbió.
-    // Esto es crítico porque al pagar 'full', penaltyAmount se vuelve 0, pero customPenaltyAmount guarda el rastro.
-    const activePenalty = record.penaltyAmount || 0;
-    const storedPenalty = record.customPenaltyAmount || 0;
-
-    // El recargo real es el mayor de los dos (asumiendo que no se duplican y que customPenaltyAmount es la "memoria" del recargo).
-    let historicalPenalty = Math.max(activePenalty, storedPenalty);
+    // D. Calcular Recargo Real Aplicado
+    // Utilizamos primero el valor explícito si existe.
+    let historicalPenalty = record.customPenaltyAmount || record.penaltyAmount || 0;
 
     // E. Calcular la Base (Costo Original)
-    // La base siempre se deriva restando el recargo identificado al gran total.
-    // Esto evita inconsistencias si 'originalAmount' fue modificado en la base de datos.
-    let baseCost = grandTotal - historicalPenalty;
-
-    // Fallback de seguridad: Si por corrupción de datos la base da negativo, asumimos que no hubo recargo.
-    if (baseCost < 0) {
-        baseCost = grandTotal;
-        historicalPenalty = 0;
+    let baseCost = record.originalAmount;
+    if (baseCost === undefined || baseCost === null || baseCost === 0) {
+        baseCost = grandTotal - historicalPenalty;
+    } else {
+        // Corrección retroactiva para registros viejos que absorbieron el recargo en su originalAmount
+        if (historicalPenalty > 0 && baseCost === grandTotal) {
+            baseCost = grandTotal - historicalPenalty;
+        } else if (historicalPenalty === 0 && grandTotal > baseCost) {
+            historicalPenalty = grandTotal - baseCost;
+        }
     }
 
-    // Limpieza de precisión flotante (ej. 0.0000001 -> 0)
-    if (historicalPenalty < 0.01) {
+    // Fallback de seguridad
+    if (baseCost < 0) {
+        baseCost = grandTotal;
         historicalPenalty = 0;
     }
 

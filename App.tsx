@@ -16,6 +16,8 @@ import RoleSelection from './pages/auth/RoleSelection';
 import StudentRegistration from './pages/auth/StudentRegistration';
 import MasterRegistration from './pages/auth/MasterRegistration';
 import MasterPinEntry from './pages/auth/MasterPinEntry';
+import EmailConfirmed from './pages/auth/EmailConfirmed';
+import CheckEmail from './pages/auth/CheckEmail';
 
 // Public Pages
 import TermsAndConditions from './pages/TermsAndConditions';
@@ -59,6 +61,8 @@ const App: React.FC = () => {
                     <Route path="/register/verify-pin" element={<MasterPinEntry />} />
                     <Route path="/register/student" element={<StudentRegistration />} />
                     <Route path="/register/master" element={<MasterRegistration />} />
+                    <Route path="/email-confirmed" element={<EmailConfirmed />} />
+                    <Route path="/check-email" element={<CheckEmail />} />
                     
                     {/* Ruta de Términos y Condiciones (Pública) */}
                     <Route path="/terms" element={<TermsAndConditions />} />

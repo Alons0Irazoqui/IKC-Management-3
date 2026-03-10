@@ -73,6 +73,7 @@ const StudentRegistration: React.FC = () => {
     formState: { errors },
     watch
   } = useForm<StudentRegistrationForm>({
+    // @ts-ignore - TS mismatch between zod coerce and useForm infer
     resolver: zodResolver(studentRegistrationSchema),
     mode: 'onChange',
     defaultValues: {
@@ -119,9 +120,7 @@ const StudentRegistration: React.FC = () => {
     try {
       const result: any = await registerStudent(data);
       if (result) {
-        addToast('Registro exitoso. Por favor revisa tu correo para activar tu cuenta.', 'success');
-        // Redirect to login to verify email
-        setTimeout(() => navigate('/login'), 2500);
+        navigate('/check-email');
       } else {
         addToast('Error al registrar.', 'error');
       }
@@ -148,7 +147,7 @@ const StudentRegistration: React.FC = () => {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <form onSubmit={handleSubmit(onSubmit as any)} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
 
           {/* STEP 1 */}
           {currentStep === 1 && (
@@ -249,7 +248,7 @@ const StudentRegistration: React.FC = () => {
 
             <button
               type="button"
-              onClick={currentStep === 3 ? handleSubmit(onSubmit) : nextStep}
+              onClick={currentStep === 3 ? handleSubmit(onSubmit as any) : nextStep}
               disabled={isSubmitting}
               className="flex-1 bg-primary hover:bg-red-600 text-white font-bold py-4 rounded-lg transition-all disabled:opacity-70"
             >

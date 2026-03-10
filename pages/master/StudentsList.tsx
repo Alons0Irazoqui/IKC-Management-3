@@ -19,7 +19,7 @@ const MotionTbody = motion.tbody as any;
 const MotionTr = motion.tr as any;
 
 const StudentsList: React.FC = () => {
-  const { students, updateStudent, deleteStudent, addStudent, academySettings, promoteStudent, records, isLoading, purgeStudentDebts, refreshData } = useStore();
+  const { students, updateStudent, deleteStudent, addStudent, academySettings, promoteStudent, records, isLoading, purgeStudentDebts, refreshData, refreshFinance } = useStore();
   const { addToast } = useToast();
   const { confirm } = useConfirmation();
   const navigate = useNavigate();
@@ -35,6 +35,7 @@ const StudentsList: React.FC = () => {
   const [showModal, setShowModal] = useState(false); 
   const [viewingStudent, setViewingStudent] = useState<Student | null>(null); 
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const initialFormState: Partial<Student> = {
       name: '', 
@@ -175,40 +176,63 @@ const StudentsList: React.FC = () => {
       setShowModal(true);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
       e.preventDefault();
       
+      if (isSubmitting) return;
+
       if (!formData.name || !formData.email || !formData.cellPhone || !formData.guardian.fullName || !formData.guardian.phones.main) {
           addToast("Por favor completa el los campos obligatorios (*)", 'error');
           return;
       }
 
-      if (!editingStudent || (editingStudent && editingStudent.email !== formData.email)) {
-          if (PulseService.checkEmailExists(formData.email)) {
-              addToast("Este correo electrónico ya está registrado.", 'error');
-              return;
+      setIsSubmitting(true);
+      try {
+          if (!editingStudent || (editingStudent && editingStudent.email !== formData.email)) {
+              const emailExists = await PulseService.checkEmailExists(formData.email);
+              if (emailExists) {
+                  addToast("Este correo electrónico ya está registrado.", 'error');
+                  setIsSubmitting(false);
+                  return;
+              }
           }
-      }
 
-      if (editingStudent) {
-          updateStudent({ ...editingStudent, ...formData });
-      } else {
-          if (!formData.password) {
-              addToast('La contraseña es obligatoria', 'error');
-              return;
+          if (editingStudent) {
+              const selectedRank = academySettings.ranks.find(r => r.name === formData.rank);
+              await updateStudent({
+                  ...editingStudent,
+                  ...formData,
+                  rankId: selectedRank?.id || editingStudent.rankId,
+                  rankColor: selectedRank?.color || editingStudent.rankColor,
+              });
+              setShowModal(false);
+          } else {
+              if (!formData.password) {
+                  addToast('La contraseña es obligatoria', 'error');
+                  setIsSubmitting(false);
+                  return;
+              }
+              const selectedRank = academySettings.ranks.find(r => r.name === formData.rank);
+              
+              await addStudent({
+                  id: '', userId: '', academyId: '', ...formData,
+                  rankId: selectedRank?.id || 'rank-1',
+                  rankColor: selectedRank?.color || 'white',
+                  stripes: 0, attendance: 0, totalAttendance: 0,
+                  joinDate: new Date().toLocaleDateString(),
+                  classesId: [], attendanceHistory: [],
+                  status: formData.status
+              });
+              
+              if (refreshFinance) refreshFinance();
+              setShowModal(false);
           }
-          const selectedRank = academySettings.ranks.find(r => r.name === formData.rank);
-          addStudent({
-              id: '', userId: '', academyId: '', ...formData,
-              rankId: selectedRank?.id || 'rank-1',
-              rankColor: selectedRank?.color || 'white',
-              stripes: 0, attendance: 0, totalAttendance: 0,
-              joinDate: new Date().toLocaleDateString(),
-              classesId: [], attendanceHistory: [],
-              status: formData.status
-          });
+      } catch (err) {
+          console.error("Error submitting form:", err);
+          // Error already toasted in AcademyContext / PulseService, so we just finish loading state
+      } finally {
+          setIsSubmitting(false);
       }
-      setShowModal(false);
   };
 
   return (
@@ -517,8 +541,20 @@ const StudentsList: React.FC = () => {
                       </div>
                       
                       <div className="md:col-span-2 flex justify-end gap-4 pt-6 border-t border-gray-100">
-                          <button type="button" onClick={() => setShowModal(false)} className="px-8 py-3.5 rounded-xl border border-gray-300 font-bold text-text-secondary hover:bg-gray-50 transition-all uppercase tracking-widest text-xs">Cancelar</button>
-                          <button type="submit" className="px-10 py-3.5 rounded-xl bg-primary text-white font-bold hover:bg-primary-hover shadow-lg transition-all active:scale-95 uppercase tracking-widest text-xs">Finalizar y Guardar</button>
+                          <button type="button" onClick={() => setShowModal(false)} disabled={isSubmitting} className="px-8 py-3.5 rounded-xl border border-gray-300 font-bold text-text-secondary hover:bg-gray-50 transition-all uppercase tracking-widest text-xs disabled:opacity-50">Cancelar</button>
+                          <button type="submit" disabled={isSubmitting} className="px-10 py-3.5 rounded-xl bg-primary text-white font-bold hover:bg-primary-hover shadow-lg transition-all active:scale-95 uppercase tracking-widest text-xs disabled:opacity-50 flex items-center gap-2">
+                              {isSubmitting ? (
+                                  <>
+                                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                      </svg>
+                                      Guardando...
+                                  </>
+                              ) : (
+                                  'Finalizar y Guardar'
+                              )}
+                          </button>
                       </div>
                   </form>
               </div>
@@ -531,9 +567,6 @@ const StudentsList: React.FC = () => {
         student={reactiveViewingStudent}
         onClose={() => setViewingStudent(null)}
         onEdit={(s) => handleEdit(s)}
-        onMessage={(id) => {
-            navigate('/master/dashboard', { state: { recipientId: id } }); // Redirección ficticia para enviar mensaje
-        }}
         financialRecords={studentFinancialRecords}
       />
     </div>

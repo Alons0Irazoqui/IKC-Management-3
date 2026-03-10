@@ -9,11 +9,14 @@ import { useToast } from './ToastContext';
 import { format } from 'date-fns';
 
 // Helper for ID generation
-const generateId = (prefix: string = 'id') => {
+const generateId = (prefix?: string) => {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-        return `${prefix}-${crypto.randomUUID()}`;
+        return crypto.randomUUID();
     }
-    return `${prefix}-${Date.now()}`;
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    });
 };
 
 interface AcademyContextType {
@@ -28,10 +31,10 @@ interface AcademyContextType {
 
     // Actions
     refreshData: () => void;
-    addStudent: (student: Student) => void;
+    addStudent: (student: Student) => Promise<void>;
     updateStudent: (student: Student) => void;
     updateStudentProfile: (studentId: string, updates: Partial<Student>) => void; // NEW: Self-update
-    deleteStudent: (id: string) => void;
+    deleteStudent: (id: string) => Promise<void>;
     updateStudentStatus: (id: string, status: Student['status']) => void;
 
     batchUpdateStudents: (updatedStudents: Student[]) => void;
@@ -310,29 +313,27 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     const addStudent = async (student: Student) => {
         if (currentUser?.role !== 'master') return;
-        const studentId = student.id || generateId('stu');
 
         const finalStudent = {
             ...student,
-            id: studentId,
-            userId: studentId,
             academyId: currentUser.academyId,
-            attendanceHistory: [],
-            balance: 0,
-            status: 'active' as const
         };
 
-        const newStudentList = [...students, finalStudent];
-        setStudents(newStudentList);
-        await PulseService.saveStudents([finalStudent]); // Save only new one
-
         try {
-            // Attempt account creation. If it fails, we still have the student record.
-            await PulseService.createStudentAccountFromMaster(finalStudent, (student as any).password);
-            addToast('Alumno creado y cuenta generada', 'success');
+            const initialFee = academySettings.paymentSettings?.monthlyTuition || 500;
+            await PulseService.createStudentAccountFromMaster(finalStudent, (student as any).password, initialFee);
+            
+            // Re-fetch students from DB now that the trigger has added the real row
+            if (currentUser.academyId) {
+                const refreshedStudents = await PulseService.getStudents(currentUser.academyId);
+                setStudents(refreshedStudents);
+            }
+            
+            addToast('Alumno creado e invitación enviada exitosamente', 'success');
         } catch (e) {
-            console.error("Failed to auto-create user account", e);
-            addToast('Alumno creado, pero hubo un error generando su cuenta de usuario', 'info');
+            console.error("Failed to register student", e);
+            addToast('Error al crear perfil y cuenta del alumno', 'error');
+            throw e;
         }
     };
 
@@ -340,12 +341,16 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (currentUser?.role !== 'master') return;
 
         const studentWithEligibility = checkPromotionEligibility(updatedStudent);
-
         const newStudents = students.map(s => s.id === studentWithEligibility.id ? { ...studentWithEligibility, balance: s.balance } : s);
-        setStudents(newStudents);
-        await PulseService.saveStudents([studentWithEligibility]);
 
-        addToast('Datos del alumno actualizados', 'success');
+        try {
+            await PulseService.saveStudents([studentWithEligibility]);
+            setStudents(newStudents);
+            addToast('Datos del alumno actualizados', 'success');
+        } catch (e) {
+            console.error(e);
+            addToast('Error al actualizar datos del alumno', 'error');
+        }
     };
 
     const updateStudentProfile = async (studentId: string, updates: Partial<Student>) => {
@@ -363,55 +368,76 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         const updatedStudent = { ...targetStudent, ...updates };
 
         const newStudents = students.map(s => s.id === studentId ? updatedStudent : s);
-        setStudents(newStudents);
-        await PulseService.saveStudents([updatedStudent]);
-        addToast('Información actualizada correctamente', 'success');
+        try {
+            await PulseService.saveStudents([updatedStudent]);
+            setStudents(newStudents);
+            addToast('Información actualizada correctamente', 'success');
+        } catch (e) {
+            console.error(e);
+            addToast('Error al actualizar perfil', 'error');
+        }
     };
 
     const batchUpdateStudents = async (updatedStudents: Student[]) => {
+        // ALWAYS update locally first to ensure UI consistency (especially for student balance calculations)
         setStudents(prev => {
             const updatedMap = new Map<string, Student>(prev.map(s => [s.id, s]));
             updatedStudents.forEach(s => updatedMap.set(s.id, s));
             return Array.from(updatedMap.values());
         });
-        await PulseService.saveStudents(updatedStudents);
+
+        // Only master role can bulk update students to DB
+        if (currentUser?.role === 'master') {
+            try {
+                await PulseService.saveStudents(updatedStudents);
+            } catch (e) {
+                console.error("Error applying bulk changes to students in DB:", e);
+                // addToast('Error al aplicar cambios múltiples en la base de datos', 'error');
+            }
+        }
     };
 
     const deleteStudent = async (id: string) => {
         if (currentUser?.role !== 'master') return;
 
-        await PulseService.deleteFullStudentData(id);
+        try {
+            await PulseService.deleteFullStudentData(id);
 
-        const newStudents = students.filter(s => s.id !== id);
-        setStudents(newStudents);
+            const newStudents = students.filter(s => s.id !== id);
+            
+            const newClasses = classes.map(c => {
+                if (c.studentIds.includes(id)) {
+                    return {
+                        ...c,
+                        studentIds: c.studentIds.filter(sid => sid !== id),
+                        studentCount: Math.max(0, c.studentCount - 1)
+                    };
+                }
+                return c;
+            });
+            await PulseService.saveClasses(newClasses);
 
-        const newClasses = classes.map(c => {
-            if (c.studentIds.includes(id)) {
-                return {
-                    ...c,
-                    studentIds: c.studentIds.filter(sid => sid !== id),
-                    studentCount: Math.max(0, c.studentCount - 1)
-                };
-            }
-            return c;
-        });
-        setClasses(newClasses);
-        await PulseService.saveClasses(newClasses);
+            const newEvents = events.map(e => {
+                if (e.registrants?.includes(id)) {
+                    return {
+                        ...e,
+                        registrants: e.registrants.filter(rid => rid !== id),
+                        registeredCount: Math.max(0, (e.registeredCount || 0) - 1)
+                    };
+                }
+                return e;
+            });
+            await PulseService.saveEvents(newEvents);
 
-        const newEvents = events.map(e => {
-            if (e.registrants?.includes(id)) {
-                return {
-                    ...e,
-                    registrants: e.registrants.filter(rid => rid !== id),
-                    registeredCount: Math.max(0, (e.registeredCount || 0) - 1)
-                };
-            }
-            return e;
-        });
-        setEvents(newEvents);
-        await PulseService.saveEvents(newEvents);
-
-        addToast('Alumno eliminado totalmente del sistema', 'success');
+            setStudents(newStudents);
+            setClasses(newClasses);
+            setEvents(newEvents);
+            addToast('Alumno eliminado totalmente del sistema', 'success');
+        } catch (e) {
+            console.error(e);
+            addToast('Error al eliminar alumno', 'error');
+            throw e; // Lanza el error para que StudentDetailModal no siga purgando deudas
+        }
     };
 
     const updateStudentStatus = async (id: string, status: Student['status']) => {
@@ -421,9 +447,14 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         const updated = { ...target, status };
 
         const newStudents = students.map(s => s.id === id ? updated : s);
-        setStudents(newStudents);
-        await PulseService.saveStudents([updated]);
-        addToast('Estado del alumno actualizado', 'success');
+        try {
+            await PulseService.saveStudents([updated]);
+            setStudents(newStudents);
+            addToast('Estado del alumno actualizado', 'success');
+        } catch (e) {
+            console.error(e);
+            addToast('Error al procesar actualización de estado', 'error');
+        }
     };
 
     const markAttendance = async (studentId: string, classId: string, date: string, status: 'present' | 'late' | 'excused' | 'absent' | undefined, reason?: string) => {
@@ -459,20 +490,26 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 const lastPresentRecord = history.find(r => r.status === 'present' || r.status === 'late');
                 const lastAttendanceDate = lastPresentRecord ? lastPresentRecord.date : s.lastAttendance;
 
-                updatedStudent = {
+                const draftStudent = {
                     ...s,
                     attendance: newAttendanceCount,
                     attendanceHistory: history,
                     lastAttendance: lastAttendanceDate
                 };
 
-                return checkPromotionEligibility(updatedStudent);
+                updatedStudent = checkPromotionEligibility(draftStudent);
+                return updatedStudent;
             }
             return s;
         });
 
-        setStudents(newStudents);
-        if (updatedStudent) await PulseService.saveStudents([updatedStudent]);
+        try {
+            if (updatedStudent) await PulseService.saveStudents([updatedStudent]);
+            setStudents(newStudents);
+        } catch (e) {
+            console.error(e);
+            addToast('Error al actualizar registro de asistencia', 'error');
+        }
     };
 
     const bulkMarkPresent = async (classId: string, date: string) => {
@@ -513,8 +550,14 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             return s;
         });
 
-        setStudents(newStudents);
-        if (studentsToUpdate.length > 0) await PulseService.saveStudents(studentsToUpdate);
+        try {
+            if (studentsToUpdate.length > 0) await PulseService.saveStudents(studentsToUpdate);
+            setStudents(newStudents);
+            addToast('Asistencia global aplicada', 'success');
+        } catch (e) {
+            console.error(e);
+            addToast('Error al registrar asistencias', 'error');
+        }
     };
 
     const promoteStudent = async (studentId: string) => {

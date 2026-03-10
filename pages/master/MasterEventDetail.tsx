@@ -60,7 +60,16 @@ const MasterEventDetail: React.FC = () => {
   const handleUpdateEvent = (e: React.FormEvent) => {
       e.preventDefault();
       if (!event || !editForm) return;
-      updateEvent({ ...event, ...editForm });
+
+      const newStart = new Date(`${editForm.date}T${editForm.time}`);
+      const newEnd = new Date(newStart.getTime() + 60 * 60 * 1000);
+
+      updateEvent({ 
+          ...event, 
+          ...editForm,
+          start: newStart,
+          end: newEnd
+      });
       setIsEditing(false);
       addToast('Evento actualizado correctamente', 'success');
   };

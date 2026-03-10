@@ -1,12 +1,131 @@
--- Function to handle new master user creation
-CREATE OR REPLACE FUNCTION public.handle_new_master_user()
+-- ==========================================
+-- IKC PULSE: COMPLETE CLEAN SLATE SCHEMA
+-- ==========================================
+
+-- 0. CLEANUP EXISTING TABLES (To ensure a true restart)
+DROP TABLE IF EXISTS public.expenses CASCADE;
+DROP TABLE IF EXISTS public.payments CASCADE;
+DROP TABLE IF EXISTS public.library CASCADE;
+DROP TABLE IF EXISTS public.events CASCADE;
+DROP TABLE IF EXISTS public.classes CASCADE;
+DROP TABLE IF EXISTS public.students CASCADE;
+DROP TABLE IF EXISTS public.profiles CASCADE;
+DROP TABLE IF EXISTS public.academies CASCADE;
+
+-- ==========================================
+-- 1. TABLE DEFINITIONS
+-- ==========================================
+
+CREATE TABLE public.academies (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    code TEXT UNIQUE NOT NULL,
+    owner_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    settings JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE public.profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    email TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'student',
+    academy_id UUID REFERENCES public.academies(id) ON DELETE SET NULL,
+    avatar_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE public.students (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+    academy_id UUID NOT NULL REFERENCES public.academies(id) ON DELETE CASCADE,
+    group_id UUID,
+    first_name TEXT,
+    last_name TEXT,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    status TEXT DEFAULT 'active',
+    rank_id TEXT,
+    balance NUMERIC DEFAULT 0,
+    attendance_data JSONB DEFAULT '{"total": 0, "history": []}'::jsonb,
+    details JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE public.classes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    academy_id UUID NOT NULL REFERENCES public.academies(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    instructor TEXT NOT NULL,
+    enrolled_student_ids JSONB DEFAULT '[]'::jsonb,
+    schedule_config JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE public.events (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    academy_id UUID NOT NULL REFERENCES public.academies(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    type TEXT NOT NULL,
+    start_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    end_time TIMESTAMP WITH TIME ZONE NOT NULL,
+    registrant_ids JSONB DEFAULT '[]'::jsonb,
+    details JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE public.library (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    academy_id UUID NOT NULL REFERENCES public.academies(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    category TEXT NOT NULL,
+    url TEXT NOT NULL,
+    details JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE public.payments (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    academy_id UUID NOT NULL REFERENCES public.academies(id) ON DELETE CASCADE,
+    student_id UUID NOT NULL REFERENCES public.students(id) ON DELETE CASCADE,
+    amount NUMERIC NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    due_date DATE,
+    payment_date TIMESTAMP WITH TIME ZONE,
+    concept TEXT NOT NULL,
+    details JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE public.expenses (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    academy_id UUID NOT NULL REFERENCES public.academies(id) ON DELETE CASCADE,
+    description TEXT NOT NULL,
+    amount NUMERIC NOT NULL,
+    date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    category TEXT DEFAULT 'General',
+    payment_method TEXT,
+    status TEXT DEFAULT 'paid',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- ==========================================
+-- 2. TRIGGERS & FUNCTIONS
+-- ==========================================
+
+-- Function to handle new user creation (Master and Student)
+CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS trigger AS $$
 DECLARE
   new_academy_id uuid;
   new_academy_code text;
+  new_student_id uuid;
+  assigned_academy_id uuid;
+  req_role text;
 BEGIN
-  -- Only proceed if the user role is 'master'
-  IF new.raw_user_meta_data->>'role' = 'master' THEN
+  req_role := COALESCE(new.raw_user_meta_data->>'role', 'student');
+
+  IF req_role = 'master' THEN
     
     -- Generate new IDs
     new_academy_id := gen_random_uuid();
@@ -19,7 +138,7 @@ BEGIN
       COALESCE(new.raw_user_meta_data->>'academy_name', 'Nueva Academia'),
       new_academy_code,
       new.id,
-      '{"modules": {"library": true, "payments": true, "attendance": true}, "paymentSettings": {"currency": "MXN", "taxRate": 0, "lateFeeAmount": 0, "lateFeeDay": 10, "monthlyTuition": 0}, "ranks": []}'::jsonb
+      '{"modules": {"library": true, "payments": true, "attendance": true}, "paymentSettings": {"currency": "MXN", "taxRate": 0, "lateFeeAmount": 150, "lateFeeDay": 10, "paymentDay": 1, "monthlyTuition": 500}, "ranks": [{"id": "r1", "name": "Blanca", "color": "#FFFFFF"}, {"id": "r2", "name": "Amarilla", "color": "#FFFF00"}, {"id": "r3", "name": "Verde", "color": "#008000"}, {"id": "r4", "name": "Cafe", "color": "#8B4513"}, {"id": "r5", "name": "Negra", "color": "#000000"}]}'::jsonb
     );
 
     -- Insert into profiles
@@ -28,23 +147,73 @@ BEGIN
       new.id,
       new.email,
       COALESCE(new.raw_user_meta_data->>'display_name', 'Maestro'),
-      COALESCE(new.raw_user_meta_data->>'role', 'master'),
+      'master',
       new_academy_id,
       ''
     );
+
+  ELSIF req_role = 'student' THEN
+    
+    -- Extract the academy_id they registered for
+    assigned_academy_id := (new.raw_user_meta_data->>'academy_id')::uuid;
+    new_student_id := gen_random_uuid();
+
+    -- Insert into profiles
+    INSERT INTO public.profiles (id, email, name, role, academy_id, avatar_url)
+    VALUES (
+      new.id,
+      new.email,
+      COALESCE(new.raw_user_meta_data->>'display_name', 'Alumno'),
+      'student',
+      assigned_academy_id,
+      COALESCE(new.raw_user_meta_data->>'avatar_url', '')
+    );
+
+    -- Insert into students
+    INSERT INTO public.students (id, user_id, academy_id, name, email, status, rank_id, balance, attendance_data, details)
+    VALUES (
+      new_student_id,
+      new.id,
+      assigned_academy_id,
+      COALESCE(new.raw_user_meta_data->>'display_name', 'Alumno'),
+      new.email,
+      CASE WHEN COALESCE((new.raw_user_meta_data->>'initial_amount')::numeric, 0) > 0 THEN 'debtor' ELSE 'active' END,
+      null,
+      CASE WHEN COALESCE((new.raw_user_meta_data->>'initial_amount')::numeric, 0) > 0 THEN (new.raw_user_meta_data->>'initial_amount')::numeric * -1 ELSE 0 END,
+      '{"total": 0, "history": []}'::jsonb,
+      COALESCE((new.raw_user_meta_data->'student_details'), '{}'::jsonb)
+    );
+
+    -- Insert initial payment if amount > 0
+    IF COALESCE((new.raw_user_meta_data->>'initial_amount')::numeric, 0) > 0 THEN
+      INSERT INTO public.payments (academy_id, student_id, amount, status, due_date, concept, details)
+      VALUES (
+        assigned_academy_id,
+        new_student_id,
+        (new.raw_user_meta_data->>'initial_amount')::numeric,
+        'pending',
+        (new.raw_user_meta_data->>'payment_due_date')::date,
+        COALESCE(new.raw_user_meta_data->>'payment_concept', 'Mensualidad Inicial'),
+        '{"type": "charge", "description": "Cuota mensual inicial", "category": "Mensualidad", "method": "System", "canBePaidInParts": false}'::jsonb
+      );
+    END IF;
+
   END IF;
+
   RETURN new;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Trigger to execute the function on new user creation
 DROP TRIGGER IF EXISTS on_auth_user_created_master ON auth.users;
-CREATE TRIGGER on_auth_user_created_master
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
+CREATE TRIGGER on_auth_user_created
 AFTER INSERT ON auth.users
-FOR EACH ROW EXECUTE FUNCTION public.handle_new_master_user();
+FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- ==========================================
--- RLS POLICIES FOR REGISTRATION FLOW
+-- 3. RLS POLICIES FOR REGISTRATION FLOW
 -- ==========================================
 
 -- 1. PROFILES
@@ -101,46 +270,51 @@ USING (
   )
 );
 
--- 4. PAYMENTS (Optimized RLS)
--- Ensure table exists first (in a real migration this would be CREATE TABLE IF NOT EXISTS)
--- But here we act on existing or assumed structure. We ADD the FK.
--- NOTE: We use DO block to avoid error if constraint exists, or just primitive SQL. 
--- Since this is a "Limpieza", likely the table is re-created or empty. 
--- We will assume standard CREATE TABLE syntax or ALTER.
+-- 4. PAYMENTS (Clean Slate & Robust FK)
 ALTER TABLE public.payments ENABLE ROW LEVEL SECURITY;
 
--- Add Constraint if not exists (Idempotent-ish)
-DO $$ 
-BEGIN 
-  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'fk_student_payment') THEN 
-    ALTER TABLE public.payments 
-    ADD CONSTRAINT fk_student_payment FOREIGN KEY (student_id) REFERENCES public.students(id) ON DELETE CASCADE; 
-  END IF; 
-END $$;
-
--- Lectura: Estudiantes ven SUS pagos, Maestros ven pagos de SU academia
-DROP POLICY IF EXISTS "View payments based on role" ON public.payments;
-CREATE POLICY "View payments based on role" 
+-- Policy: VIEW (Read)
+-- Masters: See all payments for their Academy
+-- Students: See only payments belonging to their Student Record
+DROP POLICY IF EXISTS "Payments Visibility Policy" ON public.payments;
+CREATE POLICY "Payments Visibility Policy" 
 ON public.payments FOR SELECT 
 USING (
-  -- Caso A: Soy el estudiante dueño del pago
-  auth.uid() IN (
-    SELECT user_id FROM public.students WHERE id = student_id
-  )
+  -- Case A: User is the Student (via student_id look up)
+  (auth.uid() IN (SELECT user_id FROM public.students WHERE id = student_id))
   OR
-  -- Caso B: Soy un maestro de la misma academia
-  EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE id = auth.uid() 
-      AND role = 'master' 
-      AND academy_id = public.payments.academy_id
-  )
+  -- Case B: User is the Master of the Academy
+  (auth.uid() IN (SELECT id FROM public.profiles WHERE role = 'master' AND academy_id = public.payments.academy_id))
 );
 
--- Escritura: Permitir insertar pagos (Sistema o Maestro)
-DROP POLICY IF EXISTS "Insert payments based on role" ON public.payments;
-CREATE POLICY "Insert payments based on role" 
+-- Policy: INSERT (Write)
+-- Verified by Backend usually, but RLS can allow Authenticated users to create payments 
+-- if they match their Academy or Self (for initial payment)
+DROP POLICY IF EXISTS "Payments Insert Policy" ON public.payments;
+CREATE POLICY "Payments Insert Policy" 
 ON public.payments FOR INSERT 
 WITH CHECK (
-  true -- Validación delegada al backend/service para simplificar, RLS se enfoca en lectura critica.
+  auth.role() = 'authenticated'
+);
+
+-- Policy: UPDATE (Write)
+-- Masters can update status/amount. Students usually cannot update unless uploading proof?
+-- For now, let's allow Masters of equivalent Academy.
+DROP POLICY IF EXISTS "Payments Update Policy" ON public.payments;
+CREATE POLICY "Payments Update Policy" 
+ON public.payments FOR UPDATE 
+USING (
+  auth.uid() IN (SELECT id FROM public.profiles WHERE role = 'master' AND academy_id = public.payments.academy_id)
+  OR
+  -- Allow student to update ONLY specific fields (like proof_url) - simplified here to owner check
+  (auth.uid() IN (SELECT user_id FROM public.students WHERE id = student_id))
+);
+
+-- Policy: DELETE
+-- Only Masters
+DROP POLICY IF EXISTS "Payments Delete Policy" ON public.payments;
+CREATE POLICY "Payments Delete Policy" 
+ON public.payments FOR DELETE 
+USING (
+  auth.uid() IN (SELECT id FROM public.profiles WHERE role = 'master' AND academy_id = public.payments.academy_id)
 );
