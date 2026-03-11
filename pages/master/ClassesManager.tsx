@@ -6,88 +6,24 @@ import { useToast } from '../../context/ToastContext';
 import { useConfirmation } from '../../context/ConfirmationContext';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, dateFnsLocalizer, Views, Messages } from 'react-big-calendar';
-import { format, parse, startOfWeek, getDay } from 'date-fns';
-import { es } from 'date-fns/locale';
 
-const locales = { 'es': es };
-const localizer = dateFnsLocalizer({
-    format,
-    parse,
-    startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }),
-    getDay,
-    locales,
-});
-
-const messagesEs: Messages = {
-    allDay: 'Todo el día',
-    previous: '<',
-    next: '>',
-    today: 'Hoy',
-    month: 'Mensual',
-    week: 'Semanal',
-    day: 'Día',
-    agenda: 'Anual (Agenda)',
-    date: 'Fecha',
-    time: 'Hora',
-    event: 'Actividad',
-    noEventsInRange: 'No hay actividades en este rango.',
-    showMore: total => `+ Ver más (${total})`
-};
-
-const calendarStyles = `
-@import url('https://cdn.jsdelivr.net/npm/react-big-calendar@1.8.5/lib/css/react-big-calendar.css');
-
-/* ---- Base ---- */
-.rbc-calendar { font-family: 'Inter', -apple-system, sans-serif; background: #fff; color: #1f2937; }
-
-/* ---- Toolbar: hidden (we use our own) ---- */
-.rbc-toolbar { display: none !important; }
-
-/* ---- Month grid ---- */
-.rbc-month-view { border: none; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
-.rbc-month-header { background: #f9fafb; }
-.rbc-header { padding: 14px 0 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: #6b7280; border-bottom: 1px solid #f3f4f6; border-right: 1px solid #f3f4f6; }
-.rbc-header:last-child { border-right: none; }
-.rbc-month-row { border-top: 1px solid #f3f4f6; }
-.rbc-day-bg { border-right: 1px solid #f3f4f6; }
-.rbc-day-bg:last-child { border-right: none; }
-.rbc-off-range-bg { background: #f9fafb; }
-.rbc-today { background: #eff6ff !important; }
-.rbc-date-cell { padding: 8px 10px 4px; text-align: right; }
-.rbc-date-cell > a { font-size: 13px; font-weight: 600; color: #374151; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; }
-.rbc-today .rbc-date-cell > a { background: #2563eb; color: #fff !important; font-weight: 800; }
-.rbc-off-range .rbc-date-cell > a { color: #d1d5db; }
-
-/* ---- Events (month) ---- */
-.rbc-event { border-radius: 5px !important; padding: 2px 7px !important; border: none !important; font-size: 12px !important; font-weight: 600 !important; line-height: 1.5 !important; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.12) !important; }
-.rbc-event:focus { outline: 2px solid #2563eb; outline-offset: 2px; }
-.rbc-show-more { font-size: 11px; font-weight: 700; color: #4b5563; margin: 2px 8px; padding: 1px 0; background: none; border: none; cursor: pointer; }
-
-/* ---- Week / Day view ---- */
-.rbc-time-view { border: none; }
-.rbc-time-header { border-bottom: 1px solid #f3f4f6; }
-.rbc-time-header.rbc-overflowing { border-right: none; }
-.rbc-time-header-content { border-left: 1px solid #f3f4f6; }
-.rbc-time-content { border-top: 1px solid #f3f4f6; }
-.rbc-time-gutter .rbc-timeslot-group { border: none; }
-.rbc-timeslot-group { border-bottom: 1px solid #f3f4f6; min-height: 56px; }
-.rbc-time-slot { color: #9ca3af; font-size: 11px; font-weight: 600; letter-spacing: .04em; }
-.rbc-day-slot { border-left: 1px solid #f3f4f6; }
-.rbc-current-time-indicator { background: #ef4444; height: 2px; }
-.rbc-current-time-indicator::before { content: ''; position: absolute; left: -5px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: #ef4444; }
-.rbc-day-slot .rbc-event { border-radius: 6px !important; border: none !important; font-size: 12px !important; font-weight: 700 !important; box-shadow: 0 2px 6px rgba(0,0,0,.15) !important; padding: 4px 8px !important; }
-
-/* ---- Agenda view ---- */
-.rbc-agenda-view table { border: none; width: 100%; }
-.rbc-agenda-view table thead > tr > th { padding: 10px 16px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: #6b7280; background: #f9fafb; border-bottom: 2px solid #e5e7eb; }
-.rbc-agenda-date-cell, .rbc-agenda-time-cell { font-size: 13px; font-weight: 600; color: #374151; padding: 12px 16px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; white-space: nowrap; }
-.rbc-agenda-event-cell { padding: 12px 16px; border-bottom: 1px solid #f3f4f6; }
-.rbc-agenda-event-cell .rbc-event { position: static; display: inline-flex; align-items: center; border-radius: 6px !important; padding: 3px 10px !important; font-size: 12px !important; font-weight: 700 !important; border: none !important; }
-.rbc-agenda-empty { padding: 40px; text-align: center; color: #9ca3af; font-size: 15px; font-weight: 600; }
-`;
-
-
+// ---- Custom Calendar Helpers ----
+const CAL_MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+const CAL_DAYS_SHORT = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+const CAL_COLORS = [
+    { color: '#3B82F6', label: 'Clases' },
+    { color: '#10B981', label: 'Modificadas' },
+    { color: '#8B5CF6', label: 'Movidas' },
+    { color: '#9333EA', label: 'Exámenes' },
+    { color: '#F97316', label: 'Torneos' },
+    { color: '#EC4899', label: 'Seminarios' },
+];
+function calSameDay(a: Date, b: Date) {
+    return a.getDate() === b.getDate() && a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
+}
+function calDaysInMonth(y: number, m: number) {
+    return new Date(y, m + 1, 0).getDate();
+}
 const ClassesManager: React.FC = () => {
     const { classes, events, addClass, updateClass, deleteClass, modifyClassSession, addEvent } = useStore();
     const { addToast } = useToast();
@@ -105,7 +41,7 @@ const ClassesManager: React.FC = () => {
     const [showEventModal, setShowEventModal] = useState(false);
 
     // -- CALENDAR CONTROLLED STATE --
-    const [calView, setCalView] = useState<any>(Views.MONTH);
+    const [calView, setCalView] = useState<'annual' | 'monthly' | 'weekly'>('annual');
     const [calDate, setCalDate] = useState(new Date());
 
     // Forms - Class
@@ -381,7 +317,7 @@ const ClassesManager: React.FC = () => {
                     </button>
                 </div>
             </div>
-            <style>{calendarStyles}</style>
+
 
             {/* --- CLASSES TAB CONTENT --- */}
             {activeTab === 'classes' && (
@@ -533,106 +469,201 @@ const ClassesManager: React.FC = () => {
             )}
 
             {/* --- CALENDAR TAB CONTENT --- */}
-            {activeTab === 'calendar' && (
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col gap-0 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden" style={{ minHeight: 720 }}>
-                    {/* Google-style custom toolbar */}
-                    <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                        <div className="flex items-center gap-3">
-                            <button
-                                onClick={() => setCalDate(new Date())}
-                                className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
-                            >
-                                Hoy
-                            </button>
-                            <div className="flex">
-                                <button
-                                    onClick={() => {
-                                        const d = new Date(calDate);
-                                        if (calView === Views.MONTH) d.setMonth(d.getMonth() - 1);
-                                        else if (calView === Views.WEEK) d.setDate(d.getDate() - 7);
-                                        else d.setMonth(d.getMonth() - 1);
-                                        setCalDate(d);
-                                    }}
-                                    className="p-2 rounded-l-xl border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
-                                >
+            {activeTab === 'calendar' && (() => {
+                const today = new Date();
+                const year = calDate.getFullYear();
+                const month = calDate.getMonth();
+                const eventsForDay = (d: Date) => masterEventsForCalendar.filter(ev => calSameDay(new Date(ev.start), d));
+
+                // ----- ANNUAL VIEW -----
+                if (calView === 'annual') return (
+                    <div className="animate-in fade-in duration-200">
+                        <div className="flex items-center justify-between mb-8">
+                            <div className="flex items-center gap-3">
+                                <button onClick={() => { const d = new Date(calDate); d.setFullYear(d.getFullYear() - 1); setCalDate(d); }} className="p-2 rounded-xl border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors">
                                     <span className="material-symbols-outlined text-[18px]">chevron_left</span>
                                 </button>
-                                <button
-                                    onClick={() => {
-                                        const d = new Date(calDate);
-                                        if (calView === Views.MONTH) d.setMonth(d.getMonth() + 1);
-                                        else if (calView === Views.WEEK) d.setDate(d.getDate() + 7);
-                                        else d.setMonth(d.getMonth() + 1);
-                                        setCalDate(d);
-                                    }}
-                                    className="p-2 rounded-r-xl border border-l-0 border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
-                                >
+                                <h2 className="text-3xl font-black text-gray-900 w-20 text-center">{year}</h2>
+                                <button onClick={() => { const d = new Date(calDate); d.setFullYear(d.getFullYear() + 1); setCalDate(d); }} className="p-2 rounded-xl border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors">
                                     <span className="material-symbols-outlined text-[18px]">chevron_right</span>
                                 </button>
                             </div>
-                            <h2 className="text-xl font-bold text-gray-800 capitalize">
-                                {calDate.toLocaleString('es-ES', { month: 'long', year: 'numeric' })}
-                            </h2>
+                            <button onClick={() => { setCalDate(new Date()); }} className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-gray-500 hover:bg-gray-50 transition-colors">Este año</button>
                         </div>
-
-                        {/* View Switcher */}
-                        <div className="flex bg-gray-100 p-1 rounded-xl gap-1">
-                            {[
-                                { id: Views.MONTH, label: 'Mensual' },
-                                { id: Views.WEEK, label: 'Semanal' },
-                                { id: 'agenda', label: 'Agenda' },
-                            ].map(v => (
-                                <button
-                                    key={v.id}
-                                    onClick={() => setCalView(v.id)}
-                                    className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${calView === v.id
-                                            ? 'bg-white text-gray-900 shadow-sm'
-                                            : 'text-gray-500 hover:text-gray-800'
-                                        }`}
-                                >
-                                    {v.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Legend */}
-                    <div className="flex items-center gap-4 px-6 py-2 border-b border-gray-100 bg-gray-50">
-                        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-blue-500"></div><span className="text-xs font-semibold text-gray-500">Clases</span></div>
-                        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-emerald-500"></div><span className="text-xs font-semibold text-gray-500">Clases Modificadas</span></div>
-                        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-violet-500"></div><span className="text-xs font-semibold text-gray-500">Movidas</span></div>
-                        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-purple-600"></div><span className="text-xs font-semibold text-gray-500">Exámenes</span></div>
-                        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-orange-500"></div><span className="text-xs font-semibold text-gray-500">Torneos</span></div>
-                        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-pink-500"></div><span className="text-xs font-semibold text-gray-500">Seminarios</span></div>
-                    </div>
-
-                    {/* Calendar body */}
-                    <div className="flex-1 p-4" style={{ height: 680 }}>
-                        <Calendar
-                            localizer={localizer}
-                            events={masterEventsForCalendar}
-                            messages={messagesEs}
-                            startAccessor="start"
-                            endAccessor="end"
-                            style={{ height: '100%' }}
-                            view={calView}
-                            date={calDate}
-                            onView={(v: any) => setCalView(v)}
-                            onNavigate={(d: Date) => setCalDate(d)}
-                            views={[Views.MONTH, Views.WEEK, 'agenda']}
-                            toolbar={false}
-                            popup
-                            eventPropGetter={(event: any) => ({
-                                style: {
-                                    backgroundColor: event.color,
-                                    border: 'none',
-                                    color: '#fff',
-                                }
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                            {Array.from({ length: 12 }, (_, i) => {
+                                const firstDay = new Date(year, i, 1).getDay();
+                                const offset = (firstDay + 6) % 7;
+                                const daysInM = calDaysInMonth(year, i);
+                                const isCurrentMonth = today.getFullYear() === year && today.getMonth() === i;
+                                return (
+                                    <button key={i} onClick={() => { setCalDate(new Date(year, i, 1)); setCalView('monthly'); }} className="text-left p-4 rounded-2xl border border-gray-100 hover:border-blue-200 hover:bg-blue-50/30 transition-all group">
+                                        <p className={`text-sm font-bold mb-3 ${isCurrentMonth ? 'text-blue-600' : 'text-gray-600'}`}>{CAL_MONTHS[i]}</p>
+                                        <div className="grid grid-cols-7">
+                                            {['L', 'M', 'X', 'J', 'V', 'S', 'D'].map(d => <div key={d} className="h-5 flex items-center justify-center text-[8px] text-gray-300 font-bold">{d}</div>)}
+                                            {Array.from({ length: offset }).map((_, k) => <div key={`ep${k}`} />)}
+                                            {Array.from({ length: daysInM }, (_, d) => {
+                                                const dt = new Date(year, i, d + 1);
+                                                const hasEv = masterEventsForCalendar.some(ev => calSameDay(new Date(ev.start), dt));
+                                                const isT = calSameDay(dt, today);
+                                                return (
+                                                    <div key={d} className="h-5 flex flex-col items-center justify-center">
+                                                        <span className={`text-[9px] leading-none w-4 h-4 flex items-center justify-center rounded-full ${isT ? 'bg-blue-600 text-white font-black' : 'text-gray-500'}`}>{d + 1}</span>
+                                                        {hasEv && <div className="w-1 h-1 rounded-full bg-blue-400 mt-px" />}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </button>
+                                );
                             })}
-                        />
+                        </div>
                     </div>
-                </div>
-            )}
+                );
+
+                // ----- MONTHLY VIEW -----
+                if (calView === 'monthly') {
+                    const firstDay = new Date(year, month, 1).getDay();
+                    const offset = (firstDay + 6) % 7;
+                    const daysInM = calDaysInMonth(year, month);
+                    const cells: (Date | null)[] = [];
+                    for (let i = 0; i < offset; i++) cells.push(null);
+                    for (let d = 1; d <= daysInM; d++) cells.push(new Date(year, month, d));
+                    while (cells.length % 7 !== 0) cells.push(null);
+                    return (
+                        <div className="animate-in fade-in duration-200">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-2">
+                                    <button onClick={() => setCalView('annual')} className="flex items-center gap-1 text-sm font-semibold text-gray-400 hover:text-gray-700 transition-colors">
+                                        <span className="material-symbols-outlined text-[15px]">chevron_left</span> {year}
+                                    </button>
+                                    <span className="text-gray-300 text-sm">/</span>
+                                    <h2 className="text-2xl font-black text-gray-900 capitalize">{CAL_MONTHS[month]}</h2>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button onClick={() => { const d = new Date(calDate); d.setMonth(d.getMonth() - 1); setCalDate(d); }} className="p-2 rounded-xl border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors"><span className="material-symbols-outlined text-[18px]">chevron_left</span></button>
+                                    <button onClick={() => setCalDate(new Date())} className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-gray-500 hover:bg-gray-50 transition-colors">Hoy</button>
+                                    <button onClick={() => { const d = new Date(calDate); d.setMonth(d.getMonth() + 1); setCalDate(d); }} className="p-2 rounded-xl border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors"><span className="material-symbols-outlined text-[18px]">chevron_right</span></button>
+                                </div>
+                            </div>
+                            <div className="rounded-2xl border border-gray-100 overflow-hidden">
+                                <div className="grid grid-cols-7 bg-gray-50 border-b border-gray-100">
+                                    {CAL_DAYS_SHORT.map(d => <div key={d} className="py-3 text-center text-[10px] font-black text-gray-400 uppercase tracking-widest">{d}</div>)}
+                                </div>
+                                <div className="grid grid-cols-7">
+                                    {cells.map((date, i) => {
+                                        if (!date) return <div key={`ep${i}`} className="min-h-[88px] bg-gray-50/60 border-b border-r border-gray-50" style={{ borderBottom: i >= cells.length - 7 ? 'none' : undefined }} />;
+                                        const dayEvs = eventsForDay(date);
+                                        const isToday = calSameDay(date, today);
+                                        const lastRow = i >= cells.length - 7;
+                                        const lastCol = i % 7 === 6;
+                                        return (
+                                            <div key={i} onClick={() => { setCalDate(date); setCalView('weekly'); }} className={`min-h-[88px] p-2 border-b border-r border-gray-100 cursor-pointer hover:bg-blue-50/25 transition-colors ${lastRow ? 'border-b-0' : ''} ${lastCol ? 'border-r-0' : ''}`}>
+                                                <span className={`text-sm font-semibold inline-flex items-center justify-center w-7 h-7 rounded-full mb-1 ${isToday ? 'bg-blue-600 text-white font-black' : 'text-gray-600 hover:bg-gray-100'}`}>{date.getDate()}</span>
+                                                <div className="space-y-0.5">
+                                                    {dayEvs.slice(0, 2).map((ev, ei) => (
+                                                        <div key={ei} className="text-[10px] font-semibold truncate px-1.5 py-0.5 rounded" style={{ background: ev.color + '18', color: ev.color }}>
+                                                            {ev.title.split(' (')[0]}
+                                                        </div>
+                                                    ))}
+                                                    {dayEvs.length > 2 && <div className="text-[9px] text-gray-400 pl-1">+{dayEvs.length - 2} más</div>}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                            <div className="flex flex-wrap items-center gap-3 mt-4 px-1">
+                                {CAL_COLORS.map(l => (
+                                    <div key={l.label} className="flex items-center gap-1.5">
+                                        <div className="w-2 h-2 rounded-full" style={{ background: l.color }} />
+                                        <span className="text-[11px] text-gray-500 font-medium">{l.label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                }
+
+                // ----- WEEKLY VIEW -----
+                if (calView === 'weekly') {
+                    const dow = calDate.getDay();
+                    const diff = (dow + 6) % 7;
+                    const weekStart = new Date(calDate);
+                    weekStart.setDate(calDate.getDate() - diff);
+                    const days = Array.from({ length: 7 }, (_, i) => { const d = new Date(weekStart); d.setDate(weekStart.getDate() + i); return d; });
+                    const hours = Array.from({ length: 16 }, (_, i) => i + 7); // 7am - 10pm
+                    return (
+                        <div className="animate-in fade-in duration-200">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-2">
+                                    <button onClick={() => setCalView('monthly')} className="flex items-center gap-1 text-sm font-semibold text-gray-400 hover:text-gray-700 transition-colors">
+                                        <span className="material-symbols-outlined text-[15px]">chevron_left</span> {CAL_MONTHS[month]}
+                                    </button>
+                                    <span className="text-gray-300 text-sm">/</span>
+                                    <h2 className="text-xl font-black text-gray-900">
+                                        {days[0].getDate()} – {days[6].getDate()} de {CAL_MONTHS[days[6].getMonth()]}
+                                    </h2>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <button onClick={() => { const d = new Date(calDate); d.setDate(d.getDate() - 7); setCalDate(d); }} className="p-2 rounded-xl border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors"><span className="material-symbols-outlined text-[18px]">chevron_left</span></button>
+                                    <button onClick={() => setCalDate(new Date())} className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-gray-500 hover:bg-gray-50 transition-colors">Hoy</button>
+                                    <button onClick={() => { const d = new Date(calDate); d.setDate(d.getDate() + 7); setCalDate(d); }} className="p-2 rounded-xl border border-gray-200 text-gray-400 hover:bg-gray-50 hover:text-gray-700 transition-colors"><span className="material-symbols-outlined text-[18px]">chevron_right</span></button>
+                                </div>
+                            </div>
+                            <div className="rounded-2xl border border-gray-100 overflow-hidden">
+                                {/* Day headers */}
+                                <div className="grid border-b border-gray-100" style={{ gridTemplateColumns: '48px repeat(7,1fr)' }}>
+                                    <div className="bg-gray-50 border-r border-gray-100" />
+                                    {days.map((day, i) => {
+                                        const isT = calSameDay(day, today);
+                                        return (
+                                            <div key={i} className={`py-3 text-center border-r border-gray-100 last:border-r-0 ${isT ? 'bg-blue-50' : 'bg-gray-50'}`}>
+                                                <div className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">{CAL_DAYS_SHORT[i]}</div>
+                                                <div className={`text-xl font-black mx-auto w-9 h-9 flex items-center justify-center rounded-full ${isT ? 'bg-blue-600 text-white' : 'text-gray-700'}`}>{day.getDate()}</div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                                {/* Time rows */}
+                                {hours.map((hr, hri) => (
+                                    <div key={hr} className={`grid border-b border-gray-50 ${hri === hours.length - 1 ? 'border-b-0' : ''}`} style={{ gridTemplateColumns: '48px repeat(7,1fr)', minHeight: 52 }}>
+                                        <div className="text-[10px] text-gray-300 font-semibold text-right pr-3 pt-1 border-r border-gray-100 select-none">
+                                            {hr > 12 ? `${hr - 12}pm` : hr === 12 ? '12pm' : `${hr}am`}
+                                        </div>
+                                        {days.map((day, di) => {
+                                            const slotEvs = masterEventsForCalendar.filter(ev => {
+                                                const s = new Date(ev.start);
+                                                return calSameDay(s, day) && s.getHours() === hr;
+                                            });
+                                            const isT = calSameDay(day, today);
+                                            return (
+                                                <div key={di} className={`border-r border-gray-50 last:border-r-0 px-0.5 py-0.5 space-y-0.5 ${isT ? 'bg-blue-50/20' : ''}`}>
+                                                    {slotEvs.map((ev, ei) => (
+                                                        <div key={ei} className="text-[10px] font-bold text-white px-1.5 py-1 rounded-md truncate leading-snug" style={{ background: ev.color }}>
+                                                            {ev.title.split(' (')[0]}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="flex flex-wrap items-center gap-3 mt-4 px-1">
+                                {CAL_COLORS.map(l => (
+                                    <div key={l.label} className="flex items-center gap-1.5">
+                                        <div className="w-2 h-2 rounded-full" style={{ background: l.color }} />
+                                        <span className="text-[11px] text-gray-500 font-medium">{l.label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    );
+                }
+
+                return null;
+            })()}
 
             {/* --- GLOBAL EDIT CLASS MODAL --- */}
             {showCreateModal && (
