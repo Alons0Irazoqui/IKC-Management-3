@@ -38,16 +38,55 @@ const messagesEs: Messages = {
 const calendarStyles = `
 @import url('https://cdn.jsdelivr.net/npm/react-big-calendar@1.8.5/lib/css/react-big-calendar.css');
 
-.rbc-calendar { font-family: 'Inter', sans-serif; color: #111827; }
-.rbc-header { padding: 12px 0; font-weight: 800; font-size: 11px; text-transform: uppercase; color: #6B7280; border-bottom: 1px solid #F3F4F6; }
-.rbc-today { background-color: #FAFAFA; }
-.rbc-event { border-radius: 6px; padding: 3px 6px; border: none; font-size: 11px; font-weight: 700; color: white; }
-.rbc-toolbar { margin-bottom: 20px; }
-.rbc-toolbar button { border-radius: 8px; font-weight: 600; text-transform: capitalize; border-color: #E5E7EB; color: #4B5563; }
-.rbc-toolbar button.rbc-active { background-color: #111827; color: white; border-color: #111827; }
-.rbc-toolbar button:hover:not(.rbc-active) { background-color: #F3F4F6; }
-.rbc-time-view .rbc-event { border: 1px solid rgba(255,255,255,0.2); }
+/* ---- Base ---- */
+.rbc-calendar { font-family: 'Inter', -apple-system, sans-serif; background: #fff; color: #1f2937; }
+
+/* ---- Toolbar: hidden (we use our own) ---- */
+.rbc-toolbar { display: none !important; }
+
+/* ---- Month grid ---- */
+.rbc-month-view { border: none; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.rbc-month-header { background: #f9fafb; }
+.rbc-header { padding: 14px 0 12px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: #6b7280; border-bottom: 1px solid #f3f4f6; border-right: 1px solid #f3f4f6; }
+.rbc-header:last-child { border-right: none; }
+.rbc-month-row { border-top: 1px solid #f3f4f6; }
+.rbc-day-bg { border-right: 1px solid #f3f4f6; }
+.rbc-day-bg:last-child { border-right: none; }
+.rbc-off-range-bg { background: #f9fafb; }
+.rbc-today { background: #eff6ff !important; }
+.rbc-date-cell { padding: 8px 10px 4px; text-align: right; }
+.rbc-date-cell > a { font-size: 13px; font-weight: 600; color: #374151; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; }
+.rbc-today .rbc-date-cell > a { background: #2563eb; color: #fff !important; font-weight: 800; }
+.rbc-off-range .rbc-date-cell > a { color: #d1d5db; }
+
+/* ---- Events (month) ---- */
+.rbc-event { border-radius: 5px !important; padding: 2px 7px !important; border: none !important; font-size: 12px !important; font-weight: 600 !important; line-height: 1.5 !important; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.12) !important; }
+.rbc-event:focus { outline: 2px solid #2563eb; outline-offset: 2px; }
+.rbc-show-more { font-size: 11px; font-weight: 700; color: #4b5563; margin: 2px 8px; padding: 1px 0; background: none; border: none; cursor: pointer; }
+
+/* ---- Week / Day view ---- */
+.rbc-time-view { border: none; }
+.rbc-time-header { border-bottom: 1px solid #f3f4f6; }
+.rbc-time-header.rbc-overflowing { border-right: none; }
+.rbc-time-header-content { border-left: 1px solid #f3f4f6; }
+.rbc-time-content { border-top: 1px solid #f3f4f6; }
+.rbc-time-gutter .rbc-timeslot-group { border: none; }
+.rbc-timeslot-group { border-bottom: 1px solid #f3f4f6; min-height: 56px; }
+.rbc-time-slot { color: #9ca3af; font-size: 11px; font-weight: 600; letter-spacing: .04em; }
+.rbc-day-slot { border-left: 1px solid #f3f4f6; }
+.rbc-current-time-indicator { background: #ef4444; height: 2px; }
+.rbc-current-time-indicator::before { content: ''; position: absolute; left: -5px; top: -4px; width: 10px; height: 10px; border-radius: 50%; background: #ef4444; }
+.rbc-day-slot .rbc-event { border-radius: 6px !important; border: none !important; font-size: 12px !important; font-weight: 700 !important; box-shadow: 0 2px 6px rgba(0,0,0,.15) !important; padding: 4px 8px !important; }
+
+/* ---- Agenda view ---- */
+.rbc-agenda-view table { border: none; width: 100%; }
+.rbc-agenda-view table thead > tr > th { padding: 10px 16px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; color: #6b7280; background: #f9fafb; border-bottom: 2px solid #e5e7eb; }
+.rbc-agenda-date-cell, .rbc-agenda-time-cell { font-size: 13px; font-weight: 600; color: #374151; padding: 12px 16px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; white-space: nowrap; }
+.rbc-agenda-event-cell { padding: 12px 16px; border-bottom: 1px solid #f3f4f6; }
+.rbc-agenda-event-cell .rbc-event { position: static; display: inline-flex; align-items: center; border-radius: 6px !important; padding: 3px 10px !important; font-size: 12px !important; font-weight: 700 !important; border: none !important; }
+.rbc-agenda-empty { padding: 40px; text-align: center; color: #9ca3af; font-size: 15px; font-weight: 600; }
 `;
+
 
 const ClassesManager: React.FC = () => {
     const { classes, events, addClass, updateClass, deleteClass, modifyClassSession, addEvent } = useStore();
@@ -64,6 +103,10 @@ const ClassesManager: React.FC = () => {
 
     // -- EVENT MANAGEMENT STATES --
     const [showEventModal, setShowEventModal] = useState(false);
+
+    // -- CALENDAR CONTROLLED STATE --
+    const [calView, setCalView] = useState<any>(Views.MONTH);
+    const [calDate, setCalDate] = useState(new Date());
 
     // Forms - Class
     const [classForm, setClassForm] = useState({
@@ -491,22 +534,103 @@ const ClassesManager: React.FC = () => {
 
             {/* --- CALENDAR TAB CONTENT --- */}
             {activeTab === 'calendar' && (
-                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 bg-white rounded-3xl border border-gray-100 shadow-sm p-6 lg:p-10 h-[800px]">
-                    <Calendar
-                        localizer={localizer}
-                        events={masterEventsForCalendar}
-                        messages={messagesEs}
-                        startAccessor="start"
-                        endAccessor="end"
-                        style={{ height: '100%' }}
-                        views={['month', 'week', 'agenda']}
-                        defaultView={Views.MONTH}
-                        eventPropGetter={(event: any) => ({
-                            style: {
-                                backgroundColor: event.color,
-                            }
-                        })}
-                    />
+                <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 flex flex-col gap-0 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden" style={{ minHeight: 720 }}>
+                    {/* Google-style custom toolbar */}
+                    <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => setCalDate(new Date())}
+                                className="px-4 py-2 rounded-xl border border-gray-200 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+                            >
+                                Hoy
+                            </button>
+                            <div className="flex">
+                                <button
+                                    onClick={() => {
+                                        const d = new Date(calDate);
+                                        if (calView === Views.MONTH) d.setMonth(d.getMonth() - 1);
+                                        else if (calView === Views.WEEK) d.setDate(d.getDate() - 7);
+                                        else d.setMonth(d.getMonth() - 1);
+                                        setCalDate(d);
+                                    }}
+                                    className="p-2 rounded-l-xl border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
+                                >
+                                    <span className="material-symbols-outlined text-[18px]">chevron_left</span>
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        const d = new Date(calDate);
+                                        if (calView === Views.MONTH) d.setMonth(d.getMonth() + 1);
+                                        else if (calView === Views.WEEK) d.setDate(d.getDate() + 7);
+                                        else d.setMonth(d.getMonth() + 1);
+                                        setCalDate(d);
+                                    }}
+                                    className="p-2 rounded-r-xl border border-l-0 border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
+                                >
+                                    <span className="material-symbols-outlined text-[18px]">chevron_right</span>
+                                </button>
+                            </div>
+                            <h2 className="text-xl font-bold text-gray-800 capitalize">
+                                {calDate.toLocaleString('es-ES', { month: 'long', year: 'numeric' })}
+                            </h2>
+                        </div>
+
+                        {/* View Switcher */}
+                        <div className="flex bg-gray-100 p-1 rounded-xl gap-1">
+                            {[
+                                { id: Views.MONTH, label: 'Mensual' },
+                                { id: Views.WEEK, label: 'Semanal' },
+                                { id: 'agenda', label: 'Agenda' },
+                            ].map(v => (
+                                <button
+                                    key={v.id}
+                                    onClick={() => setCalView(v.id)}
+                                    className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${calView === v.id
+                                            ? 'bg-white text-gray-900 shadow-sm'
+                                            : 'text-gray-500 hover:text-gray-800'
+                                        }`}
+                                >
+                                    {v.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Legend */}
+                    <div className="flex items-center gap-4 px-6 py-2 border-b border-gray-100 bg-gray-50">
+                        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-blue-500"></div><span className="text-xs font-semibold text-gray-500">Clases</span></div>
+                        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-emerald-500"></div><span className="text-xs font-semibold text-gray-500">Clases Modificadas</span></div>
+                        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-violet-500"></div><span className="text-xs font-semibold text-gray-500">Movidas</span></div>
+                        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-purple-600"></div><span className="text-xs font-semibold text-gray-500">Exámenes</span></div>
+                        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-orange-500"></div><span className="text-xs font-semibold text-gray-500">Torneos</span></div>
+                        <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-pink-500"></div><span className="text-xs font-semibold text-gray-500">Seminarios</span></div>
+                    </div>
+
+                    {/* Calendar body */}
+                    <div className="flex-1 p-4" style={{ height: 680 }}>
+                        <Calendar
+                            localizer={localizer}
+                            events={masterEventsForCalendar}
+                            messages={messagesEs}
+                            startAccessor="start"
+                            endAccessor="end"
+                            style={{ height: '100%' }}
+                            view={calView}
+                            date={calDate}
+                            onView={(v: any) => setCalView(v)}
+                            onNavigate={(d: Date) => setCalDate(d)}
+                            views={[Views.MONTH, Views.WEEK, 'agenda']}
+                            toolbar={false}
+                            popup
+                            eventPropGetter={(event: any) => ({
+                                style: {
+                                    backgroundColor: event.color,
+                                    border: 'none',
+                                    color: '#fff',
+                                }
+                            })}
+                        />
+                    </div>
                 </div>
             )}
 
@@ -529,8 +653,8 @@ const ClassesManager: React.FC = () => {
                                             type="button"
                                             onClick={() => toggleDay(day.key)}
                                             className={`px-3 py-2 rounded-lg text-xs font-bold transition-all border ${classForm.selectedDays.includes(day.key)
-                                                    ? 'bg-primary text-white border-primary shadow-md'
-                                                    : 'bg-white text-text-secondary border-gray-200 hover:bg-gray-50'
+                                                ? 'bg-primary text-white border-primary shadow-md'
+                                                : 'bg-white text-text-secondary border-gray-200 hover:bg-gray-50'
                                                 }`}
                                         >
                                             {day.label}
