@@ -13,7 +13,7 @@ async function testUpsert() {
     }
     const s = students[0];
     console.log("Found student:", s.id, "User ID:", s.user_id);
-    
+
     // Simulate what the mapper does for saving
     const mapped = {
         id: s.id,
@@ -27,11 +27,11 @@ async function testUpsert() {
         attendance_data: s.attendance_data,
         details: s.details
     };
-    
+
     // 2. Perform upsert directly
     console.log("Upserting payload...");
     const { error, data } = await supabase.from('students').upsert([mapped]).select();
-    
+
     if (error) {
         console.error("UPSERT ERROR:", JSON.stringify(error, null, 2));
     } else {
