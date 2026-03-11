@@ -3,6 +3,7 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useStore } from '../../context/StoreContext';
 import { formatDateDisplay } from '../../utils/dateUtils';
+import Avatar from '../../components/ui/Avatar';
 
 
 const StudentClassDetail: React.FC = () => {
@@ -106,8 +107,8 @@ const StudentClassDetail: React.FC = () => {
                             <div className="flex flex-wrap gap-4">
                                 {classmates.map(buddy => (
                                     <div key={buddy.id} className="flex flex-col items-center gap-1 w-16">
-                                        <img src={buddy.avatarUrl} title={buddy.name} className="size-12 rounded-full object-cover border-2 border-white shadow-sm bg-gray-100" />
-                                        <span className="text-[10px] text-text-secondary text-center truncate w-full font-medium">{buddy.name.split(' ')[0]}</span>
+                                        <Avatar src={buddy.avatarUrl} name={buddy.name} className="size-12 rounded-full border-2 border-white shadow-sm" />
+                                        <span className="text-[10px] text-text-secondary text-center truncate w-full font-medium" title={buddy.name}>{buddy.name.split(' ')[0]}</span>
                                     </div>
                                 ))}
                             </div>
@@ -149,9 +150,9 @@ const StudentClassDetail: React.FC = () => {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className={`text-[10px] font-bold uppercase px-3 py-1.5 rounded-full border ${record.status === 'present' ? 'bg-green-50 text-green-700 border-green-200' :
-                                                        record.status === 'late' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
-                                                            record.status === 'excused' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                                                'bg-red-50 text-red-700 border-red-200'
+                                                    record.status === 'late' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
+                                                        record.status === 'excused' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                                            'bg-red-50 text-red-700 border-red-200'
                                                     }`}>
                                                     {record.status === 'present' ? 'Presente' :
                                                         record.status === 'late' ? 'Retardo' :
