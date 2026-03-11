@@ -38,6 +38,7 @@ const StudentsList: React.FC = () => {
     const [editingStudent, setEditingStudent] = useState<Student | null>(null);
     const [credentialsStudent, setCredentialsStudent] = useState<Student | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const initialFormState: Partial<Student> = {
         name: '',
@@ -479,9 +480,14 @@ const StudentsList: React.FC = () => {
                                     </label>
 
                                     {!editingStudent && (
-                                        <label className="block">
+                                        <label className="block relative">
                                             <span className="text-[10px] font-black text-text-secondary uppercase tracking-widest">Contraseña Inicial *</span>
-                                            <input required type="password" value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} className="mt-1 block w-full rounded-xl border-gray-200 p-3 text-sm" placeholder="Mínimo 6 caracteres" />
+                                            <div className="relative mt-1">
+                                                <input required type={showPassword ? 'text' : 'password'} value={formData.password} onChange={e => setFormData({ ...formData, password: e.target.value })} className="block w-full rounded-xl border-gray-200 p-3 pr-10 text-sm" placeholder="Mínimo 6 caracteres" />
+                                                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 outline-none">
+                                                    <span className="material-symbols-outlined text-[18px]">{showPassword ? 'visibility_off' : 'visibility'}</span>
+                                                </button>
+                                            </div>
                                         </label>
                                     )}
 
