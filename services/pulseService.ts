@@ -237,10 +237,10 @@ export const PulseService = {
 
         // The trigger automatically creates the profile and the student row
         // since rank_id and status might not be set accurately by trigger, we update it immediately:
-        
+
         let attempts = 0;
         let authUserId = data?.user?.id;
-        
+
         if (authUserId) {
             // Because triggers can be slightly asynchronous, we retry finding the student record up to 5 times
             let studentRecord = null;
@@ -250,7 +250,7 @@ export const PulseService = {
                     .select('id')
                     .eq('user_id', authUserId)
                     .single();
-                    
+
                 if (fetchStudent) {
                     studentRecord = fetchStudent;
                 } else {
@@ -268,7 +268,7 @@ export const PulseService = {
                 }).eq('id', studentRecord.id);
             }
         }
-        
+
         return data;
     },
 
@@ -278,7 +278,7 @@ export const PulseService = {
 
         if (student) {
             const { data: paidPayments } = await supabase.from('payments').select('id, details').eq('student_id', studentId).eq('status', 'paid');
-            
+
             if (paidPayments && paidPayments.length > 0) {
                 // Keep a record of who the student was in the 'details' JSON before breaking the relation
                 await Promise.all(paidPayments.map(p => {
@@ -293,7 +293,7 @@ export const PulseService = {
 
         // 2. Erase the student via RPC which deletes from auth.users safely cascading the deletion properly.
         const { error } = await supabase.rpc('delete_student_and_user', { p_student_id: studentId });
-        
+
         if (error) {
             console.error("Error deleting student:", error);
             // Si quieres que la UI muestre un error y aborte en vez de continuar, puedes retornar false o lanzar un error.
@@ -430,6 +430,7 @@ export const PulseService = {
                 .from('students')
                 .select('id')
                 .eq('user_id', userId)
+                .limit(1)
                 .maybeSingle();
 
             if (error || !data) return null;
@@ -454,7 +455,7 @@ export const PulseService = {
         if (error || !data) return defaultAcademySettings;
 
         const returnedSettings = data.settings || {};
-        
+
         // Merge missing crucial settings
         const mergedSettings = { ...defaultAcademySettings, ...returnedSettings };
         if (!mergedSettings.ranks || mergedSettings.ranks.length === 0) {
@@ -577,6 +578,7 @@ export const PulseService = {
                 }
 
                 return {
+                    ...row.details,
                     id: row.id,
                     academyId: row.academy_id,
                     studentId: row.student_id,
@@ -585,7 +587,6 @@ export const PulseService = {
                     dueDate: row.due_date,
                     paymentDate: row.payment_date,
                     concept: row.concept,
-                    ...row.details,
                     studentName: fetchedName || row.details?.studentName || 'Estudiante'
                 } as TuitionRecord;
             });
@@ -703,16 +704,10 @@ export const PulseService = {
         let query = supabase.from('payments').select('*, students(first_name, last_name, group_id, name, details)');
 
         if (role === 'student') {
-            // 1. Get Student ID from User ID using Helper
-            const studentIdStr = await PulseService._getStudentId(userId);
+            // Rely entirely on Supabase RLS policies to accurately filter payments for the authenticated student.
+            // This avoids missing records if the manual studentId lookup is delayed or throws an error.
+            console.log("getPayments: Fetching payments securely using RLS for student", userId);
 
-            if (!studentIdStr) {
-                console.warn("getPayments: No student record found for user", userId);
-                return [];
-            }
-
-            // 2. Filter payments by student_id
-            query = query.eq('student_id', studentIdStr);
 
         } else if (role === 'master') {
             // 1. Get Academy ID from Profile
@@ -752,6 +747,7 @@ export const PulseService = {
             }
 
             return {
+                ...row.details,
                 id: row.id,
                 academyId: row.academy_id,
                 studentId: row.student_id,
@@ -760,7 +756,6 @@ export const PulseService = {
                 dueDate: row.due_date,
                 paymentDate: row.payment_date,
                 concept: row.concept,
-                ...row.details,
                 studentName: studentName || row.details?.studentName || 'Estudiante' // Forces live relational name
             } as TuitionRecord;
         });
