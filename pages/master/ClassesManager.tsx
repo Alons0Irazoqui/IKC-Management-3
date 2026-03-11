@@ -44,6 +44,19 @@ const ClassesManager: React.FC = () => {
     const [calView, setCalView] = useState<'annual' | 'monthly' | 'weekly'>('annual');
     const [calDate, setCalDate] = useState(new Date());
 
+    // -- SESSION MODAL STATE (Calendar click-to-edit) --
+    const [sessionModal, setSessionModal] = useState<{
+        open: boolean;
+        view: 'menu' | 'edit' | 'confirm_cancel';
+        classId: string;
+        className: string;
+        date: string; // YYYY-MM-DD
+        currentStartTime: string;
+        currentEndTime: string;
+        currentInstructor: string;
+        editForm: { newDate: string; newStartTime: string; newEndTime: string; newInstructor: string; };
+    } | null>(null);
+
     // Forms - Class
     const [classForm, setClassForm] = useState({
         name: '', instructor: '', selectedDays: [] as string[], startTime: '17:00', endTime: '18:15'
@@ -55,6 +68,55 @@ const ClassesManager: React.FC = () => {
         newEndTime: '',
         newDate: ''
     });
+
+    // -- SESSION MODAL HANDLERS --
+    const openSessionModal = (ev: any) => {
+        if (!ev.resource?.id || ev.resource?.type) return; // Only for classes, not events/seminars
+        const cls = classes.find(c => c.id === ev.resource.id);
+        if (!cls) return;
+        const dateStr = ev.start instanceof Date
+            ? ev.start.toISOString().split('T')[0]
+            : String(ev.start).split('T')[0];
+        const existingMod = cls.modifications?.find(m => m.date === dateStr);
+        setSessionModal({
+            open: true,
+            view: 'menu',
+            classId: cls.id,
+            className: cls.name,
+            date: dateStr,
+            currentStartTime: existingMod?.newStartTime || cls.startTime,
+            currentEndTime: existingMod?.newEndTime || cls.endTime,
+            currentInstructor: existingMod?.newInstructor || cls.instructor,
+            editForm: {
+                newDate: dateStr,
+                newStartTime: existingMod?.newStartTime || cls.startTime,
+                newEndTime: existingMod?.newEndTime || cls.endTime,
+                newInstructor: existingMod?.newInstructor || cls.instructor,
+            }
+        });
+    };
+
+    const handleSaveSessionEdit = async () => {
+        if (!sessionModal) return;
+        const { classId, date, editForm } = sessionModal;
+        await modifyClassSession(classId, {
+            date,
+            type: 'time',
+            newStartTime: editForm.newStartTime,
+            newEndTime: editForm.newEndTime,
+            newInstructor: editForm.newInstructor,
+        });
+        setSessionModal(null);
+        addToast('Sesión modificada correctamente', 'success');
+    };
+
+    const handleCancelSession = async () => {
+        if (!sessionModal) return;
+        const { classId, date } = sessionModal;
+        await modifyClassSession(classId, { date, type: 'cancel' });
+        setSessionModal(null);
+        addToast('Clase cancelada', 'success');
+    };
 
     // Forms - Event
     const [eventForm, setEventForm] = useState({
@@ -552,21 +614,21 @@ const ClassesManager: React.FC = () => {
                                 </div>
                                 <div className="grid grid-cols-7">
                                     {cells.map((date, i) => {
-                                        if (!date) return <div key={`ep${i}`} className="min-h-[88px] bg-gray-50/60 border-b border-r border-gray-50" style={{ borderBottom: i >= cells.length - 7 ? 'none' : undefined }} />;
+                                        if (!date) return <div key={`ep${i}`} className="min-h-[110px] bg-gray-50/60 border-b border-r border-gray-50" style={{ borderBottom: i >= cells.length - 7 ? 'none' : undefined }} />;
                                         const dayEvs = eventsForDay(date);
                                         const isToday = calSameDay(date, today);
                                         const lastRow = i >= cells.length - 7;
                                         const lastCol = i % 7 === 6;
                                         return (
-                                            <div key={i} onClick={() => { setCalDate(date); setCalView('weekly'); }} className={`min-h-[88px] p-2 border-b border-r border-gray-100 cursor-pointer hover:bg-blue-50/25 transition-colors ${lastRow ? 'border-b-0' : ''} ${lastCol ? 'border-r-0' : ''}`}>
-                                                <span className={`text-sm font-semibold inline-flex items-center justify-center w-7 h-7 rounded-full mb-1 ${isToday ? 'bg-blue-600 text-white font-black' : 'text-gray-600 hover:bg-gray-100'}`}>{date.getDate()}</span>
-                                                <div className="space-y-0.5">
-                                                    {dayEvs.slice(0, 2).map((ev, ei) => (
-                                                        <div key={ei} className="text-[10px] font-semibold truncate px-1.5 py-0.5 rounded" style={{ background: ev.color + '18', color: ev.color }}>
+                                            <div key={i} onClick={() => { setCalDate(date); setCalView('weekly'); }} className={`min-h-[110px] p-2.5 border-b border-r border-gray-100 cursor-pointer hover:bg-blue-50/25 transition-colors ${lastRow ? 'border-b-0' : ''} ${lastCol ? 'border-r-0' : ''}`}>
+                                                <span className={`text-sm font-semibold inline-flex items-center justify-center w-8 h-8 rounded-full mb-1.5 ${isToday ? 'bg-blue-600 text-white font-black' : 'text-gray-600 hover:bg-gray-100'}`}>{date.getDate()}</span>
+                                                <div className="space-y-1">
+                                                    {dayEvs.slice(0, 3).map((ev, ei) => (
+                                                        <div key={ei} onClick={e => { e.stopPropagation(); openSessionModal(ev); }} className="text-[11px] font-semibold truncate px-2 py-1 rounded-md cursor-pointer hover:opacity-80 transition-opacity" style={{ background: ev.color + '20', color: ev.color }}>
                                                             {ev.title.split(' (')[0]}
                                                         </div>
                                                     ))}
-                                                    {dayEvs.length > 2 && <div className="text-[9px] text-gray-400 pl-1">+{dayEvs.length - 2} más</div>}
+                                                    {dayEvs.length > 3 && <div className="text-[10px] text-gray-400 pl-1">+{dayEvs.length - 3} más</div>}
                                                 </div>
                                             </div>
                                         );
@@ -627,8 +689,8 @@ const ClassesManager: React.FC = () => {
                                 </div>
                                 {/* Time rows */}
                                 {hours.map((hr, hri) => (
-                                    <div key={hr} className={`grid border-b border-gray-50 ${hri === hours.length - 1 ? 'border-b-0' : ''}`} style={{ gridTemplateColumns: '48px repeat(7,1fr)', minHeight: 52 }}>
-                                        <div className="text-[10px] text-gray-300 font-semibold text-right pr-3 pt-1 border-r border-gray-100 select-none">
+                                    <div key={hr} className={`grid border-b border-gray-50 ${hri === hours.length - 1 ? 'border-b-0' : ''}`} style={{ gridTemplateColumns: '56px repeat(7,1fr)', minHeight: 64 }}>
+                                        <div className="text-[11px] text-gray-300 font-semibold text-right pr-3 pt-2 border-r border-gray-100 select-none shrink-0">
                                             {hr > 12 ? `${hr - 12}pm` : hr === 12 ? '12pm' : `${hr}am`}
                                         </div>
                                         {days.map((day, di) => {
@@ -638,9 +700,9 @@ const ClassesManager: React.FC = () => {
                                             });
                                             const isT = calSameDay(day, today);
                                             return (
-                                                <div key={di} className={`border-r border-gray-50 last:border-r-0 px-0.5 py-0.5 space-y-0.5 ${isT ? 'bg-blue-50/20' : ''}`}>
+                                                <div key={di} className={`border-r border-gray-50 last:border-r-0 px-1 py-1 space-y-0.5 ${isT ? 'bg-blue-50/20' : ''}`}>
                                                     {slotEvs.map((ev, ei) => (
-                                                        <div key={ei} className="text-[10px] font-bold text-white px-1.5 py-1 rounded-md truncate leading-snug" style={{ background: ev.color }}>
+                                                        <div key={ei} onClick={() => openSessionModal(ev)} className="text-[11px] font-bold text-white px-2 py-1.5 rounded-lg truncate leading-snug cursor-pointer hover:opacity-80 transition-opacity shadow-sm" style={{ background: ev.color }}>
                                                             {ev.title.split(' (')[0]}
                                                         </div>
                                                     ))}
@@ -664,6 +726,120 @@ const ClassesManager: React.FC = () => {
 
                 return null;
             })()}
+
+            {/* --- SESSION EDIT/CANCEL MODAL --- */}
+            {sessionModal && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setSessionModal(null)}>
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md border border-gray-100" onClick={e => e.stopPropagation()}>
+
+                        {/* Header */}
+                        <div className="flex items-start justify-between p-7 border-b border-gray-100">
+                            <div>
+                                <h3 className="text-xl font-black text-gray-900">{sessionModal.className}</h3>
+                                <p className="text-sm font-semibold text-gray-400 mt-0.5">
+                                    {new Date(sessionModal.date + 'T12:00:00').toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                </p>
+                                <p className="text-sm text-gray-500 mt-1">{sessionModal.currentStartTime} – {sessionModal.currentEndTime} · {sessionModal.currentInstructor}</p>
+                            </div>
+                            <button onClick={() => setSessionModal(null)} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
+                                <span className="material-symbols-outlined text-[20px]">close</span>
+                            </button>
+                        </div>
+
+                        {/* MENU VIEW */}
+                        {sessionModal.view === 'menu' && (
+                            <div className="p-7 space-y-3">
+                                <button
+                                    onClick={() => setSessionModal(prev => prev ? { ...prev, view: 'edit' } : null)}
+                                    className="w-full flex items-center gap-4 p-5 rounded-2xl border-2 border-gray-100 hover:border-blue-200 hover:bg-blue-50/30 transition-all group text-left"
+                                >
+                                    <div className="w-11 h-11 rounded-2xl bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                                        <span className="material-symbols-outlined text-blue-600 text-[20px]">edit_calendar</span>
+                                    </div>
+                                    <div>
+                                        <p className="font-black text-gray-800">Editar esta sesión</p>
+                                        <p className="text-sm text-gray-400 mt-0.5">Cambiar hora, instructor o fecha</p>
+                                    </div>
+                                    <span className="material-symbols-outlined text-gray-300 ml-auto">chevron_right</span>
+                                </button>
+                                <button
+                                    onClick={() => setSessionModal(prev => prev ? { ...prev, view: 'confirm_cancel' } : null)}
+                                    className="w-full flex items-center gap-4 p-5 rounded-2xl border-2 border-gray-100 hover:border-red-200 hover:bg-red-50/30 transition-all group text-left"
+                                >
+                                    <div className="w-11 h-11 rounded-2xl bg-red-100 flex items-center justify-center group-hover:bg-red-200 transition-colors">
+                                        <span className="material-symbols-outlined text-red-500 text-[20px]">event_busy</span>
+                                    </div>
+                                    <div>
+                                        <p className="font-black text-gray-800">Cancelar esta clase</p>
+                                        <p className="text-sm text-gray-400 mt-0.5">Marcar como cancelada para los alumnos</p>
+                                    </div>
+                                    <span className="material-symbols-outlined text-gray-300 ml-auto">chevron_right</span>
+                                </button>
+                            </div>
+                        )}
+
+                        {/* EDIT VIEW */}
+                        {sessionModal.view === 'edit' && (
+                            <div className="p-7 space-y-5">
+                                <button onClick={() => setSessionModal(prev => prev ? { ...prev, view: 'menu' } : null)} className="flex items-center gap-1 text-sm font-semibold text-gray-400 hover:text-gray-700 transition-colors">
+                                    <span className="material-symbols-outlined text-[16px]">chevron_left</span> Volver
+                                </button>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="text-xs font-black text-gray-500 uppercase tracking-wider mb-2 block">Inicio</label>
+                                        <input type="time" className="w-full rounded-xl border border-gray-200 p-3 font-semibold text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                            value={sessionModal.editForm.newStartTime}
+                                            onChange={e => setSessionModal(prev => prev ? { ...prev, editForm: { ...prev.editForm, newStartTime: e.target.value } } : null)}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-black text-gray-500 uppercase tracking-wider mb-2 block">Fin</label>
+                                        <input type="time" className="w-full rounded-xl border border-gray-200 p-3 font-semibold text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                            value={sessionModal.editForm.newEndTime}
+                                            onChange={e => setSessionModal(prev => prev ? { ...prev, editForm: { ...prev.editForm, newEndTime: e.target.value } } : null)}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="text-xs font-black text-gray-500 uppercase tracking-wider mb-2 block">Instructor</label>
+                                    <input type="text" className="w-full rounded-xl border border-gray-200 p-3 font-semibold text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                        value={sessionModal.editForm.newInstructor}
+                                        onChange={e => setSessionModal(prev => prev ? { ...prev, editForm: { ...prev.editForm, newInstructor: e.target.value } } : null)}
+                                        placeholder="Nombre del instructor"
+                                    />
+                                </div>
+
+                                <div className="flex gap-3 pt-2">
+                                    <button onClick={() => setSessionModal(null)} className="flex-1 py-3.5 rounded-xl border-2 border-gray-100 font-bold text-gray-500 hover:bg-gray-50 transition-colors">Cancelar</button>
+                                    <button onClick={handleSaveSessionEdit} className="flex-1 py-3.5 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200">Guardar Cambios</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* CONFIRM CANCEL VIEW */}
+                        {sessionModal.view === 'confirm_cancel' && (
+                            <div className="p-7 space-y-6">
+                                <div className="flex flex-col items-center text-center gap-3 py-4">
+                                    <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+                                        <span className="material-symbols-outlined text-red-500 text-3xl">event_busy</span>
+                                    </div>
+                                    <h4 className="text-xl font-black text-gray-900">¿Cancelar esta clase?</h4>
+                                    <p className="text-gray-500 text-sm max-w-xs">
+                                        Los alumnos verán esta clase como <span className="font-bold text-red-500">cancelada</span> en su dashboard. Esta acción se puede revertir desde el menú de edición.
+                                    </p>
+                                </div>
+                                <div className="flex gap-3">
+                                    <button onClick={() => setSessionModal(prev => prev ? { ...prev, view: 'menu' } : null)} className="flex-1 py-3.5 rounded-xl border-2 border-gray-100 font-bold text-gray-500 hover:bg-gray-50 transition-colors">Volver</button>
+                                    <button onClick={handleCancelSession} className="flex-1 py-3.5 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 transition-colors shadow-lg shadow-red-200">Sí, Cancelar Clase</button>
+                                </div>
+                            </div>
+                        )}
+
+                    </div>
+                </div>
+            )}
 
             {/* --- GLOBAL EDIT CLASS MODAL --- */}
             {showCreateModal && (
