@@ -21,7 +21,7 @@ const CAL_COLORS = [
     { color: '#3B82F6', label: 'Clases' },
     { color: '#10B981', label: 'Modificadas' },
     { color: '#8B5CF6', label: 'Movidas' },
-    { color: '#9333EA', label: 'ExÃƒÂ¡menes' },
+    { color: '#9333EA', label: 'Exámenes' },
     { color: '#F97316', label: 'Torneos' },
     { color: '#EC4899', label: 'Seminarios' },
 ];
@@ -146,10 +146,10 @@ const ClassesManager: React.FC = () => {
     const daysOptions = [
         { key: 'Monday', label: 'Lun', full: 'Lunes' },
         { key: 'Tuesday', label: 'Mar', full: 'Martes' },
-        { key: 'Wednesday', label: 'Mie', full: 'MiÃƒÂ©rcoles' },
+        { key: 'Wednesday', label: 'Mie', full: 'Miércoles' },
         { key: 'Thursday', label: 'Jue', full: 'Jueves' },
         { key: 'Friday', label: 'Vie', full: 'Viernes' },
-        { key: 'Saturday', label: 'Sab', full: 'SÃƒÂ¡bado' },
+        { key: 'Saturday', label: 'Sab', full: 'Sábado' },
         { key: 'Sunday', label: 'Dom', full: 'Domingo' },
     ];
 
@@ -663,7 +663,7 @@ const ClassesManager: React.FC = () => {
                             const endDate = endOfWeek(monthEnd, { weekStartsOn: 0 });
                             return eachDayOfInterval({ start: startDate, end: endDate });
                         }, []);
-                        const weekDays = ['Dom', 'Lun', 'Mar', 'MiÃ©', 'Jue', 'Vie', 'SÃ¡b'];
+                        const weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
                         return (
                             <div className="flex flex-col h-full animate-in fade-in duration-500 overflow-hidden">
                                 <div className="grid grid-cols-7 py-3 shrink-0 bg-white border-b border-gray-100 z-10 shadow-sm">
@@ -687,7 +687,7 @@ const ClassesManager: React.FC = () => {
                                                     <div className="w-full flex flex-col gap-1 mt-1">
                                                         {dayEvts.slice(0, 3).map(evt => (
                                                             <div key={evt.id} onClick={e => { e.stopPropagation(); handleEventClick2(evt); }}
-                                                                className={`w-full px-2 py-1 rounded-md text-[9px] font-bold truncate transition-transform hover:scale-[1.02] shadow-sm border-l-2 ${
+                                                                className={`w-full px-2.5 py-1.5 rounded-md text-[11px] font-bold truncate transition-transform hover:scale-[1.02] shadow-sm border-l-2 ${
                                                                     evt.status === 'cancelled'
                                                                         ? 'bg-gray-100 text-gray-400 line-through border-gray-300'
                                                                         : 'bg-white text-gray-700 border-red-500 hover:bg-red-50'
@@ -695,7 +695,7 @@ const ClassesManager: React.FC = () => {
                                                             >{evt.title}</div>
                                                         ))}
                                                         {dayEvts.length > 3 && (
-                                                            <div className="text-[9px] font-bold text-gray-400 text-center bg-gray-50 rounded py-0.5">+ {dayEvts.length - 3} mÃ¡s</div>
+                                                            <div className="text-[10px] font-bold text-gray-400 text-center bg-gray-50 rounded py-0.5">+ {dayEvts.length - 3} más</div>
                                                         )}
                                                     </div>
                                                 </div>
@@ -730,14 +730,14 @@ const ClassesManager: React.FC = () => {
                                                 <div className="flex flex-col gap-3 p-3 flex-1 min-h-[100px]">
                                                     {dayEvts.length > 0 ? dayEvts.map(evt => (
                                                         <div key={evt.id} onClick={() => handleEventClick2(evt)}
-                                                            className={`p-3 rounded-lg border-l-[3px] cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5 group active:scale-95 ${
+                                                            className={`p-4 rounded-xl border-l-[3px] cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5 group active:scale-95 ${
                                                                 evt.status === 'cancelled' ? 'bg-gray-50 border-gray-300 opacity-60' : 'bg-white border-red-500 shadow-sm ring-1 ring-gray-100'
                                                             }`}
                                                         >
-                                                            <p className={`text-xs font-bold leading-tight ${evt.status === 'cancelled' ? 'text-gray-400 line-through' : 'text-gray-800'}`}>{evt.title}</p>
-                                                            <div className="flex items-center gap-1 mt-1.5">
-                                                                <span className="material-symbols-outlined text-[10px] text-gray-400">schedule</span>
-                                                                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wide">{format(evt.start, 'HH:mm')}</p>
+                                                            <p className={`text-sm font-bold leading-tight ${evt.status === 'cancelled' ? 'text-gray-400 line-through' : 'text-gray-800'}`}>{evt.title}</p>
+                                                            <div className="flex items-center gap-1 mt-2">
+                                                                <span className="material-symbols-outlined text-[12px] text-gray-400">schedule</span>
+                                                                <p className="text-xs text-gray-500 font-bold uppercase tracking-wide">{format(evt.start, 'HH:mm')}</p>
                                                             </div>
                                                         </div>
                                                     )) : (
@@ -770,7 +770,7 @@ const ClassesManager: React.FC = () => {
                                                 <span className="material-symbols-outlined text-4xl opacity-30 text-gray-400">self_improvement</span>
                                             </div>
                                             <p className="text-lg font-bold text-gray-500">Sin sesiones</p>
-                                            <p className="text-sm opacity-60">No hay clases ni eventos este dÃ­a.</p>
+                                            <p className="text-sm opacity-60">No hay clases ni eventos este día.</p>
                                         </div>
                                     ) : (
                                         <div className="relative border-l border-gray-100 ml-4 space-y-8 py-2">
@@ -936,10 +936,10 @@ const ClassesManager: React.FC = () => {
                                 <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end overflow-x-auto no-scrollbar">
                                     <div className="flex bg-gray-100 p-1 rounded-xl">
                                         {([
-                                            { id: 'year', label: 'AÃ±o' },
+                                            { id: 'year', label: 'Año' },
                                             { id: 'month', label: 'Mes' },
                                             { id: 'week', label: 'Semana' },
-                                            { id: 'day', label: 'DÃ­a' },
+                                            { id: 'day', label: 'Día' },
                                         ] as { id: CalViewType; label: string }[]).map(v => (
                                             <button key={v.id} onClick={() => setCalView2(v.id)}
                                                 className={`px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
@@ -1115,12 +1115,12 @@ const ClassesManager: React.FC = () => {
                 <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in zoom-in-95">
                     <div className="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl">
                         <h2 className="text-2xl font-bold mb-6 text-text-main">
-                            {editingClassId ? 'ConfiguraciÃ³n General de Clase' : 'Crear Nueva Clase'}
+                            {editingClassId ? 'Configuración General de Clase' : 'Crear Nueva Clase'}
                         </h2>
                         <form onSubmit={handleSaveClass} className="flex flex-col gap-5">
                             <input required value={classForm.name} onChange={e => setClassForm({ ...classForm, name: e.target.value })} className="w-full rounded-xl border-gray-300 p-3 text-sm" placeholder="Nombre de la Clase" />
                             <div>
-                                <label className="text-xs font-bold text-text-secondary uppercase mb-2 block">DÃ­as Recurrentes</label>
+                                <label className="text-xs font-bold text-text-secondary uppercase mb-2 block">Días Recurrentes</label>
                                 <div className="flex flex-wrap gap-2">
                                     {daysOptions.map(day => (
                                         <button key={day.key} type="button" onClick={() => toggleDay(day.key)}
