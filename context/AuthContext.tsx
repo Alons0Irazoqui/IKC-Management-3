@@ -18,8 +18,8 @@ interface AuthContextType {
     registerStudent: (data: any) => Promise<boolean>;
     registerMaster: (data: any) => Promise<boolean>;
     logout: () => void;
-    updateUserProfile: (profile: Partial<UserProfile>) => void;
-    changePassword: (newPassword: string) => void;
+    updateUserProfile: (profile: Partial<UserProfile>) => Promise<boolean>;
+    changePassword: (newPassword: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -126,27 +126,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const updateUserProfile = async (updates: Partial<UserProfile>) => {
-        if (!currentUser) return;
+        if (!currentUser) return false;
         try {
-            const { error } = await supabase.from('profiles').update(updates).eq('id', currentUser.id);
-            if (error) throw error;
+            // Update Profile
+            const { error: profileError } = await supabase.from('profiles').update(updates).eq('id', currentUser.id);
+            if (profileError) throw profileError;
+
+            // If it's a student and they changed their name, keep the `students` table in sync
+            if (currentUser.role === 'student' && updates.name) {
+                const { error: studentError } = await supabase.from('students').update({ name: updates.name }).eq('user_id', currentUser.id);
+                if (studentError) {
+                    console.error("Failed to sync student table name:", studentError);
+                    // Non-fatal, keep going
+                }
+            }
 
             const updatedUser = { ...currentUser, ...updates };
             setCurrentUser(updatedUser);
             addToast('Perfil actualizado', 'success');
+            return true;
         } catch (error) {
+            console.error("updateUserProfile Error:", error);
             addToast("Error al actualizar perfil", "error");
+            return false;
         }
     };
-
     const changePassword = async (newPassword: string) => {
-        if (!currentUser) return;
+        if (!currentUser) return false;
         try {
             const { error } = await supabase.auth.updateUser({ password: newPassword });
             if (error) throw error;
             addToast('Contraseña actualizada', 'success');
+            return true;
         } catch (error) {
+            console.error("changePassword Error:", error);
             addToast("Error al actualizar contraseña", "error");
+            return false;
         }
     };
 
