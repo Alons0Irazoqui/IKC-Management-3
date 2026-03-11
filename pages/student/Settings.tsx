@@ -8,7 +8,7 @@ import EmergencyCard from '../../components/ui/EmergencyCard';
 import Avatar from '../../components/ui/Avatar';
 
 const Settings: React.FC = () => {
-    const { currentUser, students, updateStudent, academySettings, updateAcademySettings, updateUserProfile, changePassword } = useStore();
+    const { currentUser, students, updateStudent, updateStudentProfile, academySettings, updateAcademySettings, updateUserProfile, changePassword } = useStore();
     const { addToast } = useToast();
     const [activeTab, setActiveTab] = useState<'profile' | 'emergency' | 'academy'>('profile');
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -75,18 +75,18 @@ const Settings: React.FC = () => {
         }
     };
 
-    const handleEmergencySave = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!emergencyData || !student) return;
-        // In a real app, students might request a change rather than direct update. 
-        // For this demo, we assume self-service update capability or a mock "request sent"
-        // We will reuse updateStudent (although context restricts it to Master usually, let's assume we allow self-update here or need a specialized method)
-        // Since context restricts `updateStudent` to Master role, we should ideally have a `requestProfileUpdate` or loosen the restriction.
-        // For this UI demo, we will simulate the update in local state and toast.
+    const [isSavingEmergency, setIsSavingEmergency] = useState(false);
 
-        // *Workaround for Demo*: If we can't write to context because of role check, we just show success.
-        // Ideally, the Context would expose `updateMyProfile` for students.
-        addToast('Solicitud de actualización enviada a administración.', 'info');
+    const handleEmergencySave = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!emergencyData || !student || !updateStudentProfile) return;
+
+        setIsSavingEmergency(true);
+        try {
+            await updateStudentProfile(student.id, emergencyData);
+        } finally {
+            setIsSavingEmergency(false);
+        }
     };
 
     const handleAcademySave = (e: React.FormEvent) => {
@@ -293,7 +293,19 @@ const Settings: React.FC = () => {
                                 </div>
 
                                 <div className="mt-8 flex justify-end">
-                                    <button type="submit" className="px-6 py-2.5 rounded-xl bg-primary text-white text-sm font-bold shadow-lg hover:bg-primary-hover">Solicitar Actualización</button>
+                                    <button type="submit" disabled={isSavingEmergency} className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-white text-sm font-bold shadow-lg hover:bg-primary-hover disabled:opacity-70 disabled:cursor-not-allowed">
+                                        {isSavingEmergency ? (
+                                            <>
+                                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Guardando...
+                                            </>
+                                        ) : (
+                                            'Actualizar Información'
+                                        )}
+                                    </button>
                                 </div>
                             </form>
                         </div>
