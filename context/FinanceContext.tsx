@@ -84,6 +84,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const [records, setRecords] = useState<TuitionRecord[]>([]);
     const [expenses, setExpenses] = useState<Expense[]>([]);
     const [isFinanceLoading, setIsFinanceLoading] = useState(true);
+    const [isDeletingRecord, setIsDeletingRecord] = useState(false);
 
     // Stats State
     const [monthlyRevenueData, setMonthlyRevenueData] = useState<RevenueData[]>([]);
@@ -701,9 +702,24 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     };
 
     const deleteRecord = async (recordId: string) => {
-        setRecords(prev => prev.filter(r => r.id !== recordId));
-        await PulseService.deletePayment(recordId);
-        addToast('Registro eliminado', 'info');
+        setIsDeletingRecord(true);
+        // Espera artificial para UX por 2 segundos antes del borrado de db
+        await new Promise(resolve => setTimeout(resolve, 2000));
+
+        try {
+            // Sincronización pesimista (Borrar BD primero)
+            await PulseService.deletePayment(recordId);
+
+            // Una vez eliminado de la BD, quitar de la UI
+            setRecords(prev => prev.filter(r => r.id !== recordId));
+
+            setIsDeletingRecord(false);
+            addToast('Registro eliminado correctamente', 'info');
+        } catch (error) {
+            console.error("Error al eliminar el registro:", error);
+            setIsDeletingRecord(false);
+            addToast('Error al eliminar el movimiento de la nube', 'error');
+        }
     };
 
     const generateMonthlyBilling = async () => {
@@ -828,6 +844,16 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
             deleteExpense
         }}>
             {children}
+
+            {isDeletingRecord && (
+                <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-white p-6 rounded-3xl shadow-xl flex flex-col items-center gap-4 animate-in zoom-in-95 duration-200 border border-gray-100">
+                        <div className="w-10 h-10 border-4 border-slate-100 border-t-red-600 rounded-full animate-spin"></div>
+                        <p className="font-bold text-slate-900 text-sm">Eliminando movimiento...</p>
+                        <p className="text-[10px] text-gray-500 font-medium">Sincronizando con la base de datos</p>
+                    </div>
+                </div>
+            )}
         </FinanceContext.Provider>
     );
 };

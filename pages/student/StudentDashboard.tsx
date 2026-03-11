@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '../../context/ToastContext';
 import { Event, CalendarEvent, Student } from '../../types';
 import { useAcademy } from '../../context/AcademyContext';
-import { getLocalDate } from '../../utils/dateUtils';
+import { getLocalDate, formatDateDisplay } from '../../utils/dateUtils';
 import Avatar from '../../components/ui/Avatar';
 
 const StudentDashboard: React.FC = () => {
@@ -313,8 +313,8 @@ const StudentDashboard: React.FC = () => {
                                 marketplaceEvents.map(evt => (
                                     <div key={evt.id} onClick={() => setSelectedEvent(evt)} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors border border-transparent hover:border-gray-100">
                                         <div className={`size-10 rounded-lg flex flex-col items-center justify-center shrink-0 text-white shadow-sm ${evt.type === 'tournament' ? 'bg-orange-500' : 'bg-blue-500'}`}>
-                                            <span className="text-[10px] font-bold uppercase">{new Date(evt.date).toLocaleDateString('es-ES', { month: 'short' })}</span>
-                                            <span className="text-sm font-black leading-none">{new Date(evt.date).getDate()}</span>
+                                            <span className="text-[10px] font-bold uppercase">{formatDateDisplay(evt.date, { month: 'short' })}</span>
+                                            <span className="text-sm font-black leading-none">{formatDateDisplay(evt.date, { day: 'numeric' })}</span>
                                         </div>
                                         <div className="min-w-0">
                                             <p className="text-sm font-bold text-text-main truncate">{evt.title}</p>
@@ -408,7 +408,7 @@ const StudentDashboard: React.FC = () => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="bg-gray-50 p-4 rounded-2xl">
                                     <p className="text-xs font-bold text-gray-400 uppercase mb-1">Fecha</p>
-                                    <p className="font-bold text-text-main">{new Date(selectedEvent.date + 'T12:00:00').toLocaleDateString()}</p>
+                                    <p className="font-bold text-text-main">{formatDateDisplay(selectedEvent.date)}</p>
                                 </div>
                                 <div className="bg-gray-50 p-4 rounded-2xl">
                                     <p className="text-xs font-bold text-gray-400 uppercase mb-1">Horario</p>

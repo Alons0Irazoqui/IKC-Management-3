@@ -13,7 +13,7 @@ const generateId = (prefix?: string) => {
     if (typeof crypto !== 'undefined' && crypto.randomUUID) {
         return crypto.randomUUID();
     }
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
         const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
     });
@@ -226,10 +226,11 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
                 // 1. Determine Students Fetch
                 let studentsPromise: Promise<Student[]> = Promise.resolve([]);
-                if (isMaster) {
+                if (currentUser.academyId) {
+                    // Both masters and students now fetch the academy's students.
+                    // RLS has been relaxed safely, allowing students to see their classmates
+                    // so that the 'Mis Compañeros' list in Class Details works correctly.
                     studentsPromise = PulseService.getStudents(currentUser.academyId);
-                } else if (isStudent && currentUser.studentId) {
-                    studentsPromise = PulseService.getStudentById(currentUser.studentId).then(s => s ? [s] : []);
                 }
 
                 // 2. Execute parallel fetches (Classes/Events/Library are generally accessible to academy members)
@@ -322,13 +323,13 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         try {
             const initialFee = academySettings.paymentSettings?.monthlyTuition || 500;
             await PulseService.createStudentAccountFromMaster(finalStudent, (student as any).password, initialFee);
-            
+
             // Re-fetch students from DB now that the trigger has added the real row
             if (currentUser.academyId) {
                 const refreshedStudents = await PulseService.getStudents(currentUser.academyId);
                 setStudents(refreshedStudents);
             }
-            
+
             addToast('Alumno creado e invitación enviada exitosamente', 'success');
         } catch (e) {
             console.error("Failed to register student", e);
@@ -404,7 +405,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             await PulseService.deleteFullStudentData(id);
 
             const newStudents = students.filter(s => s.id !== id);
-            
+
             const newClasses = classes.map(c => {
                 if (c.studentIds.includes(id)) {
                     return {

@@ -19,7 +19,7 @@ export const getLocalDate = (): string => {
  * but for 'Dates' (YYYY-MM-DD), we strictly use getLocalDate.
  */
 export const getCurrentTimestamp = (): string => {
-    return new Date().toISOString(); 
+    return new Date().toISOString();
 };
 
 /**
@@ -38,18 +38,27 @@ export const parseLocalDate = (dateStr: string): Date => {
  */
 export const formatDateDisplay = (dateStr: string, options?: Intl.DateTimeFormatOptions): string => {
     if (!dateStr) return '';
-    
-    // Split explicitly to avoid Date parsing timezone assumptions
-    const [year, month, day] = dateStr.split('-').map(Number);
-    
-    if (!year || !month || !day) return dateStr; 
 
-    const dateObj = new Date(year, month - 1, day);
-    
-    const defaultOptions: Intl.DateTimeFormatOptions = { 
-        weekday: 'long', 
-        day: 'numeric', 
-        month: 'short' 
+    let dateObj: Date;
+
+    // If it's a full ISO timestamp (contains 'T'), let JS parse it to convert to local time correctly
+    if (dateStr.includes('T')) {
+        dateObj = new Date(dateStr);
+    } else {
+        // Otherwise, it's 'YYYY-MM-DD'. Split explicitly to avoid Date parsing timezone assumptions
+        const parts = dateStr.split('-');
+        if (parts.length < 3) return dateStr;
+
+        const [year, month, day] = parts.map(Number);
+        if (!year || !month || !day) return dateStr;
+
+        dateObj = new Date(year, month - 1, day);
+    }
+
+    const defaultOptions: Intl.DateTimeFormatOptions = {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'short'
     };
 
     return dateObj.toLocaleDateString('es-ES', options || defaultOptions);
