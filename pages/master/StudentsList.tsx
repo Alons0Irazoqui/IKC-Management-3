@@ -12,6 +12,7 @@ import { PulseService } from '../../services/pulseService';
 import Avatar from '../../components/ui/Avatar';
 import { getStatusLabel } from '../../utils/textUtils';
 import StudentDetailModal from '../../components/ui/StudentDetailModal';
+import UpdateCredentialsModal from '../../components/ui/UpdateCredentialsModal';
 
 // Fix for type errors with motion components
 const MotionDiv = motion.div as any;
@@ -35,6 +36,7 @@ const StudentsList: React.FC = () => {
     const [showModal, setShowModal] = useState(false);
     const [viewingStudent, setViewingStudent] = useState<Student | null>(null);
     const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+    const [credentialsStudent, setCredentialsStudent] = useState<Student | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const initialFormState: Partial<Student> = {
@@ -184,6 +186,11 @@ const StudentsList: React.FC = () => {
         setShowModal(true);
     };
 
+    const handleCredentialsEdit = (student: Student, e?: React.MouseEvent) => {
+        e?.stopPropagation();
+        setCredentialsStudent(student);
+    };
+
     const handleViewDetails = (student: Student, e?: React.MouseEvent) => {
         e?.stopPropagation();
         setViewingStudent(student);
@@ -306,8 +313,8 @@ const StudentsList: React.FC = () => {
                                     key={status}
                                     onClick={() => setFilterStatus(status)}
                                     className={`px-4 py-2 rounded-xl text-xs font-bold uppercase transition-all border ${filterStatus === status
-                                            ? 'bg-black text-white border-black'
-                                            : 'bg-white text-text-secondary border-gray-200 hover:bg-gray-50'
+                                        ? 'bg-black text-white border-black'
+                                        : 'bg-white text-text-secondary border-gray-200 hover:bg-gray-50'
                                         }`}
                                 >
                                     {status === 'all' ? 'Todos' : getStatusLabel(status as StudentStatus)}
@@ -397,6 +404,7 @@ const StudentsList: React.FC = () => {
                                                     <td className="px-6 py-4 text-right">
                                                         <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                             <button onClick={(e) => handleEdit(student, e)} className="p-1.5 hover:bg-gray-100 rounded text-gray-500 hover:text-primary transition-colors"><span className="material-symbols-outlined text-[18px]">edit</span></button>
+                                                            <button onClick={(e) => handleCredentialsEdit(student, e)} className="p-1.5 hover:bg-gray-100 rounded text-gray-500 hover:text-blue-500 transition-colors" title="Actualizar Claves"><span className="material-symbols-outlined text-[18px]">key</span></button>
                                                             <button onClick={(e) => handleDelete(student.id, e)} className="p-1.5 hover:bg-red-50 rounded text-gray-400 hover:text-red-500 transition-colors"><span className="material-symbols-outlined text-[18px]">delete</span></button>
                                                         </div>
                                                     </td>
@@ -586,6 +594,13 @@ const StudentsList: React.FC = () => {
                 onClose={() => setViewingStudent(null)}
                 onEdit={(s) => handleEdit(s)}
                 financialRecords={studentFinancialRecords}
+            />
+
+            {/* --- CREDENTIALS UPDATE MODAL --- */}
+            <UpdateCredentialsModal
+                isOpen={!!credentialsStudent}
+                student={credentialsStudent}
+                onClose={() => setCredentialsStudent(null)}
             />
         </div>
     );

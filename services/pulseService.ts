@@ -305,6 +305,18 @@ export const PulseService = {
         return true;
     },
 
+    updateStudentCredentials: async (studentId: string, email?: string, password?: string) => {
+        const { error } = await supabase.rpc('update_student_credentials', {
+            p_student_id: studentId,
+            p_new_email: email || null,
+            p_new_password: password || null
+        });
+        if (error) {
+            console.error("Supabase RPC update_student_credentials Error:", error);
+            throw new Error(error.message || "Error al actualizar las credenciales.");
+        }
+    },
+
     login: async (email: string, pass: string): Promise<UserProfile> => {
         console.log("PulseService.login started for:", email);
         console.time('login');
