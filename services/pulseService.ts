@@ -811,7 +811,10 @@ export const PulseService = {
 
     saveStudents: async (students: Student[]) => {
         if (!students || students.length === 0) return;
-        const mapped = students.map(s => {
+
+        // Loop and update individually to ensure we never overwrite or nullify columns like `user_id`
+        // due to PostgREST bulk-upsert limitations with omitted fields.
+        for (const s of students) {
             const details = { ...s };
             delete (details as any).id;
             delete (details as any).userId;
@@ -825,8 +828,6 @@ export const PulseService = {
             delete (details as any).attendanceHistory;
 
             const payload: any = {
-                id: s.id,
-                academy_id: s.academyId,
                 name: s.name,
                 status: s.status,
                 rank_id: s.rankId || null,
@@ -835,18 +836,15 @@ export const PulseService = {
                 details: details
             };
 
-            // Solamente agregamos user_id y email si existen explícitamente y tienen valor, 
-            // esto previene borrar el user_id de la db si el estado local lo perdió temporalmente
-            if (s.userId) payload.user_id = s.userId;
             if (s.email) payload.email = s.email;
+            // Never touch user_id in routine updates. It's set once by the PG trigger permanently.
 
-            return payload;
-        });
+            const { error } = await supabase.from('students').update(payload).eq('id', s.id);
 
-        const { error, data } = await supabase.from('students').upsert(mapped).select();
-        if (error) {
-            console.error("Supabase upsert STUDENTS error:", JSON.stringify(error, null, 2));
-            throw error;
+            if (error) {
+                console.error("Supabase update STUDENT error for ID", s.id, error);
+                throw error;
+            }
         }
     },
 
