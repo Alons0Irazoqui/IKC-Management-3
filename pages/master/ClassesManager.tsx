@@ -599,7 +599,7 @@ const ClassesManager: React.FC = () => {
 
                 // Inner component using hooks
                 const MasterCalendarInner = () => {
-                    const [calView2, setCalView2] = useState<CalViewType>('month');
+                    const [calView2, setCalView2] = useState<CalViewType>('week');
                     const [calDate2, setCalDate2] = useState(new Date());
                     const [selectedEvent2, setSelectedEvent2] = useState<CalendarEvent | null>(null);
                     const [isEventModal2, setIsEventModal2] = useState(false);
