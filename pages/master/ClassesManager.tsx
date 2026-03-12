@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useStore } from '../../context/StoreContext';
 import { ClassCategory, SessionModification, Event, CalendarEvent } from '../../types';
 import { useToast } from '../../context/ToastContext';
@@ -369,21 +369,40 @@ const ClassesManager: React.FC = () => {
                     <p className="text-text-secondary mt-1 text-lg">Define clases regulares y eventos especiales.</p>
                 </div>
 
-                <div className="flex bg-white p-1.5 rounded-2xl shadow-sm border border-gray-200">
-                    <button
-                        onClick={() => setActiveTab('classes')}
-                        className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'classes' ? 'bg-primary text-white shadow-md' : 'text-text-secondary hover:text-text-main hover:bg-gray-50'}`}
-                    >
-                        <span className="material-symbols-outlined text-[18px]">calendar_month</span>
-                        Clases
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('events')}
-                        className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'events' ? 'bg-primary text-white shadow-md' : 'text-text-secondary hover:text-text-main hover:bg-gray-50'}`}
-                    >
-                        <span className="material-symbols-outlined text-[18px]">trophy</span>
-                        Eventos y Seminarios
-                    </button>
+                <div className="flex items-center gap-3">
+                    <div className="flex bg-white p-1.5 rounded-2xl shadow-sm border border-gray-200">
+                        <button
+                            onClick={() => setActiveTab('classes')}
+                            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'classes' ? 'bg-primary text-white shadow-md' : 'text-text-secondary hover:text-text-main hover:bg-gray-50'}`}
+                        >
+                            <span className="material-symbols-outlined text-[18px]">calendar_month</span>
+                            Clases
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('events')}
+                            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'events' ? 'bg-primary text-white shadow-md' : 'text-text-secondary hover:text-text-main hover:bg-gray-50'}`}
+                        >
+                            <span className="material-symbols-outlined text-[18px]">trophy</span>
+                            Eventos y Seminarios
+                        </button>
+                    </div>
+                    {activeTab === 'classes' ? (
+                        <button
+                            onClick={() => { resetClassForm(); setShowCreateModal(true); }}
+                            className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-2xl font-bold shadow-lg shadow-primary/25 flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">add</span>
+                            Nueva Clase
+                        </button>
+                    ) : (
+                        <button
+                            onClick={() => setShowEventModal(true)}
+                            className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-2xl font-bold shadow-lg shadow-primary/25 flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">add_circle</span>
+                            Nuevo Evento
+                        </button>
+                    )}
                 </div>
 
             </div>
@@ -392,15 +411,6 @@ const ClassesManager: React.FC = () => {
             {/* --- CLASSES TAB CONTENT --- */}
             {activeTab === 'classes' && (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className="flex justify-end mb-6">
-                        <button
-                            onClick={() => { resetClassForm(); setShowCreateModal(true); }}
-                            className="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-primary/25 flex items-center gap-2 transition-all active:scale-95"
-                        >
-                            <span className="material-symbols-outlined">add</span>
-                            Nueva Clase
-                        </button>
-                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {classes.map(cls => (
@@ -464,15 +474,6 @@ const ClassesManager: React.FC = () => {
             {/* --- EVENTS TAB CONTENT (Updated Card Design) --- */}
             {activeTab === 'events' && (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-                    <div className="flex justify-end mb-6">
-                        <button
-                            onClick={() => setShowEventModal(true)}
-                            className="bg-primary hover:bg-primary-hover text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-primary/25 flex items-center gap-2 transition-all active:scale-95"
-                        >
-                            <span className="material-symbols-outlined">add_circle</span>
-                            Publicar Nuevo Evento
-                        </button>
-                    </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {events.length === 0 ? (
@@ -605,6 +606,16 @@ const ClassesManager: React.FC = () => {
                     const [drawerState2, setDrawerState2] = useState<{ isOpen: boolean; date: Date | null; events: CalendarEvent[] }>({
                         isOpen: false, date: null, events: []
                     });
+                    const [yearReady, setYearReady] = useState(false);
+
+                    // Defer YearView rendering so React can paint the spinner first
+                    useEffect(() => {
+                        if (calView2 === 'year') {
+                            setYearReady(false);
+                            const t = setTimeout(() => setYearReady(true), 50);
+                            return () => clearTimeout(t);
+                        }
+                    }, [calView2]);
 
                     const handleEventClick2 = (evt: CalendarEvent) => {
                         if (evt.type === 'class' && evt.status !== 'cancelled') {
@@ -960,16 +971,23 @@ const ClassesManager: React.FC = () => {
                                 {calView2 === 'day' && <DayView />}
                                 {calView2 === 'year' && (
                                     <div className="h-full overflow-y-auto p-6 custom-scrollbar">
-                                        <YearView
-                                            date={calDate2}
-                                            events={calEvents}
-                                            onNavigate={setCalDate2}
-                                            onMonthClick={(d) => { setCalDate2(d); setCalView2('month'); }}
-                                            onDayClick={(d) => {
-                                                const dayEvts = calEvents.filter(e => isSameDay(e.start, d));
-                                                handleDayClick2(d, dayEvts);
-                                            }}
-                                        />
+                                        {!yearReady ? (
+                                            <div className="flex flex-col items-center justify-center h-full gap-4 text-gray-400">
+                                                <div className="size-10 border-[3px] border-gray-200 border-t-red-500 rounded-full animate-spin"></div>
+                                                <p className="text-sm font-semibold">Cargando calendario anual...</p>
+                                            </div>
+                                        ) : (
+                                            <YearView
+                                                date={calDate2}
+                                                events={calEvents}
+                                                onNavigate={setCalDate2}
+                                                onMonthClick={(d) => { setCalDate2(d); setCalView2('month'); }}
+                                                onDayClick={(d) => {
+                                                    const dayEvts = calEvents.filter(e => isSameDay(e.start, d));
+                                                    handleDayClick2(d, dayEvts);
+                                                }}
+                                            />
+                                        )}
                                     </div>
                                 )}
                             </div>

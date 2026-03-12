@@ -41,7 +41,7 @@ interface MonthCellProps {
     onDayClick: (date: Date) => void;
 }
 
-const MonthCell: React.FC<MonthCellProps> = ({ month, events, onMonthClick, onDayClick }) => {
+const MonthCell: React.FC<MonthCellProps> = React.memo(({ month, events, onMonthClick, onDayClick }) => {
     const days = useMemo(() => {
         return eachDayOfInterval({
             start: month,
@@ -111,6 +111,6 @@ const MonthCell: React.FC<MonthCellProps> = ({ month, events, onMonthClick, onDa
             </div>
         </div>
     );
-};
+});
 
 export default YearView;
