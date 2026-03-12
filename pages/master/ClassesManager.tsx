@@ -365,7 +365,7 @@ const ClassesManager: React.FC = () => {
             {/* Header with Tabs */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-6">
                 <div>
-                    <h1 className="text-4xl font-black tracking-tight text-text-main">GestiÃƒÂ³n de Horarios</h1>
+                    <h1 className="text-4xl font-black tracking-tight text-text-main">Gestión de Horarios</h1>
                     <p className="text-text-secondary mt-1 text-lg">Define clases regulares y eventos especiales.</p>
                 </div>
 
@@ -385,14 +385,7 @@ const ClassesManager: React.FC = () => {
                         Eventos y Seminarios
                     </button>
                 </div>
-                {/* Calendar Quick Access */}
-                <button
-                    onClick={() => setShowFullCalendar(true)}
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
-                >
-                    <span className="material-symbols-outlined text-[18px] text-primary">calendar_month</span>
-                    Ver Calendario
-                </button>
+
             </div>
 
 
