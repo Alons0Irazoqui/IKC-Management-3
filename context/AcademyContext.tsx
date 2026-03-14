@@ -623,26 +623,39 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     const deleteClass = async (id: string) => {
         if (currentUser?.role !== 'master') return;
-        const newClasses = classes.filter(c => c.id !== id);
-        setClasses(newClasses);
-        // We need to delete from DB? saveClasses with missing one won't delete if we only upsert.
-        // PulseService.saveClasses(newClasses); // Upsert won't delete. 
-        // We need a deleteClass method in Service or we just ignore it for now as "soft delete" isn't implemented?
-        // For now, let's implement delete in Service or just not save deletion?
-        // Wait, PulseService only had upsert.
-        // Let's rely on upsert for now and accept that "deleted" classes might stay in DB unless we add delete.
-        // Added NOTE: Real app needs delete method. 
-        // I'll skip DB delete for now to avoid compilation error if I didn't add it, 
-        // or check if I added it. I didn't.
 
-        const newStudents = students.map(s => ({
-            ...s,
-            classesId: s.classesId.filter(cid => cid !== id)
-        }));
-        setStudents(newStudents);
-        await PulseService.saveStudents(newStudents);
+        try {
+            // 1. Delete from database using the new service method
+            await PulseService.deleteClass(id);
 
-        addToast('Clase eliminada', 'success');
+            // 2. Update local classes state
+            const newClasses = classes.filter(c => c.id !== id);
+            setClasses(newClasses);
+
+            // 3. Clean up students data (remove class enrollment & attendance)
+            const newStudents = students.map(s => {
+                const hadClass = s.classesId.includes(id);
+                const hadAttendanceForClass = s.attendanceHistory?.some(a => a.classId === id);
+
+                if (!hadClass && !hadAttendanceForClass) return s;
+
+                return {
+                    ...s,
+                    classesId: s.classesId.filter(cid => cid !== id),
+                    attendanceHistory: s.attendanceHistory?.filter(a => a.classId !== id) || [],
+                    attendance: s.attendanceHistory?.filter(a => a.classId !== id).length || 0
+                };
+            });
+
+            // 4. Update local state and save students
+            setStudents(newStudents);
+            await PulseService.saveStudents(newStudents);
+
+            addToast('Clase eliminada exitosamente', 'success');
+        } catch (err: any) {
+            console.error("Error al eliminar la clase:", err);
+            addToast(err.message || 'Error al eliminar la clase', 'error');
+        }
     };
 
     const enrollStudent = async (studentId: string, classId: string) => {

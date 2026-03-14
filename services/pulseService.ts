@@ -884,6 +884,11 @@ export const PulseService = {
         if (error) throw error;
     },
 
+    deleteClass: async (classId: string) => {
+        const { error } = await supabase.from('classes').delete().eq('id', classId);
+        if (error) throw error;
+    },
+
     saveEvents: async (events: Event[]) => {
         if (!events || events.length === 0) return;
         const mapped = events.map(e => {
