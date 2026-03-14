@@ -191,6 +191,7 @@ export interface CalendarEvent {
     // Linking to Class System
     classId?: string; // ID of the ClassCategory if this is a generated class instance
     isRecurring?: boolean;
+    originalDate?: string;
 
     // Legacy / Extended Support
     instructorName?: string; // Optional for backward compatibility, mapped to instructor

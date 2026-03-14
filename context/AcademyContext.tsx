@@ -181,20 +181,30 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
                         const end = new Date(loopDate);
                         end.setHours(eh, em, 0);
 
+                        let titleSuffix = '';
+                        if (status === 'cancelled') {
+                            titleSuffix = ' (Cancelada)';
+                        } else if (movedHere || currentMod?.type === 'move') {
+                            titleSuffix = ' (Movida)';
+                        } else if (currentMod && currentMod.type !== 'cancel') {
+                            titleSuffix = ' (Modificada)';
+                        }
+
                         generatedEvents.push({
                             id: `${cls.id}-${dateStr}`,
                             academyId: cls.academyId,
                             classId: cls.id,
-                            title: cls.name,
+                            title: cls.name + titleSuffix,
                             start,
                             end,
                             instructor,
                             instructorName: instructor,
                             status: status,
                             type: 'class',
-                            color: status === 'cancelled' ? '#ef4444' : '#3b82f6',
+                            color: status === 'cancelled' ? '#ef4444' : (titleSuffix ? '#8B5CF6' : '#3b82f6'),
                             isRecurring: true,
-                            description: status === 'cancelled' ? 'Clase Cancelada' : `Instructor: ${instructor}`
+                            description: status === 'cancelled' ? 'Clase Cancelada' : `Instructor: ${instructor}`,
+                            originalDate: dateStr // <--- NEW: injected to allow correct lookup/modification
                         });
                     }
                 }

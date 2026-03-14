@@ -37,7 +37,7 @@ function localDateStr(d: Date): string {
 }
 
 const ClassesManager: React.FC = () => {
-    const { classes, events, addClass, updateClass, deleteClass, modifyClassSession, addEvent } = useStore();
+    const { classes, events, addClass, updateClass, deleteClass, modifyClassSession, addEvent, scheduleEvents } = useStore();
     const { addToast } = useToast();
     const { confirm } = useConfirmation();
     const navigate = useNavigate();
@@ -89,20 +89,23 @@ const ClassesManager: React.FC = () => {
         if (!ev.resource?.id || ev.resource?.type) return; // Only classes, not events/seminars
         const cls = classes.find(c => c.id === ev.resource.id);
         if (!cls) return;
-        // Use LOCAL date to avoid UTC timezone offset shifting the date
-        const dateStr = ev.start instanceof Date ? localDateStr(ev.start) : String(ev.start).split('T')[0];
+        // Lookup using originalDate if available, so chained edits modify the same root instance correctly
+        const computedDate = ev.start instanceof Date ? localDateStr(ev.start) : String(ev.start).split('T')[0];
+        const dateStr = ev.originalDate || computedDate;
+        
         const existingMod = cls.modifications?.find(m => m.date === dateStr);
+        
         setSessionModal({
             open: true,
             view: 'menu',
             classId: cls.id,
             className: cls.name,
-            date: dateStr,
+            date: dateStr, // the original reference date
             currentStartTime: existingMod?.newStartTime || cls.startTime,
             currentEndTime: existingMod?.newEndTime || cls.endTime,
             currentInstructor: existingMod?.newInstructor || cls.instructor,
             editForm: {
-                newDate: existingMod?.newDate || dateStr,
+                newDate: existingMod?.newDate || (existingMod?.type === 'move' ? computedDate : dateStr),
                 newStartTime: existingMod?.newStartTime || cls.startTime,
                 newEndTime: existingMod?.newEndTime || cls.endTime,
                 newInstructor: existingMod?.newInstructor || cls.instructor,
@@ -257,97 +260,7 @@ const ClassesManager: React.FC = () => {
         });
     };
 
-    // --- MASTER CALENDAR DATA GENERATION ---
-    const masterEventsForCalendar = useMemo(() => {
-        const eventsList: any[] = [];
-        const today = new Date();
-        const startOfCal = new Date(today.getFullYear() - 1, 0, 1); // 1 yr past
-        const endOfCal = new Date(today.getFullYear() + 2, 0, 1);   // 2 yrs future
-
-        const dayNameMap: Record<number, string> = {
-            0: 'Sunday', 1: 'Monday', 2: 'Tuesday', 3: 'Wednesday', 4: 'Thursday', 5: 'Friday', 6: 'Saturday'
-        };
-
-        // 1. Convert Recurrent Classes into individual events
-        classes.forEach(cls => {
-            let currentDate = new Date(startOfCal);
-            while (currentDate <= endOfCal) {
-                const dayName = dayNameMap[currentDate.getDay()];
-                if (cls.days.includes(dayName)) {
-                    const dateStr = currentDate.toISOString().split('T')[0];
-                    const mod = cls.modifications?.find(m => m.date === dateStr);
-
-                    if (mod?.type !== 'cancel' && mod?.type !== 'move') {
-                        const startH = mod?.newStartTime || cls.startTime;
-                        const endH = mod?.newEndTime || cls.endTime;
-
-                        const [sH, sM] = startH.split(':').map(Number);
-                        const [eH, eM] = endH.split(':').map(Number);
-
-                        const startDate = new Date(currentDate);
-                        startDate.setHours(sH, sM, 0);
-
-                        const endDate = new Date(currentDate);
-                        endDate.setHours(eH, eM, 0);
-
-                        eventsList.push({
-                            id: `cls-${cls.id}-${dateStr}`,
-                            title: cls.name + (mod ? ' (Modificada)' : ''),
-                            start: startDate,
-                            end: endDate,
-                            color: mod ? '#10B981' : '#3B82F6', // Blue default, green if modified
-                            resource: cls
-                        });
-                    }
-                }
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-
-            // Handle forced move instances
-            cls.modifications?.filter(m => m.type === 'move' && m.newDate).forEach(mod => {
-                const [y, mth, d] = mod.newDate!.split('-').map(Number);
-                const [sH, sM] = (mod.newStartTime || cls.startTime).split(':').map(Number);
-                const [eH, eM] = (mod.newEndTime || cls.endTime).split(':').map(Number);
-
-                const startDate = new Date(y, mth - 1, d, sH, sM, 0);
-                const endDate = new Date(y, mth - 1, d, eH, eM, 0);
-
-                eventsList.push({
-                    id: `cls-${cls.id}-moved-${mod.newDate}`,
-                    title: cls.name + ' (Movida)',
-                    start: startDate,
-                    end: endDate,
-                    color: '#8B5CF6',
-                    resource: cls
-                });
-            });
-        });
-
-        // 2. Add Special Events & Seminars
-        events.forEach(ev => {
-            const [y, mth, d] = ev.date.split('-').map(Number);
-            const [h, m] = ev.time.split(':').map(Number);
-
-            const startDate = new Date(y, mth - 1, d, h, m, 0);
-            const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // roughly 1 hr
-
-            // Assign color by type
-            let color = '#F97316'; // orange default (tournament)
-            if (ev.type === 'exam') color = '#9333EA'; // purple
-            else if (ev.type === 'seminar') color = '#EC4899'; // pink
-
-            eventsList.push({
-                id: `evt-${ev.id}`,
-                title: ev.title + ` (${ev.type === 'exam' ? 'Examen' : ev.type === 'seminar' ? 'Seminario' : 'Torneo'})`,
-                start: startDate,
-                end: endDate,
-                color,
-                resource: ev
-            });
-        });
-
-        return eventsList;
-    }, [classes, events]);
+    // --- MASTER CALENDAR DATA GENERATION DELETED IN FAVOR OF scheduleEvents ---
 
     const getEventTypeLabel = (type: string) => {
         switch (type) {
@@ -552,48 +465,8 @@ const ClassesManager: React.FC = () => {
             {/* ============================================================= */}
             {showFullCalendar && (() => {
 
-                // --- Convert master events to CalendarEvent format ---
-                const calEvents: CalendarEvent[] = masterEventsForCalendar.map((ev: any) => ({
-                    id: ev.id,
-                    title: ev.title,
-                    start: ev.start instanceof Date ? ev.start : new Date(ev.start),
-                    end: ev.end instanceof Date ? ev.end : new Date(ev.end),
-                    type: ev.resource?.type ? ev.resource.type : 'class',
-                    classId: ev.resource?.id,
-                    instructor: ev.resource?.instructor || ev.resource?.instructorName || '',
-                    status: 'active' as const,
-                    color: ev.color,
-                    description: ev.resource?.description || '',
-                    instructorName: ev.resource?.instructor || '',
-                    academyId: '',
-                }));
-
-                // Also add cancelled sessions
-                classes.forEach(cls => {
-                    cls.modifications?.forEach(mod => {
-                        if (mod.type === 'cancel') {
-                            const [y, mth, d] = mod.date.split('-').map(Number);
-                            const [sH, sM] = cls.startTime.split(':').map(Number);
-                            const [eH, eM] = cls.endTime.split(':').map(Number);
-                            const startD = new Date(y, mth - 1, d, sH, sM, 0);
-                            const endD = new Date(y, mth - 1, d, eH, eM, 0);
-                            calEvents.push({
-                                id: `cancelled-${cls.id}-${mod.date}`,
-                                title: cls.name,
-                                start: startD,
-                                end: endD,
-                                type: 'class',
-                                classId: cls.id,
-                                instructor: cls.instructor,
-                                status: 'cancelled' as const,
-                                color: '#9CA3AF',
-                                description: '',
-                                instructorName: cls.instructor,
-                                academyId: '',
-                            });
-                        }
-                    });
-                });
+                // Use the exact same engine as Student (scheduleEvents)
+                const calEvents: CalendarEvent[] = scheduleEvents;
 
                 type CalViewType = 'year' | 'month' | 'week' | 'day';
 
