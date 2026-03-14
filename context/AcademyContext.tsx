@@ -514,12 +514,14 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             return s;
         });
 
-        try {
-            if (updatedStudent) await PulseService.saveStudents([updatedStudent]);
-            setStudents(newStudents);
-        } catch (e) {
-            console.error(e);
-            addToast('Error al actualizar registro de asistencia', 'error');
+        // Optimistic update – set state immediately so UI reflects changes instantly
+        setStudents(newStudents);
+        // Persist to DB in background
+        if (updatedStudent) {
+            PulseService.saveStudents([updatedStudent]).catch(e => {
+                console.error('saveStudents error:', e);
+                addToast('Error al guardar asistencia en servidor', 'error');
+            });
         }
     };
 
@@ -561,13 +563,15 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             return s;
         });
 
-        try {
-            if (studentsToUpdate.length > 0) await PulseService.saveStudents(studentsToUpdate);
-            setStudents(newStudents);
-            addToast('Asistencia global aplicada', 'success');
-        } catch (e) {
-            console.error(e);
-            addToast('Error al registrar asistencias', 'error');
+        // Optimistic update first
+        setStudents(newStudents);
+        addToast('Asistencia global aplicada', 'success');
+        // Persist in background
+        if (studentsToUpdate.length > 0) {
+            PulseService.saveStudents(studentsToUpdate).catch(e => {
+                console.error('bulkMarkPresent save error:', e);
+                addToast('Error al guardar en servidor', 'error');
+            });
         }
     };
 
@@ -601,11 +605,17 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     const addClass = async (newClass: ClassCategory) => {
         if (currentUser?.role !== 'master') return;
-        const cls = { ...newClass, id: newClass.id || generateId('cls'), academyId: currentUser.academyId };
+        const cls = { ...newClass, id: generateId(), academyId: currentUser.academyId };
         const newClasses = [...classes, cls];
+        // Optimistic update first
         setClasses(newClasses);
-        await PulseService.saveClasses([cls]); // Optimized save
         addToast('Clase creada correctamente', 'success');
+        try {
+            await PulseService.saveClasses([cls]);
+        } catch (e) {
+            console.error('Error saving new class to DB:', e);
+            addToast('Error al guardar clase en servidor', 'error');
+        }
     };
 
     const updateClass = async (updatedClass: ClassCategory) => {

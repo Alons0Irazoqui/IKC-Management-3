@@ -863,25 +863,38 @@ export const PulseService = {
     saveClasses: async (classes: ClassCategory[]) => {
         if (!classes || classes.length === 0) return;
         const mapped = classes.map(c => {
-            const config = { ...c };
-            delete (config as any).id;
-            delete (config as any).academyId;
-            delete (config as any).name;
-            delete (config as any).instructor;
-            delete (config as any).studentIds;
+            // Build a clean schedule_config with only schedule-related fields
+            const config: Record<string, any> = {
+                days: c.days,
+                startTime: c.startTime,
+                endTime: c.endTime,
+                schedule: c.schedule,
+                modifications: c.modifications || [],
+                studentCount: c.studentCount || 0,
+            };
 
             return {
                 id: c.id,
                 academy_id: c.academyId,
                 name: c.name,
                 instructor: c.instructor,
-                enrolled_student_ids: c.studentIds,
+                enrolled_student_ids: c.studentIds || [],
                 schedule_config: config
             };
         });
 
-        const { error } = await supabase.from('classes').upsert(mapped);
-        if (error) throw error;
+        try {
+            const { error } = await supabase
+                .from('classes')
+                .upsert(mapped, { onConflict: 'id' });
+            if (error) {
+                console.error('saveClasses DB error:', error);
+                throw error;
+            }
+        } catch (e) {
+            console.error('saveClasses failed:', e);
+            throw e;
+        }
     },
 
     deleteClass: async (classId: string) => {
