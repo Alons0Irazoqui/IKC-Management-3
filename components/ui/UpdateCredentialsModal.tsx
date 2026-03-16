@@ -48,39 +48,39 @@ const UpdateCredentialsModal: React.FC<UpdateCredentialsModalProps> = ({ isOpen,
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-                <div className="p-6 border-b border-gray-100 flex justify-between items-center">
+            <div className="bg-[#0e0e11] rounded-2xl w-full max-w-md shadow-2xl animate-in fade-in zoom-in-95 duration-200 border border-white/5">
+                <div className="p-6 border-b border-white/5 flex justify-between items-center">
                     <div>
-                        <h2 className="text-xl font-bold text-text-main">Accesos del Alumno</h2>
-                        <p className="text-sm text-text-secondary mt-1 truncate">
+                        <h2 className="text-xl font-bold text-white">Accesos del Alumno</h2>
+                        <p className="text-sm text-gray-400 mt-1 truncate">
                             {student.name}
                         </p>
                     </div>
-                    <button onClick={onClose} disabled={isSaving} className="text-gray-400 hover:text-text-main disabled:opacity-50">
+                    <button onClick={onClose} disabled={isSaving} className="text-gray-500 hover:text-white disabled:opacity-50">
                         <span className="material-symbols-outlined">close</span>
                     </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-5">
                     <label className="block">
-                        <span className="text-[10px] font-black text-text-secondary uppercase tracking-widest">Nuevo Correo Electrónico</span>
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Nuevo Correo Electrónico</span>
                         <input
                             type="email"
                             required
                             value={email}
                             onChange={e => setEmail(e.target.value)}
-                            className="mt-1 block w-full rounded-xl border-gray-200 p-3 text-sm focus:ring-2 focus:ring-primary/10"
+                            className="mt-1 block w-full rounded-xl bg-[#16161a] border-white/5 text-white p-3 text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary placeholder-gray-500"
                             placeholder="correo@ejemplo.com"
                         />
                     </label>
 
                     <label className="block">
-                        <span className="text-[10px] font-black text-text-secondary uppercase tracking-widest">Nueva Contraseña</span>
+                        <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Nueva Contraseña</span>
                         <input
                             type="password"
                             value={password}
                             onChange={e => setPassword(e.target.value)}
-                            className="mt-1 block w-full rounded-xl border-gray-200 p-3 text-sm focus:ring-2 focus:ring-primary/10"
+                            className="mt-1 block w-full rounded-xl bg-[#16161a] border-white/5 text-white p-3 text-sm focus:ring-2 focus:ring-primary/50 focus:border-primary placeholder-gray-500"
                             placeholder="Dejar vacía para mantener la actual"
                         />
                     </label>
@@ -89,7 +89,7 @@ const UpdateCredentialsModal: React.FC<UpdateCredentialsModalProps> = ({ isOpen,
                         <button
                             type="submit"
                             disabled={isSaving}
-                            className="w-full md:w-auto px-8 py-3 rounded-xl bg-gray-900 text-white font-bold hover:bg-black shadow-lg transition-all active:scale-95 disabled:opacity-50 flex justify-center items-center gap-2"
+                            className="w-full md:w-auto px-8 py-3 rounded-xl bg-primary text-white font-bold hover:bg-primary-hover shadow-lg transition-all active:scale-95 disabled:opacity-50 flex justify-center items-center gap-2"
                         >
                             {isSaving ? (
                                 <>

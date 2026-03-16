@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useStore } from '../../context/StoreContext';
 import { useAuth } from '../../context/AuthContext';
+import './Login.css';
 
 const Login: React.FC = () => {
     const { login } = useStore();
@@ -37,98 +38,150 @@ const Login: React.FC = () => {
         e.preventDefault();
         setLoading(true);
 
-        const result = await login(formData.email, formData.password);
-        if (result.success && result.user) {
-            if (result.user.role === 'master') navigate('/master/dashboard');
-            else navigate('/student/dashboard');
-            // Do NOT call setLoading(false) here, as component unmounts.
-        } else {
-            // Only stop loading if we stay on this page (error case)
-            if (isMounted.current) setLoading(false);
+        try {
+            const result = await login(formData.email, formData.password);
+            if (result.success && result.user) {
+                if (result.user.role === 'master') navigate('/master/dashboard');
+                else navigate('/student/dashboard');
+                // Do NOT call setLoading(false) here — component unmounts on navigate.
+                return;
+            }
+            // Login failed (wrong credentials, etc.) — always unblock the button
+            // Note: we do NOT check isMounted here to avoid a race condition where
+            // a stale SIGNED_IN event from Supabase briefly unmounts this component.
+            setLoading(false);
+        } catch {
+            // Unexpected exception: always unblock the button
+            setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen w-full flex flex-col items-center justify-center bg-white font-sans text-slate-900 p-6 selection:bg-red-100 selection:text-red-900">
+        <div className="login-dark-theme">
+            {/* Fondos de grado corporativo */}
+            <div className="enterprise-bg"></div>
+            <div className="ambient-glow"></div>
 
-            {/* Main Container - Paper Surface */}
-            <div className="w-full max-w-[400px] bg-white border border-gray-100 rounded-2xl p-8 sm:p-10 animate-in fade-in zoom-in-95 duration-300">
-
-                {/* 1. BRANDING */}
-                <div className="flex flex-col items-center text-center mb-10">
-                    <h1 className="text-5xl font-black text-red-600 tracking-tighter select-none leading-none">
-                        IKC
-                    </h1>
-                    <p className="text-[10px] font-bold text-gray-500 tracking-[0.3em] uppercase mt-2 ml-1">
-                        MANAGEMENT
-                    </p>
-                </div>
-
-                {/* Welcome Message */}
-                <div className="mb-8">
-                    <h2 className="text-2xl font-semibold text-gray-900 tracking-tight">Accede a tu cuenta</h2>
-                    <p className="text-sm text-gray-500 mt-1 font-medium">Ingresa tus credenciales para continuar.</p>
-                </div>
-
-                {/* 2. FORMULARIO CORPORATIVO (Outlined Style) */}
-                <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-
-                    <div className="space-y-1">
-                        <label className="block text-xs font-bold text-gray-700 ml-1 mb-1">Correo electrónico</label>
-                        <input
-                            type="email"
-                            required
-                            className="w-full h-12 px-4 bg-white border border-gray-300 rounded-lg text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-all duration-200"
-                            placeholder="nombre@ejemplo.com"
-                            value={formData.email}
-                            onChange={e => setFormData({ ...formData, email: e.target.value })}
-                        />
-                    </div>
-
-                    <div className="space-y-1">
-                        <div className="flex justify-between items-center ml-1 mb-1">
-                            <label className="block text-xs font-bold text-gray-700">Contraseña</label>
-                            <button type="button" className="text-xs font-bold text-red-600 hover:text-red-700">¿Olvidaste tu contraseña?</button>
+            <main className="layout-container">
+                
+                {/* LADO IZQUIERDO: PRESENTACIÓN */}
+                <section className="presentation-side">
+                    <div className="brand-header">
+                        <div className="logo-mark">
+                            <i className="fa-solid fa-shield-halved"></i>
                         </div>
-                        <input
-                            type="password"
-                            required
-                            className="w-full h-12 px-4 bg-white border border-gray-300 rounded-lg text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-red-600 focus:ring-1 focus:ring-red-600 transition-all duration-200"
-                            placeholder="••••••••"
-                            value={formData.password}
-                            onChange={e => setFormData({ ...formData, password: e.target.value })}
-                        />
+                        <span>IKC Enterprise</span>
+                    </div>
+                    
+                    <div className="value-prop">
+                        <h1>Infraestructura marcial <span>de clase mundial.</span></h1>
+                        
+                        <ul className="feature-list">
+                            <li className="feature-item">
+                                <div className="feature-icon"><i className="fa-solid fa-check"></i></div>
+                                <div className="feature-text">
+                                    <h3>Gestión Centralizada</h3>
+                                    <p>Administra atletas, dojos y licencias WKF desde un único panel ultra seguro.</p>
+                                </div>
+                            </li>
+                            <li className="feature-item">
+                                <div className="feature-icon"><i className="fa-solid fa-lock"></i></div>
+                                <div className="feature-text">
+                                    <h3>Seguridad Nivel Bancario</h3>
+                                    <p>Encriptación end-to-end (E2EE) y cumplimiento estricto de normativas GDPR.</p>
+                                </div>
+                            </li>
+                            <li className="feature-item">
+                                <div className="feature-icon"><i className="fa-solid fa-bolt"></i></div>
+                                <div className="feature-text">
+                                    <h3>Alta Disponibilidad</h3>
+                                    <p>Infraestructura desplegada en edge con un 99.99% de uptime garantizado.</p>
+                                </div>
+                            </li>
+                        </ul>
                     </div>
 
-                    {/* 3. ACTION BUTTON (Solid) */}
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="w-full h-12 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-200 mt-2 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center text-sm tracking-wide"
-                    >
-                        {loading ? (
-                            <div className="size-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                        ) : (
-                            'Ingresar'
-                        )}
-                    </button>
-                </form>
+                    <div className="trust-badges">
+                        <span>Certificaciones globales:</span>
+                        <span><i className="fa-solid fa-globe"></i> WKF Standard</span>
+                        <span><i className="fa-solid fa-shield"></i> ISO 27001</span>
+                    </div>
+                </section>
 
-                <div className="text-center mt-8 pt-6 border-t border-gray-50">
-                    <p className="text-sm text-gray-600">
-                        ¿No tienes cuenta?{' '}
-                        <Link to="/role-selection" className="font-bold text-red-600 hover:text-red-700 transition-colors">
-                            Crear cuenta
-                        </Link>
-                    </p>
-                </div>
+                {/* LADO DERECHO: AUTENTICACIÓN EDGE-TO-EDGE */}
+                <section className="auth-side">
+                    <div className="auth-wrapper">
+                        
+                        <div className="auth-header">
+                            <h2>Iniciar Sesión</h2>
+                            <p>Accede a tu entorno de trabajo seguro</p>
+                        </div>
 
-            </div>
+                        {/* Formulario */}
+                        <form id="enterpriseForm" onSubmit={handleSubmit}>
+                            
+                            {/* Floating Label Input para Email */}
+                            <div className="form-group">
+                                {/* El placeholder " " (espacio) es un hack de CSS necesario para la pseudo-clase :placeholder-shown */}
+                                <input 
+                                    type="email" 
+                                    id="email" 
+                                    className="form-control bg-[#16161a] border-[#ffffff1f] text-white pt-7 pb-2 px-4 shadow-inner" 
+                                    placeholder=" " 
+                                    required 
+                                    autoComplete="email"
+                                    value={formData.email}
+                                    onChange={e => setFormData({ ...formData, email: e.target.value })}
+                                />
+                                <label htmlFor="email" className="floating-label">Correo Institucional</label>
+                            </div>
 
-            {/* System Footer */}
-            <div className="fixed bottom-6 text-[10px] font-bold text-gray-300 tracking-wider uppercase select-none">
-                Secure System v2.0
-            </div>
+                            {/* Floating Label Input para Password */}
+                            <div className="form-group">
+                                <input 
+                                    type="password" 
+                                    id="password" 
+                                    className="form-control bg-[#16161a] border-[#ffffff1f] text-white pt-7 pb-2 px-4 shadow-inner" 
+                                    placeholder=" " 
+                                    required 
+                                    autoComplete="current-password"
+                                    value={formData.password}
+                                    onChange={e => setFormData({ ...formData, password: e.target.value })}
+                                />
+                                <label htmlFor="password" className="floating-label">Contraseña</label>
+                            </div>
+
+                            <div className="form-actions">
+                                <label className="checkbox-wrapper">
+                                    <input type="checkbox" id="remember" />
+                                    <span>Mantener sesión</span>
+                                </label>
+                                <a href="#">Recuperar acceso</a>
+                            </div>
+
+                            <button type="submit" className={`btn-primary ${loading ? 'is-loading' : ''}`} id="loginBtn" disabled={loading}>
+                                Continuar
+                            </button>
+
+                        </form>
+
+                        <div className="text-center mt-6">
+                            <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                                ¿No tienes cuenta?{' '}
+                                <Link to="/role-selection" style={{ color: 'var(--text-primary)', fontWeight: 'bold' }}>
+                                    Crear cuenta
+                                </Link>
+                            </p>
+                        </div>
+
+                        <div className="secure-badge">
+                            <i className="fa-solid fa-lock"></i>
+                            Conexión cifrada E2EE de 256 bits
+                        </div>
+
+                    </div>
+                </section>
+            </main>
         </div>
     );
 };

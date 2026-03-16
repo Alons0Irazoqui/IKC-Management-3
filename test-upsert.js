@@ -18,6 +18,7 @@ async function testUpsert() {
     const mapped = {
         id: s.id,
         academy_id: s.academy_id,
+
         user_id: s.user_id || null, // Might be empty string
         name: s.name + " (Edit)",
         email: s.email,

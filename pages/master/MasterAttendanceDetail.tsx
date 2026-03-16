@@ -174,7 +174,7 @@ const MasterAttendanceDetail: React.FC = () => {
       title: 'Eliminar Alumno de Clase',
       message: `¿Estás seguro que deseas eliminar a ${student.name} de la clase de ${currentClass?.name}?`,
       type: 'danger', confirmText: 'Eliminar', cancelText: 'Cancelar',
-      onConfirm: () => { if (classId) unenrollStudent(student.id, classId); }
+      onConfirm: async () => { if (classId) await unenrollStudent(student.id, classId); }
     });
   };
 

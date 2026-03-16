@@ -14,28 +14,49 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   return (
     // MAIN CONTAINER: Flex container. Sidebar handled internally.
-    <div className="flex h-screen w-full overflow-hidden font-sans text-slate-900 bg-white">
+    <div className="flex h-screen w-full overflow-hidden font-sans" style={{backgroundColor: 'var(--color-bg-app)', color: 'var(--color-text-primary)'}}>
       <Sidebar 
         role={role} 
         isOpen={isMobileMenuOpen} 
         onClose={() => setIsMobileMenuOpen(false)} 
       />
       
-      {/* 
-          CONTENT AREA: Pure White Background.
-          Separation from sidebar is achieved via surface color difference (Sidebar is gray-50).
-      */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-white">
+      {/* CONTENT AREA with Premium Enterprise Background */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden relative" style={{backgroundColor: 'var(--color-bg-app)'}}>
         
+        {/* Grid pattern — ultra-subtle, fades to edges */}
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundImage: 'linear-gradient(var(--bg-grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--bg-grid-line) 1px, transparent 1px)',
+          backgroundSize: 'var(--bg-grid-size)',
+          zIndex: 0,
+          pointerEvents: 'none',
+          maskImage: 'radial-gradient(ellipse 65% 60% at 50% 40%, black 0%, transparent 100%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 65% 60% at 50% 40%, black 0%, transparent 100%)'
+        }} />
+
+        {/* Ambient glow — soft, off-center, not overpowering */}
+        <div style={{
+          position: 'fixed',
+          top: '-10%',
+          right: '0%',
+          width: '45vw',
+          height: '45vw',
+          background: 'radial-gradient(circle, rgba(225,29,72,0.10) 0%, transparent 70%)',
+          zIndex: 0,
+          pointerEvents: 'none'
+        }} />
         {/* Mobile Header */}
-        <header className="md:hidden flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur-md sticky top-0 z-30 border-b border-gray-50">
+        <header className="md:hidden flex items-center justify-between px-6 py-4 sticky top-0 z-30" style={{backgroundColor: 'var(--color-bg-surface)', borderBottom: '1px solid var(--color-border-subtle)'}}>
             <div className="flex flex-col leading-none">
-                 <span className="font-black text-xl text-red-600 tracking-tighter">IKC</span>
-                 <span className="text-[9px] font-medium uppercase tracking-[0.25em] text-gray-400 mt-0.5">Management</span>
+                 <span className="font-black text-xl tracking-tighter" style={{color: 'var(--color-brand)'}}>IKC</span>
+                 <span className="text-[9px] font-medium uppercase tracking-[0.25em] mt-0.5" style={{color: 'var(--color-text-muted)'}}>Management</span>
             </div>
             <button 
               onClick={() => setIsMobileMenuOpen(true)}
-              className="text-slate-900 bg-gray-50 hover:bg-gray-100 p-2.5 rounded-full transition-colors focus:outline-none"
+              className="p-2.5 rounded-full transition-colors focus:outline-none"
+              style={{color: 'var(--color-text-primary)', backgroundColor: 'var(--color-bg-raised)'}}
             >
                 <span className="material-symbols-outlined text-xl">menu</span>
             </button>
@@ -44,7 +65,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         {/* 
             SCROLL CANVAS
         */}
-        <main className="flex-1 overflow-y-auto scrollbar-hide relative w-full">
+        <main className="flex-1 overflow-y-auto scrollbar-hide relative w-full" style={{zIndex: 1}}>
             {children}
         </main>
       </div>

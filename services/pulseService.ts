@@ -14,10 +14,10 @@ export const PulseService = {
 
     checkEmailExists: async (email: string): Promise<boolean> => {
         try {
-            // Create a promise that rejects after 5 seconds
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Request timed out')), 5000)
-            );
+            let timeoutId: any;
+            const timeoutPromise = new Promise((_, reject) => {
+                timeoutId = setTimeout(() => reject(new Error('Request timed out')), 5000)
+            });
 
             // Race the supabase call against the timeout
             const { data, error } = await Promise.race([
@@ -29,7 +29,7 @@ export const PulseService = {
                 timeoutPromise
             ]) as any;
 
-            console.timeEnd('checkEmailExists');
+            clearTimeout(timeoutId);
             if (error) {
                 // If permission denied or other error, assume false to let Auth handle it
                 return false;
@@ -241,17 +241,27 @@ export const PulseService = {
         let attempts = 0;
         let authUserId = data?.user?.id;
 
+        // Helper: wraps a promise with a timeout that RESOLVES to null (never rejects)
+        // This guarantees the function always completes even if Supabase hangs
+        const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T | null> =>
+            Promise.race([promise, new Promise<null>(resolve => setTimeout(() => resolve(null), ms))]);
+
         if (authUserId) {
             // Because triggers can be slightly asynchronous, we retry finding the student record up to 5 times
+            // Use maybeSingle() instead of single() to avoid throwing when 0 rows found
             let studentRecord = null;
             while (attempts < 5 && !studentRecord) {
-                const { data: fetchStudent } = await supabase
-                    .from('students')
-                    .select('id')
-                    .eq('user_id', authUserId)
-                    .single();
+                const result = await withTimeout(
+                    supabase
+                        .from('students')
+                        .select('id')
+                        .eq('user_id', authUserId)
+                        .maybeSingle(),
+                    2500  // 2.5 second timeout per attempt
+                );
 
-                if (fetchStudent) {
+                const fetchStudent = result?.data ?? null;
+                if (fetchStudent?.id) {
                     studentRecord = fetchStudent;
                 } else {
                     await new Promise(resolve => setTimeout(resolve, 800));
@@ -262,15 +272,20 @@ export const PulseService = {
             if (studentRecord) {
                 // Update rank and status to match what the Master chose in the form
                 // But preserve 'debtor' if there's an initial amount!
-                await supabase.from('students').update({
-                    rank_id: studentData.rankId,
-                    status: initialAmount > 0 ? 'debtor' : studentData.status
-                }).eq('id', studentRecord.id);
+                // Wrapped in withTimeout so a slow update never hangs the spinner
+                await withTimeout(
+                    supabase.from('students').update({
+                        rank_id: studentData.rankId,
+                        status: initialAmount > 0 ? 'debtor' : studentData.status
+                    }).eq('id', studentRecord.id),
+                    3000
+                );
             }
         }
 
         return data;
     },
+
 
     deleteFullStudentData: async (studentId: string) => {
         // Fetch the student name before deletion so we can stamp it on their retained paid payments

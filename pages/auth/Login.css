@@ -1,0 +1,496 @@
+/* ==========================================================================
+   ENTERPRISE DESIGN TOKENS (Premium Dark Mode)
+   ========================================================================== */
+@import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css");
+
+.login-dark-theme {
+    /* FONDOS: Contraste sutil entre paneles */
+    --bg-app: #050505;          /* Fondo izquierdo ultra oscuro */
+    --bg-surface: #0e0e11;      /* Fondo derecho (panel de login) */
+    --bg-input: #16161a;        /* Fondo de los inputs */
+    --bg-input-hover: #1c1c21;
+    
+    /* TEXTOS */
+    --text-primary: #ffffff;
+    --text-secondary: #a1a1aa;
+    --text-muted: #71717a;
+    
+    /* BORDES Y DESTELLOS */
+    --border-subtle: rgba(255, 255, 255, 0.06);
+    --border-strong: rgba(255, 255, 255, 0.12);
+    --ring-focus: rgba(255, 255, 255, 0.4);
+    
+    /* ACENTOS CORPORATIVOS */
+    --brand-primary: #e11d48;   /* Rojo elegante */
+    --brand-glow: rgba(225, 29, 72, 0.15);
+    --success: #10b981;
+    
+    /* GEOMETRÍA */
+    --transition-fast: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    line-height: 1.5;
+    overflow-x: hidden;
+}
+
+/* ==========================================================================
+   FONDOS Y DESTELLOS PREMIUM
+   ========================================================================== */
+.enterprise-bg {
+    position: fixed;
+    inset: 0;
+    background-image: 
+        linear-gradient(var(--border-subtle) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px);
+    background-size: 32px 32px;
+    opacity: 0.6;
+    z-index: 0;
+    pointer-events: none;
+    mask-image: radial-gradient(circle at 30% 50%, black 10%, transparent 60%);
+    -webkit-mask-image: radial-gradient(circle at 30% 50%, black 10%, transparent 60%);
+}
+
+.ambient-glow {
+    position: fixed;
+    top: -20%;
+    left: -10%;
+    width: 70vw;
+    height: 70vw;
+    background: radial-gradient(circle, var(--brand-glow) 0%, transparent 60%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   LAYOUT (SPLIT DESKTOP)
+   ========================================================================== */
+.layout-container {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    z-index: 1;
+    position: relative;
+}
+
+/* --- LADO IZQUIERDO: PRESENTACIÓN CORPORATIVA --- */
+.presentation-side {
+    flex: 1.2;
+    padding: 4rem 5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.brand-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-weight: 700;
+    font-size: 1.25rem;
+    letter-spacing: -0.02em;
+}
+
+.logo-mark {
+    width: 40px;
+    height: 40px;
+    background: var(--text-primary);
+    color: var(--bg-app);
+    border-radius: var(--radius-md);
+    display: grid;
+    place-content: center;
+    font-size: 1.2rem;
+    box-shadow: 0 0 20px rgba(255,255,255,0.1);
+}
+
+.value-prop {
+    max-width: 540px;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.8s ease-out;
+}
+
+.value-prop h1 {
+    font-size: clamp(3rem, 4.5vw, 4.2rem);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 2.5rem;
+}
+
+.value-prop h1 span {
+    color: var(--text-secondary);
+    display: block;
+}
+
+.feature-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+    padding: 0;
+    margin: 0;
+}
+
+.feature-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+}
+
+.feature-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-strong);
+    display: grid;
+    place-content: center;
+    color: var(--text-primary);
+    font-size: 0.75rem;
+    flex-shrink: 0;
+    margin-top: 0.1rem;
+    transition: var(--transition-fast);
+}
+
+.feature-item:hover .feature-icon {
+    border-color: var(--text-primary);
+    transform: scale(1.05);
+}
+
+.feature-text h3 {
+    font-size: 1.05rem;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+    color: var(--text-primary);
+}
+
+.feature-text p {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.trust-badges {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-top: 1px solid var(--border-subtle);
+    padding-top: 2rem;
+    max-width: 540px;
+}
+
+.trust-badges span i {
+    margin-right: 0.4rem;
+}
+
+/* --- LADO DERECHO: PANEL DE LOGIN (EDGE-TO-EDGE) --- */
+.auth-side {
+    width: 540px;
+    background: var(--bg-surface);
+    border-left: 1px solid var(--border-subtle);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    box-shadow: -30px 0 60px rgba(0,0,0,0.4);
+}
+
+.auth-wrapper {
+    width: 100%;
+    max-width: 380px;
+    animation: fadeIn 0.6s ease-out 0.2s both;
+}
+
+.auth-header {
+    margin-bottom: 2.5rem;
+}
+
+.auth-header h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+}
+
+.auth-header p {
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin: 0;
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.5rem 0;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.divider span {
+    padding: 0 1rem;
+}
+
+/* ==========================================================================
+   CONTROLES DE FORMULARIO (FLOATING LABELS ULTRA-CLEAN)
+   ========================================================================== */
+.form-group {
+    position: relative;
+    margin-bottom: 1.25rem;
+}
+
+.form-control {
+    width: 100%;
+    background-color: var(--bg-input) !important;
+    border: 1px solid var(--border-strong) !important;
+    border-radius: var(--radius-md) !important;
+    color: var(--text-primary) !important;
+    font-family: inherit;
+    font-size: 1rem !important;
+    padding: 1.8rem 1rem 0.6rem 1rem !important; /* Más aire para el texto al escribir */
+    transition: var(--transition-fast) !important;
+    outline: none !important;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1) !important;
+}
+
+/* Evitar el fondo blanco y color de texto feo del autocompletado del navegador */
+.form-control:-webkit-autofill,
+.form-control:-webkit-autofill:hover, 
+.form-control:-webkit-autofill:focus, 
+.form-control:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px var(--bg-input) inset !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+    background-color: var(--bg-input) !important;
+    color: var(--text-primary) !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+.floating-label {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    pointer-events: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    margin: 0 !important;
+}
+
+/* Estado Focus & Fill (La Magia del Floating Label) */
+.form-control:focus,
+.form-control:not(:placeholder-shown) {
+    border-color: var(--brand-primary) !important; /* Rojo elegante en focus */
+    background-color: var(--bg-input-hover) !important;
+    box-shadow: 0 0 0 1px var(--brand-primary) !important;
+}
+
+.form-control:focus + .floating-label,
+.form-control:not(:placeholder-shown) + .floating-label {
+    top: 0.5rem !important; /* Posición del placeholder cuando sube */
+    transform: translateY(0);
+    font-size: 0.70rem !important;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+/* Ocultar el placeholder real */
+.form-control::placeholder {
+    color: transparent;
+}
+
+/* ==========================================================================
+   ACCIONES Y BOTÓN PRINCIPAL
+   ========================================================================== */
+.form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 1.5rem 0 2rem;
+    font-size: 0.85rem;
+}
+
+.checkbox-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+}
+
+.checkbox-wrapper input[type="checkbox"] {
+    appearance: none;
+    width: 1.1rem;
+    height: 1.1rem;
+    border: 1px solid var(--text-muted);
+    border-radius: 4px;
+    background-color: transparent;
+    display: grid;
+    place-content: center;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.checkbox-wrapper input[type="checkbox"]::before {
+    content: "";
+    width: 0.65em;
+    height: 0.65em;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+    transform: scale(0);
+    background-color: var(--bg-surface);
+    transition: 120ms transform ease-in-out;
+}
+
+.checkbox-wrapper input[type="checkbox"]:checked {
+    background-color: var(--text-primary);
+    border-color: var(--text-primary);
+}
+
+.checkbox-wrapper input[type="checkbox"]:checked::before {
+    transform: scale(1);
+}
+
+.login-dark-theme a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: var(--transition-fast);
+}
+
+.login-dark-theme a:hover {
+    color: var(--text-primary);
+}
+
+.btn-primary {
+    width: 100%;
+    background-color: var(--text-primary);
+    color: var(--bg-app);
+    padding: 1rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: #e4e4e7;
+    transform: translateY(-1px);
+}
+
+.btn-primary:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.secure-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 2.5rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.secure-badge i {
+    color: var(--success);
+}
+
+/* --- ESTADO DE CARGA ANIMADO --- */
+.btn-primary.is-loading {
+    color: transparent !important;
+    pointer-events: none;
+    position: relative;
+}
+
+.btn-primary.is-loading::after {
+    content: '';
+    position: absolute;
+    width: 1.2rem;
+    height: 1.2rem;
+    border: 2px solid var(--bg-app);
+    border-radius: 50%;
+    border-right-color: transparent;
+    animation: spin-loader 0.75s linear infinite;
+}
+
+@keyframes spin-loader {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+@media (max-width: 1024px) {
+    .presentation-side { padding: 3rem; }
+    .value-prop h1 { font-size: 3rem; }
+    .auth-side { width: 440px; padding: 2rem; }
+}
+
+@media (max-width: 860px) {
+    .layout-container { flex-direction: column; }
+    
+    .ambient-glow {
+        width: 100vw;
+        height: 100vw;
+        top: -50%;
+        left: 0;
+    }
+
+    .presentation-side {
+        flex: none;
+        padding: 3rem 2rem 2rem;
+        align-items: center;
+        text-align: center;
+    }
+
+    .brand-header { margin-bottom: 2rem; }
+    .feature-list { display: none; }
+    .trust-badges { display: none; }
+    
+    .value-prop h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0;
+    }
+
+    .auth-side {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid var(--border-subtle);
+        padding: 3rem 2rem;
+        box-shadow: none;
+    }
+}

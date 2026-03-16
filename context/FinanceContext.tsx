@@ -57,7 +57,7 @@ interface FinanceContextType {
     updateRecordAmount: (recordId: string, newAmount: number) => void;
     deleteRecord: (recordId: string) => void;
     generateMonthlyBilling: () => void;
-    purgeStudentDebts: (studentId: string) => void;
+    purgeStudentDebts: (studentId: string) => void | Promise<void>;
     getStudentPendingDebts: (studentId: string) => TuitionRecord[];
     uploadProof: (recordId: string, file: File) => void;
     markAsPaidByMaster: (recordId: string, amount: number, method: 'Efectivo' | 'Transferencia' | 'Tarjeta', note?: string) => void;
@@ -731,21 +731,19 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         }
     };
 
-    const purgeStudentDebts = (studentId: string) => {
-        // This is a UI filter? Or delete?
-        // Prompt says "purge" but implementation just filtered `records` state.
-        // It didn't save. 
-        // If we want to really purge:
-        setRecords(prev => {
-            const toDelete = prev.filter(r => r.studentId === studentId && r.status !== 'paid');
-            toDelete.forEach(r => PulseService.deletePayment(r.id));
-            return prev.filter(r => {
-                if (r.studentId === studentId) {
-                    return r.status === 'paid';
-                }
-                return true;
-            });
-        });
+    const purgeStudentDebts = async (studentId: string) => {
+        // Collect records to delete before updating state
+        const toDeleteIds = records
+            .filter(r => r.studentId === studentId && r.status !== 'paid')
+            .map(r => r.id);
+
+        if (toDeleteIds.length > 0) {
+            // Wait for DB deletions
+            await Promise.all(toDeleteIds.map(id => PulseService.deletePayment(id)));
+
+            // Once DB finishes, update UI state
+            setRecords(prev => prev.filter(r => !toDeleteIds.includes(r.id)));
+        }
     };
 
     const getStudentPendingDebts = (studentId: string) => {

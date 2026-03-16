@@ -27,6 +27,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
+    // Guard: prevents SIGNED_IN events from firing while logout is in progress
+    const isLoggingOut = React.useRef(false);
     const { addToast } = useToast();
 
     // Initialize Session
@@ -67,17 +69,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 console.log(`AuthContext: Auth event ${event}`);
 
                 if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-                    // Only re-fetch if we have a session but no user, or if it changed
-                    if (session?.user) {
+                    // Guard: ignore SIGNED_IN fired during/after logout (stale localStorage events)
+                    if (isLoggingOut.current) {
+                        console.log('AuthContext: Ignoring SIGNED_IN — logout in progress');
+                        return;
+                    }
+                    // Verify the session has a valid user ID before fetching
+                    if (session?.user?.id) {
                         try {
+                            // Small delay to let Supabase fully commit the session
+                            // This eliminates the race condition where getCurrentUser
+                            // returns a stale/null profile right after login.
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                            // Double-check the active session matches the event's user
+                            // to avoid loading a stale/previous user's profile
+                            const { data: { session: freshSession } } = await supabase.auth.getSession();
+                            if (!freshSession || freshSession.user.id !== session.user.id) {
+                                console.log('AuthContext: Session mismatch, skipping profile load');
+                                return;
+                            }
                             const user = await PulseService.getCurrentUser();
-                            if (mounted) setCurrentUser(user);
+                            if (mounted) {
+                                setCurrentUser(user);
+                                setLoading(false);
+                            }
                         } catch (e) {
                             console.warn("AuthContext: Silent error fetching user on change", e);
+                            if (mounted) setLoading(false);
                         }
                     }
                 } else if (event === 'SIGNED_OUT') {
-                    // Immediate cleanup
+                    // Immediate cleanup — loading=false was already set optimistically in logout()
                     if (mounted) {
                         setCurrentUser(null);
                         setLoading(false);
@@ -110,18 +132,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const logout = async () => {
-        // 1. Optimistic Cleanup (Immediate)
+        // 1. Set guard to block SIGNED_IN events during logout
+        isLoggingOut.current = true;
+
+        // 2. Optimistic Cleanup (Immediate)
         setCurrentUser(null);
         setLoading(false);
         addToast('Sesión cerrada correctamente', 'info');
 
-        // 2. Server Cleanup (Background)
+        // 3. Server Cleanup — await so the session is fully cleared before next login
         try {
             await PulseService.logout();
-            // We do NOT wait or check for errors here. The user is already "out" locally.
         } catch (error) {
             // Ignore network errors on logout, user is already gone locally.
             console.warn("Supabase signOut error (ignorable):", error);
+        } finally {
+            // Release the guard after a small buffer so any pending
+            // SIGNED_OUT / stale SIGNED_IN events from Supabase have time to fire and be ignored
+            setTimeout(() => { isLoggingOut.current = false; }, 500);
         }
     };
 

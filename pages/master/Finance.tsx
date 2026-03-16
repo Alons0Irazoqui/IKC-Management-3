@@ -140,6 +140,37 @@ const Finance: React.FC = () => {
   const [viewDetailRecord, setViewDetailRecord] = useState<TuitionRecord | null>(null);
   const [isChargeModalOpen, setIsChargeModalOpen] = useState(false);
 
+  // --- ALL MOVEMENTS MODAL STATES ---
+  const [showAllMovementsModal, setShowAllMovementsModal] = useState(false);
+  const [modalSearch, setModalSearch] = useState('');
+  const [modalMonthFilter, setModalMonthFilter] = useState('');
+
+  const modalMovements = useMemo(() => {
+        let filtered = records;
+        
+        if (modalSearch) {
+            const q = modalSearch.toLowerCase();
+            filtered = filtered.filter(r => 
+                (r.studentName || '').toLowerCase().includes(q) || 
+                (r.concept || '').toLowerCase().includes(q) || 
+                r.amount.toString().includes(q) ||
+                (r.description || '').toLowerCase().includes(q)
+            );
+        }
+
+        if (modalMonthFilter) {
+            filtered = filtered.filter(r => (r.paymentDate || r.dueDate).startsWith(modalMonthFilter));
+        }
+
+        return filtered.sort((a, b) => new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime());
+  }, [records, modalSearch, modalMonthFilter]);
+
+  const uniqueModalMonths = useMemo(() => {
+        const set = new Set<string>();
+        records.forEach(r => set.add((r.paymentDate || r.dueDate).substring(0, 7))); // "YYYY-MM"
+        return Array.from(set).sort().reverse();
+  }, [records]);
+
   // -- DATA PROCESSING --
   const rawFilteredRecords = useMemo(() => {
       let filtered = records;
@@ -562,6 +593,12 @@ const Finance: React.FC = () => {
                     </table>
                 )}
             </div>
+            
+            <div className="max-w-[1600px] mx-auto mt-6 flex justify-center pb-8">
+                <button onClick={() => setShowAllMovementsModal(true)} className="text-red-500 font-bold hover:text-red-600 bg-red-50 hover:bg-red-100 px-6 py-2 rounded-full transition-colors text-xs uppercase tracking-wider flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[18px]">view_list</span> Ver Todos los Movimientos
+                </button>
+            </div>
         </div>
 
         {/* --- REVIEW MODAL --- */}
@@ -662,6 +699,122 @@ const Finance: React.FC = () => {
                                 <span className="material-symbols-outlined">check_circle</span>
                                 Confirmar y Aplicar
                             </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* --- MODAL PANTALLA COMPLETA: TODOS LOS MOVIMIENTOS --- */}
+        {showAllMovementsModal && (
+            <div className="fixed inset-0 z-[60] bg-[#F5F5F7] flex flex-col animate-in fade-in zoom-in-95 duration-200">
+                <div className="bg-white border-b border-gray-200 px-6 py-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm shrink-0">
+                    <div className="flex items-center gap-4">
+                        <button onClick={() => setShowAllMovementsModal(false)} className="p-2 hover:bg-gray-100 rounded-full text-gray-500 transition-colors">
+                            <span className="material-symbols-outlined">arrow_back</span>
+                        </button>
+                        <div>
+                            <h1 className="text-xl font-black text-slate-900 leading-none">Todos los Movimientos</h1>
+                            <p className="text-sm text-slate-500">Historial completo de registros financieros</p>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col md:flex-row gap-3">
+                        <div className="relative">
+                            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">search</span>
+                            <input
+                                type="text"
+                                placeholder="Buscar alumno o concepto..."
+                                value={modalSearch}
+                                onChange={(e) => setModalSearch(e.target.value)}
+                                className="w-full md:w-64 pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:border-red-500 transition-all font-medium placeholder:font-normal"
+                            />
+                            {modalSearch && (
+                                <button onClick={() => setModalSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                    <span className="material-symbols-outlined text-sm">close</span>
+                                </button>
+                            )}
+                        </div>
+                        <select
+                            value={modalMonthFilter}
+                            onChange={(e) => setModalMonthFilter(e.target.value)}
+                            className="w-full md:w-48 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold text-slate-700 outline-none focus:border-red-500 transition-all cursor-pointer appearance-none"
+                        >
+                            <option value="">Todos los Meses</option>
+                            {uniqueModalMonths.map(m => {
+                                const [y, mm] = m.split('-');
+                                const dateObj = new Date(parseInt(y), parseInt(mm) - 1, 1);
+                                return (
+                                    <option key={m} value={m}>
+                                        {formatDateDisplay(dateObj.toISOString(), { month: 'long', year: 'numeric' })}
+                                    </option>
+                                );
+                            })}
+                        </select>
+                    </div>
+                </div>
+
+                <div className="flex-1 overflow-auto p-6 md:p-10 max-w-[1400px] w-full mx-auto flex flex-col gap-6">
+                    <div className="bg-white rounded-3xl shadow-soft border border-gray-100 overflow-hidden flex-1 flex flex-col min-h-[400px]">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead className="bg-gray-50 text-xs font-bold text-gray-400 uppercase tracking-wider sticky top-0 z-10 shadow-sm">
+                                    <tr>
+                                        <th className="px-6 py-4 w-32">Fecha</th>
+                                        <th className="px-6 py-4">Concepto & Alumno</th>
+                                        <th className="px-6 py-4 w-32">Estado</th>
+                                        <th className="px-6 py-4 w-32 text-right">Total</th>
+                                        <th className="px-6 py-4 w-16 text-center">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-50">
+                                    {modalMovements.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={5} className="py-20 text-center text-gray-400 font-bold">
+                                                <div className="mx-auto size-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-dashed border-gray-200">
+                                                    <span className="material-symbols-outlined text-gray-300 text-2xl">search_off</span>
+                                                </div>
+                                                Sin movimientos encontrados.
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        modalMovements.map(rec => {
+                                            const totalDebt = rec.amount + (rec.penaltyAmount || 0);
+                                            const historyPaid = (rec.paymentHistory || []).reduce((acc, h) => acc + h.amount, 0);
+                                            const totalOriginal = totalDebt + historyPaid;
+
+                                            return (
+                                                <tr key={rec.id} onClick={() => setViewDetailRecord(rec)} className="hover:bg-gray-50/50 transition-colors cursor-pointer group">
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <p className="font-bold text-slate-900 text-sm">
+                                                            {formatDateDisplay(rec.paymentDate || rec.dueDate, { day: '2-digit', month: 'short', year: '2-digit' })}
+                                                        </p>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <p className="font-bold text-slate-900 leading-tight">{rec.concept}</p>
+                                                        <p className="text-sm text-gray-500 flex items-center gap-1.5 mt-1">
+                                                            <span className="material-symbols-outlined text-[14px]">person</span> {rec.studentName}
+                                                        </p>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <StatusBadge status={rec.status} amount={rec.amount} penalty={rec.penaltyAmount} />
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right whitespace-nowrap">
+                                                        <span className="font-black text-slate-900 text-sm">
+                                                            ${totalOriginal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-center">
+                                                        <div className="flex items-center mx-auto justify-center size-8 bg-gray-50 text-gray-400 rounded-lg group-hover:bg-red-50 group-hover:text-red-600 transition-colors">
+                                                            <span className="material-symbols-outlined text-sm">open_in_new</span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Student, ClassCategory, Event, LibraryResource, AcademySettings, Message, AttendanceRecord, SessionModification, ClassException, PromotionHistoryItem, CalendarEvent, Rank } from '../types';
 import { PulseService } from '../services/pulseService';
 import { mockMessages, defaultAcademySettings } from '../mockData';
@@ -956,9 +956,36 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m));
     };
 
+    // --- Strict Rank Mapping based on Academy Settings ---
+    const mappedStudents = useMemo(() => {
+        if (!academySettings?.ranks || academySettings.ranks.length === 0) return students;
+        return students.map(s => {
+            // 1. Prioritize strict ID match
+            let activeRank = academySettings.ranks.find(r => r.id === s.rankId);
+            
+            // 2. Fallback to name match (legacy logic bridging)
+            if (!activeRank) {
+                activeRank = academySettings.ranks.find(r => r.name.toLowerCase() === s.rank.toLowerCase());
+            }
+
+            // 3. Absolute fallback: the beginner belt
+            if (!activeRank) {
+                activeRank = academySettings.ranks[0];
+            }
+
+            // Return student with strictly coerced rank presentation
+            return {
+                ...s,
+                rank: activeRank.name,
+                rankColor: activeRank.color,
+                rankId: activeRank.id,
+            };
+        });
+    }, [students, academySettings?.ranks]);
+
     return (
         <AcademyContext.Provider value={{
-            students,
+            students: mappedStudents,
             classes,
             events,
             scheduleEvents,

@@ -17,77 +17,112 @@
         extend: {
           colors: {
             primary: {
-              DEFAULT: "#DC2626", // Red 600
-              hover: "#B91C1C",   // Red 700
-              light: "#FEF2F2",   // Red 50
+              DEFAULT: "#e11d48",
+              hover: "#be185d",
+              light: "rgba(225, 29, 72, 0.15)",
             },
             background: {
-              light: "#F9FAFB", // Gray 50
-              surface: "#FFFFFF",
-              input: "#F9FAFB",
-              dark: "#111827",
+              app:     "#050505",
+              surface: "#0e0e11",
+              raised:  "#16161a",
+              hover:   "#1c1c21",
+            },
+            border: {
+              subtle: "rgba(255,255,255,0.06)",
+              strong: "rgba(255,255,255,0.12)",
             },
             text: {
-              main: "#111827", // Gray 900
-              secondary: "#6B7280", // Gray 500
+              primary:   "#ffffff",
+              secondary: "#a1a1aa",
+              muted:     "#71717a",
             },
-            success: "#16A34A",
-            warning: "#EA580C",
-            danger: "#DC2626",
+            success: "#10b981",
+            warning: "#f59e0b",
+            danger:  "#e11d48",
           },
           fontFamily: {
             sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica", "Arial", "sans-serif"],
           },
-          boxShadow: {
-            sm: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-            DEFAULT: "0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)",
-            md: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-            lg: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-            xl: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-            'soft': "0 4px 20px -4px rgba(0, 0, 0, 0.05)", // Structured Minimalism Shadow
-            'glow': "0 0 15px rgba(220, 38, 38, 0.15)", // Red Glow
-          },
-          borderRadius: {
-            none: "0",
-            sm: "0.125rem",
-            DEFAULT: "0.25rem",
-            md: "0.375rem",
-            lg: "0.5rem",
-            xl: "0.75rem",
-            '2xl': "1rem",
-            '3xl': "1.5rem",
-            full: "9999px",
-          }
         },
       },
     }
   </script>
   <style>
+    /* ==========================================================================
+       DESIGN SYSTEM — CSS VARIABLES (Dark Enterprise Theme)
+       Cambia los valores aquí para alternar entre temas sin tocar nada más.
+       ========================================================================== */
     :root {
-      --bg-canvas: #FFFFFF;
-      --bg-sidebar: #F9FAFB;
-      --text-main: #111827;
-      --text-secondary: #6B7280;
-      --primary-brand: #DC2626;
+      /* ── FONDOS ── */
+      --color-bg-app:     #08080a;   /* Grafito ultra oscuro, no negro puro */
+      --color-bg-surface: #101014;   /* Paneles, sidebars, cards */
+      --color-bg-raised:  #18181d;   /* Inputs, elements ligeramente elevados */
+      --color-bg-hover:   #1e1e25;   /* Hover state de inputs y rows */
+
+      /* ── TEXTOS ── */
+      --color-text-primary:   #dde1e7;   /* Gris luna — suave, no blanco duro */
+      --color-text-secondary: #9ca3af;   /* Gris medio para etiquetas */
+      --color-text-muted:     #6b7280;   /* Muy atenuado para caps/labels */
+
+      /* ── BORDES ── */
+      --color-border-subtle: rgba(255, 255, 255, 0.05);
+      --color-border-strong: rgba(255, 255, 255, 0.10);
+      --color-border-focus:  rgba(255, 255, 255, 0.30);
+
+      /* ── ACENTO / BRAND ── */
+      --color-brand:       #e11d48;              /* Rojo elegante */
+      --color-brand-hover: #be185d;
+      --color-brand-glow:  rgba(225, 29, 72, 0.12);
+      --color-brand-glow-strong: rgba(225, 29, 72, 0.18);
+
+      /* ── FONDO PREMIUM (Grid + Glow) ── */
+      --bg-grid-line: rgba(255, 255, 255, 0.025);  /* Más sutil — casi invisible */
+      --bg-grid-size: 40px 40px;                   /* Cuadros más grandes = más elegante */
+
+      /* ── SEMÁNTICOS ── */
+      --color-success: #10b981;
+      --color-warning: #f59e0b;
+      --color-danger:  #e11d48;
+
+      /* ── GEOMETRÍA ── */
+      --radius-sm: 0.375rem;
+      --radius-md: 0.5rem;
+      --radius-lg: 0.75rem;
+      --radius-xl: 1rem;
+
+      /* ── TRANSICIONES ── */
+      --transition-fast: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ==========================================================================
+       BASE GLOBAL
+       ========================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
     }
 
     body {
-      font-family: 'Inter', sans-serif;
-      background-color: var(--bg-canvas);
-      color: var(--text-main);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: var(--color-bg-app);
+      color: var(--color-text-primary);
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
-    /* Icons */
+    /* ==========================================================================
+       ICONS
+       ========================================================================== */
     .material-symbols-outlined {
       font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
-
     .material-symbols-outlined.filled {
       font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
 
-    /* Inputs - Structured Minimalism */
+    /* ==========================================================================
+       INPUTS GLOBALES — Dark Enterprise
+       ========================================================================== */
     input[type="text"],
     input[type="email"],
     input[type="password"],
@@ -97,72 +132,87 @@
     input[type="time"],
     select,
     textarea {
-      background-color: #F9FAFB !important;
-      /* bg-gray-50 */
-      border: 1px solid transparent !important;
-      color: #111827 !important;
-      /* text-gray-900 */
-      border-radius: 0.5rem !important;
-      /* rounded-lg */
-      padding-top: 0.6rem !important;
-      padding-bottom: 0.6rem !important;
+      background-color: var(--color-bg-raised) !important;
+      border: 1px solid var(--color-border-strong) !important;
+      color: var(--color-text-primary) !important;
+      border-radius: var(--radius-md) !important;
+      padding: 0.65rem 0.875rem !important;
       font-size: 0.875rem !important;
-      transition: all 0.2s ease-in-out;
+      transition: var(--transition-fast);
     }
 
     input::placeholder,
     textarea::placeholder {
-      color: #9CA3AF !important;
+      color: var(--color-text-muted) !important;
     }
 
-    /* Focus State: Soft & Elegant - EXCLUDING Checkbox/Radio */
+    /* Focus State */
     input:not([type="checkbox"]):not([type="radio"]):focus,
     select:focus,
     textarea:focus {
-      background-color: #FFFFFF !important;
-      border-color: #FEE2E2 !important;
-      /* border-red-100 */
-      box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.05) !important;
-      /* ring-4 ring-red-500/5 */
+      background-color: var(--color-bg-hover) !important;
+      border-color: var(--color-brand) !important;
+      box-shadow: 0 0 0 3px var(--color-brand-glow) !important;
       outline: none !important;
     }
 
-    /* Buttons & Interactive Elements */
+    /* Autofill oscuro */
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus {
+      -webkit-box-shadow: 0 0 0 30px var(--color-bg-raised) inset !important;
+      -webkit-text-fill-color: var(--color-text-primary) !important;
+      caret-color: var(--color-text-primary) !important;
+    }
+
+    /* ============================================================
+       OVERRIDES PARA EL LOGIN (floating labels necesitan más padding)
+       ============================================================ */
+    .login-dark-theme input[type="email"],
+    .login-dark-theme input[type="password"] {
+      padding-top: 1.75rem !important;
+      padding-bottom: 0.5rem !important;
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+      font-size: 1rem !important;
+    }
+
+    .login-dark-theme input[type="email"]::placeholder,
+    .login-dark-theme input[type="password"]::placeholder {
+      color: transparent !important;
+    }
+
+    .login-dark-theme input[type="email"]:focus,
+    .login-dark-theme input[type="password"]:focus {
+      background-color: var(--color-bg-hover) !important;
+      border-color: var(--color-brand) !important;
+      box-shadow: 0 0 0 1px var(--color-brand) !important;
+    }
+
+    /* ==========================================================================
+       BOTONES (base) 
+       ========================================================================== */
     button:active {
       transform: translateY(1px);
     }
 
-    /* Scrollbar - Minimal */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
+    /* ==========================================================================
+       ENTERPRISE CARD POLISH
+       ========================================================================== */
+    /* Scrollbar premium — muy fino e invisible hasta hover */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--color-border-strong); border-radius: 4px; opacity: 0; transition: opacity 0.3s; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--color-border-focus); opacity: 1; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #E5E7EB;
-      border-radius: 3px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: #D1D5DB;
-    }
-
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-
-    .no-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-
+    /* ==========================================================================
+       SELECCIÓN DE TEXTO
+       ========================================================================== */
     ::selection {
-      background-color: #FECACA;
-      color: #7F1D1D;
+      background-color: var(--color-brand-glow);
+      color: var(--color-text-primary);
     }
   </style>
   <script type="importmap">
@@ -188,7 +238,7 @@
   <link rel="stylesheet" href="/index.css">
 </head>
 
-<body class="antialiased h-full bg-white text-slate-900">
+<body class="antialiased h-full">
   <div id="root" class="h-full"></div>
   <script type="module" src="./index.tsx"></script>
   <script type="module" src="/index.tsx"></script>

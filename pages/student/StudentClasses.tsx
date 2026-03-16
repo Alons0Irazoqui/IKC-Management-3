@@ -34,8 +34,8 @@ const EventDetailModal: React.FC<{
                     event.type === 'tournament' ? 'bg-orange-600 text-white' : 
                     'bg-blue-600 text-white'
                 }`}>
-                    <button onClick={onClose} className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 rounded-full backdrop-blur-md transition-colors">
-                        <span className="material-symbols-outlined">close</span>
+                    <button onClick={onClose} className="absolute top-4 right-4 size-10 flex items-center justify-center bg-white/20 hover:bg-white/30 rounded-full backdrop-blur-md transition-colors cursor-pointer">
+                        <span className="material-symbols-outlined text-[20px] leading-none">close</span>
                     </button>
                     
                     <div className="flex items-center gap-2 mb-3 opacity-90">
