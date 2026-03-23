@@ -34,63 +34,55 @@ const InfiniteMonthGrid: React.FC<{
 
     return (
         <div className="flex flex-col h-full animate-in fade-in duration-500 overflow-hidden">
-            {/* Headers Fixed */}
-            <div className="grid grid-cols-7 py-3 shrink-0 bg-white border-b border-gray-100 z-10 shadow-sm">
+            {/* Day Headers */}
+            <div className="grid grid-cols-7 py-3 shrink-0 z-10" style={{backgroundColor: 'var(--color-bg-surface)', borderBottom: '1px solid var(--color-border-subtle)'}}>
                 {weekDays.map(day => (
-                    <div key={day} className="text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                    <div key={day} className="text-center text-[10px] font-bold uppercase tracking-widest" style={{color: 'var(--color-text-muted)'}}>
                         {day}
                     </div>
                 ))}
             </div>
 
-            {/* Scrollable Grid Area */}
+            {/* Scrollable Grid */}
             <div className="flex-1 overflow-y-auto custom-scrollbar">
-                <div className="grid grid-cols-7 auto-rows-fr bg-gray-50 gap-px border-b border-gray-100 min-h-[600px]">
+                <div className="grid grid-cols-7 auto-rows-fr gap-px min-h-[600px]" style={{backgroundColor: 'var(--color-border-subtle)'}}>
                     {days.map((day) => {
                         const dayEvents = events
                             .filter(e => isSameDay(e.start, day))
                             .sort((a, b) => a.start.getTime() - b.start.getTime());
-                        
                         const isToday = isSameDay(day, new Date());
                         const isCurrentMonth = isSameMonth(day, date);
 
                         return (
-                            <div 
-                                key={day.toISOString()} 
+                            <div
+                                key={day.toISOString()}
                                 onClick={() => onDayClick(day, dayEvents)}
-                                className={`
-                                    min-h-[120px] p-2 cursor-pointer transition-colors hover:bg-blue-50/30 flex flex-col items-center gap-1
-                                    ${isCurrentMonth ? 'bg-white' : 'bg-gray-50/50'}
-                                `}
+                                className="min-h-[120px] p-2 cursor-pointer flex flex-col items-center gap-1 transition-colors"
+                                style={{backgroundColor: isCurrentMonth ? 'var(--color-bg-surface)' : 'var(--color-bg-app)'}}
+                                onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'}
+                                onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = isCurrentMonth ? 'var(--color-bg-surface)' : 'var(--color-bg-app)'}
                             >
-                                {/* Day Number */}
-                                <div className={`
-                                    size-7 flex items-center justify-center rounded-full text-xs font-bold transition-all
-                                    ${isToday 
-                                        ? 'bg-red-600 text-white shadow-md' 
-                                        : isCurrentMonth ? 'text-gray-700' : 'text-gray-300'}
-                                `}>
+                                <div className="size-7 flex items-center justify-center rounded-full text-xs font-bold transition-all"
+                                     style={isToday
+                                         ? {backgroundColor: '#FC6F6F', color: '#000', boxShadow: '0 0 10px rgba(252,111,111,0.4)'}
+                                         : {color: isCurrentMonth ? 'var(--color-text-primary)' : 'var(--color-border-strong)'}}>
                                     {format(day, 'd')}
                                 </div>
 
-                                {/* Events List (Pills) */}
                                 <div className="w-full flex flex-col gap-1 mt-1">
                                     {dayEvents.slice(0, 3).map(evt => (
-                                        <div 
-                                            key={evt.id}
-                                            className={`
-                                                w-full px-2 py-1 rounded-md text-[9px] font-bold truncate transition-transform hover:scale-[1.02] shadow-sm border-l-2
-                                                ${evt.status === 'cancelled' 
-                                                    ? 'bg-gray-100 text-gray-400 line-through border-gray-300' 
-                                                    : 'bg-white text-gray-700 border-red-500 hover:bg-red-50'}
-                                            `}
+                                        <div key={evt.id}
+                                            className="w-full px-2 py-1 rounded-md text-[9px] font-bold truncate border-l-2"
+                                            style={evt.status === 'cancelled'
+                                                ? {backgroundColor: 'var(--color-bg-app)', color: 'var(--color-text-muted)', borderLeftColor: 'var(--color-border-strong)', textDecoration: 'line-through'}
+                                                : {backgroundColor: 'rgba(252,111,111,0.08)', color: '#FC6F6F', borderLeftColor: '#FC6F6F', border: '1px solid rgba(252,111,111,0.15)', borderLeft: '2px solid #FC6F6F'}}
                                         >
                                             {evt.title}
                                         </div>
                                     ))}
                                     {dayEvents.length > 3 && (
-                                        <div className="text-[9px] font-bold text-gray-400 text-center bg-gray-50 rounded py-0.5">
-                                            + {dayEvents.length - 3} más
+                                        <div className="text-[9px] font-bold text-center rounded py-0.5" style={{color: 'var(--color-text-muted)', backgroundColor: 'var(--color-bg-app)'}}>
+                                            +{dayEvents.length - 3} más
                                         </div>
                                     )}
                                 </div>
@@ -120,8 +112,8 @@ const CleanWeekView: React.FC<{
     }, [date]);
 
     return (
-        <div className="flex-1 overflow-y-auto bg-white custom-scrollbar animate-in fade-in slide-in-from-bottom-2 duration-500">
-            <div className="grid grid-cols-1 md:grid-cols-7 min-h-full divide-y md:divide-y-0 md:divide-x divide-gray-100">
+        <div className="flex-1 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-bottom-2 duration-500" style={{backgroundColor: 'var(--color-bg-app)'}}>
+            <div className="grid grid-cols-1 md:grid-cols-7 min-h-full gap-px" style={{backgroundColor: 'var(--color-border-subtle)'}}>
                 {weekDays.map((day) => {
                     const dayEvents = events
                         .filter(e => isSameDay(e.start, day))
@@ -130,43 +122,37 @@ const CleanWeekView: React.FC<{
                     const isToday = isSameDay(day, new Date());
 
                     return (
-                        <div key={day.toISOString()} className="flex flex-col relative bg-white">
-                            {/* Sticky Header */}
-                            <div className={`sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-gray-50 py-3 text-center transition-colors ${isToday ? 'bg-red-50/30' : ''}`}>
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{format(day, 'EEE', { locale: es })}</p>
-                                <div className={`mx-auto size-8 flex items-center justify-center rounded-full mt-1 ${isToday ? 'bg-red-600 text-white shadow-md' : 'text-gray-900 font-black'}`}>
+                        <div key={day.toISOString()} className="flex flex-col relative" style={{backgroundColor: 'var(--color-bg-surface)'}}>
+                            <div className={`sticky top-0 z-10 backdrop-blur-sm border-b py-3 text-center transition-colors`} style={{backgroundColor: isToday ? 'rgba(239,68,68,0.05)' : 'var(--color-bg-surface)', borderColor: 'var(--color-border-subtle)'}}>
+                                <p className="text-[10px] font-bold uppercase tracking-widest" style={{color: 'var(--color-text-muted)'}}>{format(day, 'EEE', { locale: es })}</p>
+                                <div className={`mx-auto size-8 flex items-center justify-center rounded-full mt-1`} style={isToday ? {backgroundColor: '#EF4444', color: '#fff'} : {color: 'var(--color-text-primary)', fontWeight: 900}}>
                                     <span className="text-lg leading-none">{format(day, 'd')}</span>
                                 </div>
                             </div>
 
-                            {/* Events Stack */}
                             <div className="flex flex-col gap-3 p-3 flex-1 min-h-[100px]">
                                 {dayEvents.length > 0 ? (
                                     dayEvents.map(evt => (
-                                        <div 
-                                            key={evt.id}
-                                            onClick={() => onEventClick(evt)}
-                                            className={`
-                                                p-3 rounded-lg border-l-[3px] cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5 group active:scale-95
-                                                ${evt.status === 'cancelled' 
-                                                    ? 'bg-gray-50 border-gray-300 opacity-60' 
-                                                    : 'bg-white border-red-500 shadow-sm ring-1 ring-gray-100'}
-                                            `}
+                                        <div key={evt.id} onClick={() => onEventClick(evt)}
+                                            className="p-3 rounded-lg border-l-[3px] cursor-pointer transition-all group active:scale-95"
+                                            style={evt.status === 'cancelled'
+                                                ? {backgroundColor: 'var(--color-bg-app)', borderLeftColor: 'var(--color-border-strong)', opacity: 0.5}
+                                                : {backgroundColor: 'var(--color-bg-raised)', borderLeftColor: '#FC6F6F', border: '1px solid var(--color-border-subtle)', borderLeft: '3px solid #FC6F6F'}}
+                                            onMouseEnter={e => { if (evt.status !== 'cancelled') (e.currentTarget as HTMLElement).style.borderColor = 'rgba(56,189,248,0.3)'; }}
+                                            onMouseLeave={e => { if (evt.status !== 'cancelled') (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-border-subtle)'; }}
                                         >
-                                            <p className={`text-xs font-bold leading-tight ${evt.status === 'cancelled' ? 'text-gray-400 line-through' : 'text-gray-800'}`}>
+                                            <p className={`text-xs font-bold leading-tight`} style={{color: evt.status === 'cancelled' ? 'var(--color-text-muted)' : 'var(--color-text-primary)', textDecoration: evt.status === 'cancelled' ? 'line-through' : 'none'}}>
                                                 {evt.title}
                                             </p>
                                             <div className="flex items-center gap-1 mt-1.5">
-                                                <span className="material-symbols-outlined text-[10px] text-gray-400">schedule</span>
-                                                <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wide">
-                                                    {format(evt.start, 'HH:mm')}
-                                                </p>
+                                                <span className="material-symbols-outlined text-[10px]" style={{color: 'var(--color-text-muted)'}}>schedule</span>
+                                                <p className="text-[10px] font-bold uppercase tracking-wide" style={{color: 'var(--color-text-muted)'}}>{format(evt.start, 'HH:mm')}</p>
                                             </div>
                                         </div>
                                     ))
                                 ) : (
                                     <div className="hidden md:flex flex-1 flex-col items-center justify-center opacity-10">
-                                        <div className="h-full w-px bg-gray-100 border-l border-dashed border-gray-300"></div>
+                                        <div className="h-full w-px border-l border-dashed" style={{borderColor: 'var(--color-border-subtle)'}}></div>
                                     </div>
                                 )}
                             </div>
@@ -192,61 +178,56 @@ const CleanDayView: React.FC<{
     }, [date, events]);
 
     return (
-        <div className="flex-1 overflow-y-auto custom-scrollbar bg-white">
+        <div className="flex-1 overflow-y-auto custom-scrollbar" style={{backgroundColor: 'var(--color-bg-app)'}}>
             <div className="max-w-3xl mx-auto w-full p-6 md:p-10 animate-in fade-in zoom-in-95 duration-300">
-                <h3 className="text-3xl font-black text-gray-900 mb-8 capitalize flex items-center gap-3">
-                    <span className="w-1.5 h-8 bg-red-600 rounded-full"></span>
+                <h3 className="text-3xl font-black mb-8 capitalize flex items-center gap-3" style={{color: 'var(--color-text-primary)'}}>
+                    <span className="w-1.5 h-8 rounded-full" style={{backgroundColor: '#FC6F6F'}}></span>
                     {format(date, 'EEEE d, MMMM', { locale: es })}
                 </h3>
 
                 {dayEvents.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-20 text-gray-400 border-2 border-dashed border-gray-100 rounded-3xl bg-gray-50/50">
-                        <div className="size-20 bg-white rounded-full flex items-center justify-center mb-4 shadow-sm">
-                            <span className="material-symbols-outlined text-4xl opacity-30 text-gray-400">self_improvement</span>
+                    <div className="flex flex-col items-center justify-center py-20 rounded-3xl border-2 border-dashed"
+                         style={{borderColor: 'var(--color-border-subtle)', backgroundColor: 'var(--color-bg-surface)'}}>
+                        <div className="size-20 rounded-full flex items-center justify-center mb-4"
+                             style={{backgroundColor: 'var(--color-bg-raised)'}}>
+                            <span className="material-symbols-outlined text-4xl opacity-30" style={{color: 'var(--color-text-secondary)'}}>self_improvement</span>
                         </div>
-                        <p className="text-lg font-bold text-gray-500">Día libre</p>
-                        <p className="text-sm opacity-60">No hay sesiones programadas.</p>
+                        <p className="text-lg font-bold" style={{color: 'var(--color-text-secondary)'}}>Día libre</p>
+                        <p className="text-sm mt-1" style={{color: 'var(--color-text-muted)'}}>No hay sesiones programadas.</p>
                     </div>
                 ) : (
-                    <div className="relative border-l border-gray-100 ml-4 space-y-8 py-2">
+                    <div className="relative border-l ml-4 space-y-8 py-2" style={{borderColor: 'var(--color-border-subtle)'}}>
                         {dayEvents.map(evt => (
-                            <div 
-                                key={evt.id}
-                                onClick={() => onEventClick(evt)}
-                                className="relative pl-8 group cursor-pointer"
-                            >
-                                {/* Timeline Dot */}
-                                <div className={`absolute -left-[5px] top-4 size-2.5 rounded-full border-2 border-white shadow-sm ring-1 ring-gray-100 transition-colors ${evt.status === 'cancelled' ? 'bg-gray-300' : 'bg-red-600 group-hover:scale-125'}`}></div>
-                                
-                                <div className={`
-                                    flex items-center gap-6 p-6 rounded-2xl border transition-all hover:shadow-lg hover:-translate-y-1 bg-white
-                                    ${evt.status === 'cancelled' 
-                                        ? 'border-gray-100 opacity-60 grayscale bg-gray-50' 
-                                        : 'border-gray-100 hover:border-red-100'}
-                                `}>
+                            <div key={evt.id} onClick={() => onEventClick(evt)} className="relative pl-8 group cursor-pointer">
+                                <div className={`absolute -left-[5px] top-4 size-2.5 rounded-full border-2 shadow-sm ring-1 transition-colors`}
+                                     style={{borderColor: 'var(--color-bg-app)', backgroundColor: evt.status === 'cancelled' ? 'var(--color-border-strong)' : '#FC6F6F', ringColor: 'var(--color-border-subtle)'}}></div>
+                                <div className={`flex items-center gap-6 p-6 rounded-2xl border transition-all group-hover:shadow-lg group-hover:-translate-y-1`}
+                                     style={evt.status === 'cancelled'
+                                        ? {borderColor: 'var(--color-border-subtle)', backgroundColor: 'var(--color-bg-surface)', opacity: 0.5}
+                                        : {borderColor: 'var(--color-border-subtle)', backgroundColor: 'var(--color-bg-surface)'}}
+                                     onMouseEnter={e => { if (evt.status !== 'cancelled') (e.currentTarget as HTMLElement).style.borderColor = 'rgba(56,189,248,0.3)'; }}
+                                     onMouseLeave={e => { if (evt.status !== 'cancelled') (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-border-subtle)'; }}
+                                >
                                     <div className="flex flex-col items-center min-w-[60px] text-center">
-                                        <span className="text-lg font-black text-gray-900 leading-none">{format(evt.start, 'HH:mm')}</span>
-                                        <span className="text-xs font-bold text-gray-400 mt-1">{format(evt.end, 'HH:mm')}</span>
+                                        <span className="text-lg font-black leading-none" style={{color: 'var(--color-text-primary)'}}>{format(evt.start, 'HH:mm')}</span>
+                                        <span className="text-xs font-bold mt-1" style={{color: 'var(--color-text-muted)'}}>{format(evt.end, 'HH:mm')}</span>
                                     </div>
-                                    
-                                    <div className="w-px h-10 bg-gray-100"></div>
-
+                                    <div className="w-px h-10" style={{backgroundColor: 'var(--color-border-subtle)'}}></div>
                                     <div className="flex-1">
-                                        <h4 className={`text-xl font-bold ${evt.status === 'cancelled' ? 'text-gray-500 line-through' : 'text-gray-900 group-hover:text-red-700 transition-colors'}`}>
+                                        <h4 className="text-xl font-bold transition-colors" style={{color: evt.status === 'cancelled' ? 'var(--color-text-muted)' : 'var(--color-text-primary)', textDecoration: evt.status === 'cancelled' ? 'line-through' : 'none'}}>
                                             {evt.title}
                                         </h4>
                                         <div className="flex items-center gap-3 mt-1.5">
-                                            <span className="text-sm text-gray-500 font-medium flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded-md">
+                                            <span className="text-sm font-medium flex items-center gap-1 px-2 py-0.5 rounded-md" style={{color: 'var(--color-text-secondary)', backgroundColor: 'var(--color-bg-app)', border: '1px solid var(--color-border-subtle)'}}>
                                                 <span className="material-symbols-outlined text-sm">person</span>
                                                 {evt.instructor}
                                             </span>
                                             {evt.status === 'cancelled' && (
-                                                <span className="bg-red-50 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded uppercase border border-red-100">Cancelada</span>
+                                                <span className="text-[10px] font-bold px-2 py-0.5 rounded uppercase" style={{backgroundColor: 'rgba(239,68,68,0.1)', color: '#F87171', border: '1px solid rgba(239,68,68,0.2)'}}>Cancelada</span>
                                             )}
                                         </div>
                                     </div>
-
-                                    <div className="size-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-red-50 group-hover:text-red-600 transition-colors">
+                                    <div className="size-10 rounded-full flex items-center justify-center transition-colors" style={{backgroundColor: 'var(--color-bg-app)', color: 'var(--color-text-muted)'}}>
                                         <span className="material-symbols-outlined">chevron_right</span>
                                     </div>
                                 </div>
@@ -285,50 +266,52 @@ const AgendaView: React.FC<{
     }, [agendaItems]);
 
     return (
-        <div className="flex-1 overflow-y-auto custom-scrollbar bg-white">
+        <div className="flex-1 overflow-y-auto custom-scrollbar" style={{backgroundColor: 'var(--color-bg-app)'}}>
             <div className="p-6 md:p-10 max-w-4xl mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <h3 className="text-xs font-black text-gray-400 mb-8 uppercase tracking-[0.2em] flex items-center gap-2">
+                <h3 className="text-xs font-black mb-8 uppercase tracking-[0.2em] flex items-center gap-2" style={{color: 'var(--color-text-muted)'}}>
                     <span className="material-symbols-outlined text-lg">upcoming</span>
                     Agenda Próxima
                 </h3>
 
                 {Object.keys(grouped).length === 0 ? (
-                    <div className="text-center py-20 bg-gray-50 rounded-3xl border border-dashed border-gray-200">
-                        <p className="text-gray-500 font-medium">No tienes eventos próximos en tu agenda.</p>
+                    <div className="text-center py-20 rounded-3xl border border-dashed"
+                         style={{borderColor: 'var(--color-border-subtle)', backgroundColor: 'var(--color-bg-surface)'}}>
+                        <span className="material-symbols-outlined text-5xl mb-4 block opacity-20" style={{color: 'var(--color-text-muted)'}}>event_upcoming</span>
+                        <p className="font-medium" style={{color: 'var(--color-text-muted)'}}>No tienes eventos próximos en tu agenda.</p>
                     </div>
                 ) : (
-                    <div className="relative border-l-2 border-gray-100 ml-3 md:ml-6 space-y-10 pb-20">
+                    <div className="relative border-l-2 ml-3 md:ml-6 space-y-10 pb-20" style={{borderColor: 'var(--color-border-subtle)'}}>
                         {Object.entries(grouped).map(([dateStr, items]: [string, CalendarEvent[]]) => {
                             const dateObj = new Date(dateStr + 'T00:00:00');
                             const isToday = isSameDay(dateObj, new Date());
-
                             return (
                                 <div key={dateStr} className="relative pl-6 md:pl-10">
-                                    {/* Date Bubble */}
-                                    <div className={`absolute -left-[9px] top-1 size-4 rounded-full border-4 border-white shadow-sm z-10 ${isToday ? 'bg-red-600' : 'bg-gray-300'}`}></div>
-                                    
-                                    <h4 className={`text-lg font-bold mb-4 capitalize flex items-center gap-2 ${isToday ? 'text-red-600' : 'text-gray-800'}`}>
-                                        {isToday && <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider">Hoy</span>}
+                                    <div className={`absolute -left-[9px] top-1 size-4 rounded-full border-4 z-10 ${isToday ? 'bg-red-500' : ''}`}
+                                         style={{borderColor: 'var(--color-bg-app)', backgroundColor: isToday ? '#EF4444' : 'var(--color-border-strong)'}}></div>
+                                    <h4 className={`text-lg font-bold mb-4 capitalize flex items-center gap-2`}
+                                        style={{color: isToday ? '#F87171' : 'var(--color-text-primary)'}}>
+                                        {isToday && <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider" style={{backgroundColor: 'rgba(239,68,68,0.15)', color: '#F87171', border: '1px solid rgba(239,68,68,0.25)'}}>Hoy</span>}
                                         {format(dateObj, 'EEEE d MMMM', { locale: es })}
                                     </h4>
-
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         {items.map(evt => (
-                                            <div 
-                                                key={evt.id}
-                                                onClick={() => onEventClick(evt)}
-                                                className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm hover:shadow-lg hover:border-red-100 transition-all cursor-pointer group active:scale-[0.98]"
+                                            <div key={evt.id} onClick={() => onEventClick(evt)}
+                                                className="p-5 rounded-2xl border transition-all cursor-pointer group active:scale-[0.98]"
+                                                style={{backgroundColor: 'var(--color-bg-surface)', borderColor: 'var(--color-border-subtle)'}}
+                                                onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'var(--color-border-strong)'; el.style.transform = 'translateY(-2px)'; el.style.boxShadow = '0 8px 24px -8px rgba(0,0,0,0.5)'; }}
+                                                onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = 'var(--color-border-subtle)'; el.style.transform = 'translateY(0)'; el.style.boxShadow = 'none'; }}
                                             >
                                                 <div className="flex justify-between items-start mb-3">
-                                                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider bg-gray-50 px-2 py-1 rounded border border-gray-100">
+                                                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-lg"
+                                                          style={{backgroundColor: 'var(--color-bg-app)', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-subtle)'}}>
                                                         {format(evt.start, 'HH:mm')}
                                                     </span>
                                                     {evt.type === 'exam' && <span className="material-symbols-outlined text-yellow-500 text-lg">stars</span>}
                                                 </div>
-                                                <h5 className="font-bold text-gray-900 text-lg mb-1 group-hover:text-red-700 transition-colors leading-tight">
+                                                <h5 className="font-bold text-lg mb-1 leading-tight transition-colors" style={{color: 'var(--color-text-primary)'}}>
                                                     {evt.title}
                                                 </h5>
-                                                <p className="text-xs text-gray-500 font-medium flex items-center gap-1 mt-2">
+                                                <p className="text-xs font-medium flex items-center gap-1 mt-2" style={{color: 'var(--color-text-secondary)'}}>
                                                     <span className="material-symbols-outlined text-[14px]">person</span>
                                                     {evt.instructor}
                                                 </p>
@@ -370,48 +353,52 @@ const DayAgendaDrawer: React.FC<{
                         animate={{ x: 0 }}
                         exit={{ x: '100%' }}
                         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                        className="fixed inset-y-0 right-0 z-[60] w-full max-w-md bg-white shadow-2xl flex flex-col"
+                        className="fixed inset-y-0 right-0 z-[60] w-full max-w-md shadow-2xl flex flex-col"
+                        style={{backgroundColor: 'var(--color-bg-surface)', borderLeft: '1px solid var(--color-border-subtle)'}}
                     >
-                        <div className="p-8 border-b border-gray-100 flex justify-between items-start bg-white shrink-0">
+                        <div className="p-8 flex justify-between items-start shrink-0 border-b" style={{backgroundColor: 'var(--color-bg-surface)', borderColor: 'var(--color-border-subtle)'}}>
                             <div>
-                                <h2 className="text-3xl font-black text-gray-900 tracking-tight capitalize">
+                                <h2 className="text-3xl font-black tracking-tight capitalize" style={{color: 'var(--color-text-primary)'}}>
                                     {format(date, 'EEEE', { locale: es })}
                                 </h2>
-                                <p className="text-gray-500 font-medium text-lg capitalize">
+                                <p className="font-medium text-lg capitalize" style={{color: 'var(--color-text-secondary)'}}>
                                     {format(date, 'd MMMM yyyy', { locale: es })}
                                 </p>
                             </div>
-                            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-900 transition-colors">
+                            <button onClick={onClose} className="p-2 rounded-full transition-colors" style={{color: 'var(--color-text-muted)'}} onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}>
                                 <span className="material-symbols-outlined">close</span>
                             </button>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-8 bg-white custom-scrollbar">
+                        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar" style={{backgroundColor: 'var(--color-bg-surface)'}}>
                             {events.length === 0 ? (
-                                <div className="h-full flex flex-col items-center justify-center text-center text-gray-400">
-                                    <span className="material-symbols-outlined text-6xl opacity-20 mb-4">event_busy</span>
-                                    <p className="font-medium">No hay actividades programadas.</p>
+                                <div className="h-full flex flex-col items-center justify-center text-center">
+                                    <span className="material-symbols-outlined text-6xl opacity-20 mb-4" style={{color: 'var(--color-text-muted)'}}>event_busy</span>
+                                    <p className="font-medium" style={{color: 'var(--color-text-muted)'}}>No hay actividades programadas.</p>
                                 </div>
                             ) : (
                                 <div className="space-y-6 relative">
-                                    <div className="absolute left-[19px] top-4 bottom-4 w-[2px] bg-gray-100"></div>
+                                    <div className="absolute left-[19px] top-4 bottom-4 w-[2px]" style={{backgroundColor: 'var(--color-border-subtle)'}}></div>
                                     {events.map((evt) => (
-                                        <div 
-                                            key={evt.id} 
-                                            onClick={() => onEventClick(evt)}
-                                            className="relative pl-10 group cursor-pointer"
-                                        >
-                                            <div className={`absolute left-2 top-2 size-6 rounded-full border-4 border-white shadow-sm z-10 box-content ${evt.status === 'cancelled' ? 'bg-gray-300' : 'bg-red-600'}`}></div>
-                                            <div className={`p-5 rounded-2xl border transition-all ${evt.status === 'cancelled' ? 'bg-gray-50 border-gray-100 opacity-60' : 'bg-white border-gray-100 hover:border-red-100 hover:shadow-lg hover:shadow-red-500/5'}`}>
+                                        <div key={evt.id} onClick={() => onEventClick(evt)} className="relative pl-10 group cursor-pointer">
+                                            <div className={`absolute left-2 top-2 size-6 rounded-full border-4 z-10 box-content`}
+                                                 style={{borderColor: 'var(--color-bg-surface)', backgroundColor: evt.status === 'cancelled' ? 'var(--color-border-strong)' : '#FC6F6F'}}></div>
+                                            <div className={`p-5 rounded-2xl border transition-all`}
+                                                 style={evt.status === 'cancelled'
+                                                     ? {backgroundColor: 'var(--color-bg-app)', borderColor: 'var(--color-border-subtle)', opacity: 0.6}
+                                                     : {backgroundColor: 'var(--color-bg-raised)', borderColor: 'var(--color-border-subtle)'}}
+                                                 onMouseEnter={e => { if (evt.status !== 'cancelled') (e.currentTarget as HTMLElement).style.borderColor = 'rgba(56,189,248,0.3)'; }}
+                                                 onMouseLeave={e => { if (evt.status !== 'cancelled') (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-border-subtle)'; }}
+                                            >
                                                 <div className="flex justify-between items-start mb-2">
-                                                    <span className={`text-xs font-bold uppercase tracking-wider ${evt.status === 'cancelled' ? 'text-gray-400' : 'text-red-600'}`}>
+                                                    <span className="text-xs font-bold uppercase tracking-wider" style={{color: evt.status === 'cancelled' ? 'var(--color-text-muted)' : '#FC6F6F'}}>
                                                         {format(evt.start, 'HH:mm')} - {format(evt.end, 'HH:mm')}
                                                     </span>
                                                 </div>
-                                                <h3 className={`font-bold text-lg leading-tight mb-1 ${evt.status === 'cancelled' ? 'text-gray-500 line-through' : 'text-gray-900'}`}>
+                                                <h3 className={`font-bold text-lg leading-tight mb-1`} style={{color: evt.status === 'cancelled' ? 'var(--color-text-muted)' : 'var(--color-text-primary)', textDecoration: evt.status === 'cancelled' ? 'line-through' : 'none'}}>
                                                     {evt.title}
                                                 </h3>
-                                                <p className="text-sm text-gray-500">{evt.instructor}</p>
+                                                <p className="text-sm" style={{color: 'var(--color-text-secondary)'}}>{evt.instructor}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -436,55 +423,51 @@ const EventDetailModal: React.FC<{
     const isCancelled = event.status === 'cancelled';
 
     return (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-white/60 backdrop-blur-md animate-in fade-in zoom-in-95 duration-200" onClick={onClose}>
-            <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden flex flex-col relative border border-gray-100" onClick={e => e.stopPropagation()}>
-                
-                <div className={`h-32 ${isCancelled ? 'bg-red-500' : 'bg-gray-900'} relative overflow-hidden flex items-center justify-center`}>
-                    <div className="absolute inset-0 opacity-10">
-                        <div className="absolute -top-10 -right-10 size-40 bg-white rounded-full blur-3xl"></div>
-                        <div className="absolute bottom-0 left-0 size-32 bg-white rounded-full blur-3xl"></div>
-                    </div>
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 animate-in fade-in zoom-in-95 duration-200" style={{backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)'}} onClick={onClose}>
+            <div className="rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden flex flex-col relative border" style={{backgroundColor: 'var(--color-bg-surface)', borderColor: 'var(--color-border-subtle)'}} onClick={e => e.stopPropagation()}>
+                <div className={`h-32 relative overflow-hidden flex items-center justify-center`} style={{backgroundColor: isCancelled ? 'rgba(239,68,68,0.1)' : 'var(--color-bg-app)', borderBottom: '1px solid var(--color-border-subtle)'}}>
+                    <div className="absolute inset-0" style={{background: 'radial-gradient(circle at 50% 0%, rgba(252,111,111,0.06) 0%, transparent 60%)'}}></div>
                     <div className="relative z-10 text-center flex flex-col items-center">
-                        <span className="material-symbols-outlined text-4xl text-white mb-2">
+                        <span className="material-symbols-outlined text-4xl mb-2" style={{color: isCancelled ? '#F87171' : '#FC6F6F'}}>
                             {event.type === 'class' ? 'sports_martial_arts' : event.type === 'exam' ? 'workspace_premium' : 'emoji_events'}
                         </span>
-                        <div className="bg-white/20 backdrop-blur-md px-4 py-1 rounded-full text-white text-[10px] font-bold uppercase tracking-widest border border-white/20">
+                        <div className="px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border" style={{backgroundColor: 'var(--color-bg-raised)', color: 'var(--color-text-secondary)', borderColor: 'var(--color-border-subtle)'}}>
                             {event.type === 'class' ? 'Clase' : 'Evento'}
                         </div>
                     </div>
-                    <button onClick={onClose} className="absolute top-5 right-5 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full transition-colors backdrop-blur-md active:scale-95">
+                    <button onClick={onClose} className="absolute top-5 right-5 p-2 rounded-full transition-all" style={{backgroundColor: 'var(--color-bg-raised)', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-subtle)'}} onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-surface)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'}>
                         <span className="material-symbols-outlined text-lg">close</span>
                     </button>
                 </div>
 
                 <div className="px-8 pb-10 -mt-6 relative z-10">
-                    <div className="bg-white p-6 rounded-3xl shadow-lg border border-gray-50 flex flex-col gap-6 text-center">
+                    <div className="p-6 rounded-3xl shadow-lg flex flex-col gap-6 text-center border" style={{backgroundColor: 'var(--color-bg-surface)', borderColor: 'var(--color-border-subtle)'}}>
                         <div>
-                            <h2 className={`text-2xl font-black text-gray-900 leading-tight mb-2 ${isCancelled ? 'line-through text-gray-400' : ''}`}>
+                            <h2 className={`text-2xl font-black leading-tight mb-2`} style={{color: isCancelled ? 'var(--color-text-muted)' : 'var(--color-text-primary)', textDecoration: isCancelled ? 'line-through' : 'none'}}>
                                 {event.title}
                             </h2>
                             {isCancelled && (
-                                <span className="inline-block px-3 py-1 rounded-lg bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-wider border border-red-100">
+                                <span className="inline-block px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border" style={{backgroundColor: 'rgba(239,68,68,0.1)', color: '#F87171', borderColor: 'rgba(239,68,68,0.2)'}}>
                                     Clase Cancelada
                                 </span>
                             )}
                         </div>
                         <div className="flex flex-col gap-3">
-                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl">
-                                <span className="text-xs font-bold text-gray-400 uppercase">Fecha</span>
-                                <span className="font-bold text-gray-900 text-sm capitalize">{format(event.start, 'd MMMM, yyyy', { locale: es })}</span>
+                            <div className="flex items-center justify-between p-3 rounded-2xl" style={{backgroundColor: 'var(--color-bg-app)'}}>
+                                <span className="text-xs font-bold uppercase" style={{color: 'var(--color-text-muted)'}}>Fecha</span>
+                                <span className="font-bold text-sm capitalize" style={{color: 'var(--color-text-primary)'}}>{format(event.start, 'd MMMM, yyyy', { locale: es })}</span>
                             </div>
-                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl">
-                                <span className="text-xs font-bold text-gray-400 uppercase">Horario</span>
-                                <span className="font-bold text-gray-900 text-sm">{format(event.start, 'HH:mm')} - {format(event.end, 'HH:mm')}</span>
+                            <div className="flex items-center justify-between p-3 rounded-2xl" style={{backgroundColor: 'var(--color-bg-app)'}}>
+                                <span className="text-xs font-bold uppercase" style={{color: 'var(--color-text-muted)'}}>Horario</span>
+                                <span className="font-bold text-sm" style={{color: 'var(--color-text-primary)'}}>{format(event.start, 'HH:mm')} - {format(event.end, 'HH:mm')}</span>
                             </div>
-                            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl">
-                                <span className="text-xs font-bold text-gray-400 uppercase">Instructor</span>
-                                <span className="font-bold text-gray-900 text-sm">{event.instructor || event.instructorName}</span>
+                            <div className="flex items-center justify-between p-3 rounded-2xl" style={{backgroundColor: 'var(--color-bg-app)'}}>
+                                <span className="text-xs font-bold uppercase" style={{color: 'var(--color-text-muted)'}}>Instructor</span>
+                                <span className="font-bold text-sm" style={{color: 'var(--color-text-primary)'}}>{event.instructor || event.instructorName}</span>
                             </div>
                         </div>
                         {event.description && (
-                            <div className="text-sm text-gray-500 leading-relaxed text-left border-t border-gray-100 pt-4">
+                            <div className="text-sm leading-relaxed text-left border-t pt-4" style={{color: 'var(--color-text-secondary)', borderColor: 'var(--color-border-subtle)'}}>
                                 {event.description}
                             </div>
                         )}
@@ -572,18 +555,18 @@ const StudentSchedule: React.FC = () => {
     }, [view, date]);
 
     return (
-        <div className="w-full h-full bg-white flex flex-col font-sans overflow-hidden">
+        <div className="w-full h-full flex flex-col font-sans overflow-hidden" style={{backgroundColor: 'var(--color-bg-app)'}}>  
             
             {/* --- IMMERSIVE HEADER --- */}
-            <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 border-b border-gray-100 bg-white shrink-0 gap-4 z-20">
+            <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 shrink-0 gap-4 z-20 border-b" style={{backgroundColor: 'var(--color-bg-surface)', borderColor: 'var(--color-border-subtle)'}}>
                 <div className="flex items-center gap-6 w-full md:w-auto">
-                    <h1 className="text-3xl font-black tracking-tight text-gray-900 capitalize min-w-[200px]">
+                    <h1 className="text-3xl font-black tracking-tight capitalize min-w-[200px]" style={{color: 'var(--color-text-primary)'}}>
                         {headerTitle}
                     </h1>
                 </div>
 
                 <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end overflow-x-auto no-scrollbar">
-                    <div className="flex bg-gray-100 p-1 rounded-xl">
+                    <div className="flex p-1 rounded-xl" style={{backgroundColor: 'var(--color-bg-app)', border: '1px solid var(--color-border-subtle)'}}>
                         {[
                             { id: 'agenda', label: 'Agenda' },
                             { id: 'year', label: 'Año' },
@@ -594,11 +577,10 @@ const StudentSchedule: React.FC = () => {
                             <button
                                 key={v.id}
                                 onClick={() => setView(v.id as ViewType)}
-                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                                    view === v.id 
-                                    ? 'bg-white text-gray-900 shadow-sm' 
-                                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200/50'
-                                }`}
+                                className="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap"
+                                style={view === v.id
+                                    ? {backgroundColor: 'var(--color-bg-surface)', color: 'var(--color-text-primary)', boxShadow: '0 1px 4px rgba(0,0,0,0.3)'}
+                                    : {color: 'var(--color-text-muted)'}}
                             >
                                 {v.label}
                             </button>
@@ -607,13 +589,13 @@ const StudentSchedule: React.FC = () => {
 
                     {view !== 'agenda' && (
                         <div className="flex items-center gap-1">
-                            <button onClick={() => handleNavigate('PREV')} className="size-9 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-all">
+                            <button onClick={() => handleNavigate('PREV')} className="size-9 flex items-center justify-center rounded-full transition-all" style={{color: 'var(--color-text-muted)'}} onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}>
                                 <span className="material-symbols-outlined text-xl">chevron_left</span>
                             </button>
-                            <button onClick={() => handleNavigate('TODAY')} className="px-3 py-1.5 rounded-lg hover:bg-gray-100 text-xs font-bold text-gray-900 uppercase transition-all">
+                            <button onClick={() => handleNavigate('TODAY')} className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all" style={{color: 'var(--color-text-secondary)'}} onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}>
                                 Hoy
                             </button>
-                            <button onClick={() => handleNavigate('NEXT')} className="size-9 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-all">
+                            <button onClick={() => handleNavigate('NEXT')} className="size-9 flex items-center justify-center rounded-full transition-all" style={{color: 'var(--color-text-muted)'}} onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}>
                                 <span className="material-symbols-outlined text-xl">chevron_right</span>
                             </button>
                         </div>
@@ -622,7 +604,7 @@ const StudentSchedule: React.FC = () => {
             </div>
 
             {/* --- MAIN CANVAS CONTENT (Scroll Container) --- */}
-            <div className="flex-1 relative bg-white overflow-hidden flex flex-col">
+            <div className="flex-1 relative overflow-hidden flex flex-col" style={{backgroundColor: 'var(--color-bg-app)'}}>
                 
                 {/* 1. VIEW: AGENDA (Scrolls Internally) */}
                 {view === 'agenda' && (

@@ -18,38 +18,40 @@ interface StudentDetailModalProps {
 }
 
 const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
-    isOpen,
-    student,
-    onClose,
-    onEdit,
-    financialRecords
+    isOpen, student, onClose, onEdit, financialRecords
 }) => {
     const { deleteStudent, purgeStudentDebts, academySettings, updateStudent } = useStore();
     const { confirm } = useConfirmation();
     const { addToast } = useToast();
 
-    // ESTADOS LOCALES
     const [activeTab, setActiveTab] = useState<'info' | 'payments'>('info');
     const [isEditing, setIsEditing] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
     const [isEditingCredentials, setIsEditingCredentials] = useState(false);
     const [formData, setFormData] = useState<Student | null>(null);
+    // Search state — only for the finances tab
+    const [paymentSearch, setPaymentSearch] = useState('');
 
-    // Sincronizar formData cuando el estudiante cambia o se entra en modo edición
     useEffect(() => {
-        if (student && isEditing) {
-            setFormData(JSON.parse(JSON.stringify(student)));
-        }
+        if (student && isEditing) setFormData(JSON.parse(JSON.stringify(student)));
     }, [student, isEditing]);
 
-    // CÁLCULO DE PROGRESO
     const { progressPercent, requiredAttendance } = useMemo(() => {
         if (!student) return { progressPercent: 0, requiredAttendance: 0 };
-        const currentRankConfig = academySettings.ranks.find(r => r.id === student.rankId);
-        const required = currentRankConfig?.requiredAttendance || 0;
+        const cfg = academySettings.ranks.find(r => r.id === student.rankId);
+        const required = cfg?.requiredAttendance || 0;
         const percent = required > 0 ? Math.min(Math.round((student.attendance / required) * 100), 100) : 100;
         return { progressPercent: percent, requiredAttendance: required };
     }, [student, academySettings]);
+
+    // Filtered financial records
+    const filteredRecords = useMemo(() => {
+        const q = paymentSearch.trim().toLowerCase();
+        if (!q) return financialRecords;
+        return financialRecords.filter(r =>
+            r.concept?.toLowerCase().includes(q)
+        );
+    }, [financialRecords, paymentSearch]);
 
     if (!student) return null;
 
@@ -57,59 +59,43 @@ const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
         confirm({
             title: 'Eliminar Expediente',
             message: `¿Deseas eliminar permanentemente a ${student.name}? Esta acción borrará registros de asistencia y deudas.`,
-            type: 'danger',
-            confirmText: 'Confirmar Eliminación',
+            type: 'danger', confirmText: 'Confirmar Eliminación',
             onConfirm: async () => {
                 setIsDeleting(true);
-                try {
-                    await deleteStudent(student.id);
-                    purgeStudentDebts(student.id);
-                    onClose();
-                } catch (e) {
-                    addToast('Ocurrió un error al eliminar.', 'error');
-                } finally {
-                    setIsDeleting(false);
-                }
+                try { await deleteStudent(student.id); purgeStudentDebts(student.id); onClose(); }
+                catch (e) { addToast('Ocurrió un error al eliminar.', 'error'); }
+                finally { setIsDeleting(false); }
             }
         });
     };
 
     const handleSaveChanges = () => {
         if (!formData) return;
-
-        // Validación básica
-        if (!formData.name || !formData.email) {
-            addToast('Nombre y Email son obligatorios', 'error');
-            return;
-        }
-
+        if (!formData.name || !formData.email) { addToast('Nombre y Email son obligatorios', 'error'); return; }
         updateStudent(formData);
         addToast('Datos actualizados correctamente', 'success');
         setIsEditing(false);
     };
 
-    // Helpers para actualización de campos anidados
     const updateNestedField = (path: string, value: any) => {
         setFormData(prev => {
             if (!prev) return null;
             const next = { ...prev };
             const keys = path.split('.');
-            let current: any = next;
-            for (let i = 0; i < keys.length - 1; i++) {
-                current = current[keys[i]];
-            }
-            current[keys[keys.length - 1]] = value;
+            let cur: any = next;
+            for (let i = 0; i < keys.length - 1; i++) cur = cur[keys[i]];
+            cur[keys[keys.length - 1]] = value;
             return next;
         });
     };
 
-    const statusConfig: Record<string, { label: string; color: string; bg: string; border: string }> = {
-        active:     { label: 'Activo',        color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
-        debtor:     { label: 'Adeudo',        color: 'text-red-400',     bg: 'bg-red-500/10',     border: 'border-red-500/20' },
-        exam_ready: { label: 'Listo p/Examen',color: 'text-sky-400',     bg: 'bg-sky-500/10',     border: 'border-sky-500/20' },
-        inactive:   { label: 'Inactivo',      color: 'text-gray-500',    bg: 'bg-gray-500/10',    border: 'border-gray-500/20' },
+    const statusMap: Record<string, { label: string; dot: string; badgeBg: string; badgeText: string }> = {
+        active:     { label: 'Activo',         dot: 'bg-emerald-400', badgeBg: 'bg-emerald-500/15 border-emerald-500/30', badgeText: 'text-emerald-400' },
+        debtor:     { label: 'Adeudo',          dot: 'bg-red-400',     badgeBg: 'bg-red-500/15 border-red-500/30',         badgeText: 'text-red-400' },
+        exam_ready: { label: 'Listo p/ Examen', dot: 'bg-sky-400',     badgeBg: 'bg-sky-500/15 border-sky-500/30',         badgeText: 'text-sky-400' },
+        inactive:   { label: 'Inactivo',        dot: 'bg-zinc-500',    badgeBg: 'bg-zinc-800 border-zinc-700',             badgeText: 'text-zinc-500' },
     };
-    const sConfig = statusConfig[student.status] || statusConfig.inactive;
+    const sMap = statusMap[student.status] || statusMap.inactive;
 
     return (
         <>
@@ -119,454 +105,458 @@ const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] bg-[#0a0a0d] overflow-y-auto font-sans"
+                        transition={{ duration: 0.15 }}
+                        className="fixed inset-0 z-[100] overflow-y-auto"
+                        style={{ background: '#07070a', fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}
                     >
                         {isEditing && formData ? (
-                            /* --- MODO EDICIÓN: DARK ENTERPRISE FORM --- */
+                            /* ═══════════════ EDIT MODE ═══════════════ */
                             <div className="min-h-screen flex flex-col">
-                                <header className="bg-[#0e0e11] border-b border-white/5 px-8 py-5 sticky top-0 z-50 backdrop-blur-md">
-                                    <div className="max-w-5xl mx-auto flex justify-between items-center">
-                                        <div>
-                                            <h2 className="text-xl font-black text-white tracking-tight">Editar Expediente</h2>
-                                            <p className="text-gray-500 text-xs font-medium mt-0.5">Actualiza la información técnica y personal del alumno.</p>
-                                        </div>
-                                        <button
-                                            onClick={() => setIsEditing(false)}
-                                            className="p-2 rounded-xl hover:bg-white/5 text-gray-500 hover:text-white transition-all"
-                                        >
-                                            <span className="material-symbols-outlined">close</span>
-                                        </button>
-                                    </div>
-                                </header>
-
-                                <main className="flex-1 max-w-5xl mx-auto w-full p-8 pb-32">
-                                    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-
-                                        {/* SECCIÓN 1: DATOS DEL ALUMNO */}
-                                        <section>
-                                            <DarkSectionTitle icon="person" title="Información del Alumno" />
-                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                                                <div className="md:col-span-2">
-                                                    <DarkEditInput label="Nombre Completo" value={formData.name} onChange={v => updateNestedField('name', v)} />
-                                                </div>
-                                                <DarkEditInput label="Email de Acceso" value={formData.email} onChange={v => updateNestedField('email', v)} type="email" />
-                                                <DarkEditInput label="Celular Alumno" value={formData.cellPhone} onChange={v => updateNestedField('cellPhone', v)} type="tel" />
-                                                <DarkEditInput label="Fecha Nacimiento" value={formData.birthDate} onChange={v => updateNestedField('birthDate', v)} type="date" />
-                                                <DarkEditSelect
-                                                    label="Tipo de Sangre"
-                                                    value={(formData as any).bloodType || ''}
-                                                    onChange={v => updateNestedField('bloodType', v)}
-                                                    options={['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-']}
-                                                />
-                                                <DarkEditInput label="Peso (kg)" value={formData.weight?.toString() || ''} onChange={v => updateNestedField('weight', parseFloat(v))} type="number" />
-                                                <DarkEditInput label="Estatura (cm)" value={formData.height?.toString() || ''} onChange={v => updateNestedField('height', parseInt(v))} type="number" />
-                                                <DarkEditSelect
-                                                    label="Rango Actual"
-                                                    value={formData.rank}
-                                                    onChange={v => {
-                                                        const r = academySettings.ranks.find(rank => rank.name === v);
-                                                        if (r) {
-                                                            updateNestedField('rank', r.name);
-                                                            updateNestedField('rankId', r.id);
-                                                            updateNestedField('rankColor', r.color);
-                                                        }
-                                                    }}
-                                                    options={academySettings.ranks.map(r => r.name)}
-                                                />
-                                            </div>
-                                        </section>
-
-                                        {/* SECCIÓN 2: DIRECCIÓN */}
-                                        <section>
-                                            <DarkSectionTitle icon="location_on" title="Domicilio Residencial" />
-                                            <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                                                <div className="md:col-span-2">
-                                                    <DarkEditInput label="Calle" value={formData.guardian.address.street} onChange={v => updateNestedField('guardian.address.street', v)} />
-                                                </div>
-                                                <DarkEditInput label="Núm. Exterior" value={formData.guardian.address.exteriorNumber} onChange={v => updateNestedField('guardian.address.exteriorNumber', v)} />
-                                                <DarkEditInput label="Núm. Interior" value={formData.guardian.address.interiorNumber || ''} onChange={v => updateNestedField('guardian.address.interiorNumber', v)} />
-                                                <div className="md:col-span-3">
-                                                    <DarkEditInput label="Colonia" value={formData.guardian.address.colony} onChange={v => updateNestedField('guardian.address.colony', v)} />
-                                                </div>
-                                                <DarkEditInput label="Código Postal" value={formData.guardian.address.zipCode} onChange={v => updateNestedField('guardian.address.zipCode', v)} />
-                                            </div>
-                                        </section>
-
-                                        {/* SECCIÓN 3: TUTOR */}
-                                        <section>
-                                            <DarkSectionTitle icon="family_history" title="Tutor y Emergencias" />
-                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                                                <div className="md:col-span-2">
-                                                    <DarkEditInput label="Nombre del Tutor" value={formData.guardian.fullName} onChange={v => updateNestedField('guardian.fullName', v)} />
-                                                </div>
-                                                <DarkEditSelect
-                                                    label="Parentesco"
-                                                    value={formData.guardian.relationship}
-                                                    onChange={v => updateNestedField('guardian.relationship', v)}
-                                                    options={['Padre', 'Madre', 'Tutor Legal', 'Familiar', 'Otro']}
-                                                />
-                                                <DarkEditInput label="Email Tutor" value={formData.guardian.email} onChange={v => updateNestedField('guardian.email', v)} type="email" />
-                                                <DarkEditInput label="Teléfono Principal" value={formData.guardian.phones.main} onChange={v => updateNestedField('guardian.phones.main', v)} type="tel" />
-                                                <DarkEditInput label="Teléfono Secundario" value={formData.guardian.phones.secondary || ''} onChange={v => updateNestedField('guardian.phones.secondary', v)} type="tel" />
-                                            </div>
-                                        </section>
-
-                                    </div>
-                                </main>
-
-                                {/* BARRA DE ACCIONES FIJA */}
-                                <footer className="fixed bottom-0 left-0 right-0 bg-[#0e0e11]/90 backdrop-blur-md border-t border-white/5 p-5 z-50">
-                                    <div className="max-w-5xl mx-auto flex gap-3">
-                                        <button
-                                            onClick={() => setIsEditing(false)}
-                                            className="flex-1 py-3.5 bg-white/5 text-gray-400 rounded-xl font-bold hover:bg-white/10 hover:text-white transition-all uppercase tracking-widest text-xs"
-                                        >
+                                <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-[#09090d]/95 backdrop-blur-md px-6 py-4 flex items-center justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <button onClick={() => setIsEditing(false)}
+                                            className="flex items-center gap-1.5 text-zinc-500 hover:text-white transition-colors text-sm font-medium">
+                                            <span className="material-symbols-outlined text-[18px]">arrow_back</span>
                                             Cancelar
                                         </button>
-                                        <button
-                                            onClick={handleSaveChanges}
-                                            className="flex-[2] py-3.5 bg-white text-black rounded-xl font-bold hover:bg-gray-100 transition-all shadow-xl uppercase tracking-widest text-xs active:scale-[0.98]"
-                                        >
-                                            Guardar Cambios
-                                        </button>
+                                        <span className="text-zinc-800">/</span>
+                                        <span className="text-white text-sm font-semibold">{student.name}</span>
                                     </div>
-                                </footer>
-                            </div>
-                        ) : (
-                            /* --- MODO LECTURA: DARK ENTERPRISE VIEW --- */
-                            <>
-                                {/* --- STICKY TOP BAR --- */}
-                                <header className="sticky top-0 z-50 bg-[#0e0e11]/90 backdrop-blur-md border-b border-white/5">
-                                    <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-                                        {/* IZQUIERDA: IDENTIDAD */}
-                                        <div className="flex items-center gap-4">
-                                            <Avatar
-                                                src={student.avatarUrl}
-                                                name={student.name}
-                                                className="w-12 h-12 rounded-2xl object-cover text-base font-black ring-1 ring-white/10"
-                                            />
-                                            <div>
-                                                <div className="flex items-center gap-2.5 flex-wrap">
-                                                    <h1 className="text-lg font-bold text-white tracking-tight">{student.name}</h1>
-                                                    <span className="bg-white/10 text-gray-300 border border-white/10 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest">
-                                                        {student.rank}
-                                                    </span>
-                                                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest border ${sConfig.bg} ${sConfig.color} ${sConfig.border}`}>
-                                                        {sConfig.label}
-                                                    </span>
-                                                </div>
-                                                <p className="text-gray-600 text-[11px] font-medium mt-0.5">
-                                                    Alumno desde: {student.joinDate}
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        {/* DERECHA: ACCIONES */}
-                                        <div className="flex items-center gap-1">
-                                            <ActionBtn icon="edit" title="Editar" onClick={() => setIsEditing(true)} color="text-gray-400 hover:text-white hover:bg-white/10" />
-                                            <ActionBtn icon="key" title="Claves" onClick={() => setIsEditingCredentials(true)} color="text-gray-400 hover:text-indigo-400 hover:bg-indigo-500/10" />
-
-                                            <button
-                                                onClick={handleDelete}
-                                                title="Eliminar"
-                                                disabled={isDeleting}
-                                                className={`p-2.5 rounded-xl transition-all flex items-center justify-center ${isDeleting ? 'text-gray-600 cursor-not-allowed' : 'text-gray-400 hover:text-red-400 hover:bg-red-500/10'}`}
-                                            >
-                                                {isDeleting ? (
-                                                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                                    </svg>
-                                                ) : (
-                                                    <span className="material-symbols-outlined text-[20px]">delete</span>
-                                                )}
-                                            </button>
-
-                                            <div className="w-px h-5 bg-white/10 mx-1" />
-
-                                            <ActionBtn icon="close" title="Cerrar" onClick={onClose} color="text-gray-400 hover:text-white hover:bg-white/10" />
-                                        </div>
-                                    </div>
-
-                                    {/* TABS */}
-                                    <div className="max-w-7xl mx-auto px-6">
-                                        <nav className="flex gap-0">
-                                            <DarkTabBtn active={activeTab === 'info'} onClick={() => setActiveTab('info')} label="Expediente" />
-                                            <DarkTabBtn active={activeTab === 'payments'} onClick={() => setActiveTab('payments')} label="Finanzas & Pagos" />
-                                        </nav>
-                                    </div>
+                                    <button onClick={handleSaveChanges}
+                                        className="px-5 py-2 rounded-lg text-sm font-semibold text-black bg-white hover:bg-zinc-200 transition-all shadow-lg">
+                                        Guardar Cambios
+                                    </button>
                                 </header>
 
-                                {/* --- CONTENIDO PRINCIPAL --- */}
-                                <main className="max-w-7xl mx-auto p-6 pb-24">
-                                    {activeTab === 'info' ? (
-                                        <div className="grid grid-cols-12 gap-4 animate-in fade-in slide-in-from-bottom-2 duration-400">
+                                <main className="max-w-3xl mx-auto w-full px-6 py-10 space-y-12 pb-20">
+                                    <EditSection label="Datos del Alumno">
+                                        <div className="grid grid-cols-12 gap-5">
+                                            <div className="col-span-12 md:col-span-7"><EInput label="Nombre Completo" value={formData.name} onChange={v => updateNestedField('name', v)} /></div>
+                                            <div className="col-span-12 md:col-span-5"><EInput label="Email" value={formData.email} onChange={v => updateNestedField('email', v)} type="email" /></div>
+                                            <div className="col-span-6 md:col-span-4"><EInput label="Celular" value={formData.cellPhone} onChange={v => updateNestedField('cellPhone', v)} type="tel" /></div>
+                                            <div className="col-span-6 md:col-span-4"><EInput label="Nacimiento" value={formData.birthDate} onChange={v => updateNestedField('birthDate', v)} type="date" /></div>
+                                            <div className="col-span-3 md:col-span-2"><EInput label="Peso kg" value={formData.weight?.toString() || ''} onChange={v => updateNestedField('weight', parseFloat(v))} type="number" /></div>
+                                            <div className="col-span-3 md:col-span-2"><EInput label="Alt. cm" value={formData.height?.toString() || ''} onChange={v => updateNestedField('height', parseInt(v))} type="number" /></div>
+                                            <div className="col-span-6 md:col-span-4"><ESelect label="Tipo de Sangre" value={(formData as any).bloodType || ''} onChange={v => updateNestedField('bloodType', v)} options={['A+','A-','B+','B-','AB+','AB-','O+','O-']} /></div>
+                                            <div className="col-span-6 md:col-span-4">
+                                                <ESelect label="Rango" value={formData.rank}
+                                                    onChange={v => { const r = academySettings.ranks.find(rank => rank.name === v); if (r) { updateNestedField('rank', r.name); updateNestedField('rankId', r.id); updateNestedField('rankColor', r.color); } }}
+                                                    options={academySettings.ranks.map(r => r.name)} />
+                                            </div>
+                                        </div>
+                                    </EditSection>
 
-                                            {/* 1. PROGRESO DE GRADO */}
-                                            <div className="col-span-12 lg:col-span-8 bg-[#0e0e11] rounded-2xl border border-white/5 p-6">
-                                                <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-5">Progreso de Grado</p>
-                                                <div className="flex items-end justify-between mb-4">
-                                                    <div className="flex items-baseline gap-2">
-                                                        <span className="text-5xl font-black text-white tabular-nums">{student.attendance}</span>
-                                                        <span className="text-gray-600 font-bold uppercase text-xs">Clases asistidas</span>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <span className="text-2xl font-black text-white">{progressPercent}<span className="text-lg text-gray-500">%</span></span>
-                                                        <p className="text-[10px] text-gray-600 font-bold uppercase mt-0.5">Meta: {requiredAttendance} clases</p>
+                                    <EditSection label="Domicilio">
+                                        <div className="grid grid-cols-12 gap-5">
+                                            <div className="col-span-12 md:col-span-6"><EInput label="Calle" value={formData.guardian.address.street} onChange={v => updateNestedField('guardian.address.street', v)} /></div>
+                                            <div className="col-span-6 md:col-span-3"><EInput label="Núm. Ext." value={formData.guardian.address.exteriorNumber} onChange={v => updateNestedField('guardian.address.exteriorNumber', v)} /></div>
+                                            <div className="col-span-6 md:col-span-3"><EInput label="Núm. Int." value={formData.guardian.address.interiorNumber || ''} onChange={v => updateNestedField('guardian.address.interiorNumber', v)} /></div>
+                                            <div className="col-span-12 md:col-span-8"><EInput label="Colonia" value={formData.guardian.address.colony} onChange={v => updateNestedField('guardian.address.colony', v)} /></div>
+                                            <div className="col-span-6 md:col-span-4"><EInput label="C.P." value={formData.guardian.address.zipCode} onChange={v => updateNestedField('guardian.address.zipCode', v)} /></div>
+                                        </div>
+                                    </EditSection>
+
+                                    <EditSection label="Tutor y Emergencias">
+                                        <div className="grid grid-cols-12 gap-5">
+                                            <div className="col-span-12 md:col-span-6"><EInput label="Nombre del Tutor" value={formData.guardian.fullName} onChange={v => updateNestedField('guardian.fullName', v)} /></div>
+                                            <div className="col-span-6 md:col-span-3"><ESelect label="Parentesco" value={formData.guardian.relationship} onChange={v => updateNestedField('guardian.relationship', v)} options={['Padre','Madre','Tutor Legal','Familiar','Otro']} /></div>
+                                            <div className="col-span-6 md:col-span-3"><EInput label="Email Tutor" value={formData.guardian.email} onChange={v => updateNestedField('guardian.email', v)} type="email" /></div>
+                                            <div className="col-span-6 md:col-span-4"><EInput label="Tel. Principal" value={formData.guardian.phones.main} onChange={v => updateNestedField('guardian.phones.main', v)} type="tel" /></div>
+                                            <div className="col-span-6 md:col-span-4"><EInput label="Tel. Secundario" value={formData.guardian.phones.secondary || ''} onChange={v => updateNestedField('guardian.phones.secondary', v)} type="tel" /></div>
+                                        </div>
+                                    </EditSection>
+                                </main>
+                            </div>
+
+                        ) : (
+                            /* ═══════════════ READ MODE ═══════════════ */
+                            <div className="min-h-screen">
+
+                                {/* ── TOPBAR ── */}
+                                <div className="sticky top-0 z-50 border-b border-white/[0.05] bg-[#09090d]/92 backdrop-blur-xl">
+                                    <div className="max-w-5xl mx-auto px-6 h-13 py-3 flex items-center justify-between">
+                                        <span className="text-xs text-zinc-600 uppercase tracking-[0.15em] font-semibold">Expediente de Alumno</span>
+                                        <div className="flex items-center gap-1">
+                                            <TopBtn icon="edit"   label="Editar"  onClick={() => setIsEditing(true)} />
+                                            <TopBtn icon="key"    label="Acceso"  onClick={() => setIsEditingCredentials(true)} />
+                                            <div className="w-px h-4 bg-white/10 mx-1.5" />
+                                            <button onClick={handleDelete} disabled={isDeleting}
+                                                className="h-8 px-3 flex items-center gap-1.5 rounded-lg text-xs font-semibold text-red-500/80 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-40">
+                                                {isDeleting
+                                                    ? <svg className="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
+                                                    : <span className="material-symbols-outlined text-[15px]">delete</span>}
+                                                Eliminar
+                                            </button>
+                                            <div className="w-px h-4 bg-white/10 mx-1.5" />
+                                            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-600 hover:text-white hover:bg-white/8 transition-all">
+                                                <span className="material-symbols-outlined text-[20px]">close</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* ── HERO SECTION ── */}
+                                <div className="relative overflow-hidden border-b border-white/[0.05]">
+                                    {/* Ambient background glows */}
+                                    <div className="absolute inset-0 pointer-events-none select-none">
+                                        <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-[700px] h-[400px]"
+                                            style={{ background: 'radial-gradient(ellipse, rgba(220,38,38,0.10) 0%, transparent 65%)' }} />
+                                        <div className="absolute -top-10 left-0 w-[400px] h-[250px]"
+                                            style={{ background: 'radial-gradient(ellipse, rgba(99,102,241,0.08) 0%, transparent 70%)' }} />
+                                        <div className="absolute top-0 right-0 w-[300px] h-[200px]"
+                                            style={{ background: 'radial-gradient(ellipse, rgba(220,38,38,0.06) 0%, transparent 70%)' }} />
+                                    </div>
+
+                                    <div className="relative max-w-5xl mx-auto px-6 pt-10 pb-7">
+                                        <div className="flex items-end gap-8">
+                                            {/* Avatar */}
+                                            <div className="relative flex-shrink-0">
+                                                <div className="absolute -inset-3 rounded-full opacity-30 blur-2xl"
+                                                    style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.8) 0%, rgba(220,38,38,0.4) 100%)' }} />
+                                                <div className="relative p-[3px] rounded-full" style={{ background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 50%, #dc2626 100%)' }}>
+                                                    <div className="p-[3px] rounded-full bg-[#07070a]">
+                                                        <Avatar
+                                                            src={student.avatarUrl}
+                                                            name={student.name}
+                                                            className="w-28 h-28 rounded-full object-cover text-3xl font-black"
+                                                        />
                                                     </div>
                                                 </div>
-                                                <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                                                    <motion.div
-                                                        initial={{ width: 0 }}
-                                                        animate={{ width: `${progressPercent}%` }}
-                                                        transition={{ duration: 0.8, ease: 'easeOut' }}
-                                                        className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full"
+                                            </div>
+
+                                            {/* Identity */}
+                                            <div className="pb-1 flex-1 min-w-0">
+                                                <h1 className="text-4xl font-black text-white tracking-tight leading-none mb-3 truncate">
+                                                    {student.name}
+                                                </h1>
+                                                <div className="flex items-center gap-2 flex-wrap mb-4">
+                                                    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border ${sMap.badgeBg} ${sMap.badgeText}`}>
+                                                        <span className={`w-2 h-2 rounded-full ${sMap.dot}`} />
+                                                        {sMap.label}
+                                                    </span>
+                                                    <span className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border border-indigo-500/25 bg-indigo-500/10 text-indigo-400">
+                                                        {student.rank}
+                                                    </span>
+                                                </div>
+                                                {/* Stats row */}
+                                                <div className="flex items-center gap-6 flex-wrap">
+                                                    <HeroStat label="Asistencias" value={String(student.attendance)} />
+                                                    <div className="w-px h-8 bg-white/8" />
+                                                    <HeroStat label="Progreso" value={`${progressPercent}%`} accent />
+                                                    <div className="w-px h-8 bg-white/8" />
+                                                    <HeroStat
+                                                        label="Saldo"
+                                                        value={`$${student.balance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`}
+                                                        danger={student.balance > 0}
+                                                        success={student.balance === 0}
                                                     />
-                                                </div>
-                                                {student.lastAttendance && (
-                                                    <p className="text-[11px] text-gray-600 mt-3">
-                                                        Última asistencia: <span className="text-gray-400 font-semibold">{formatDateDisplay(student.lastAttendance)}</span>
-                                                    </p>
-                                                )}
-                                            </div>
 
-                                            {/* 2. BIOMETRÍA */}
-                                            <div className="col-span-12 lg:col-span-4 bg-[#0e0e11] rounded-2xl border border-white/5 p-6">
-                                                <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-5">Biometría</p>
-                                                <div className="grid grid-cols-2 gap-5">
-                                                    <DarkBiometryField label="Edad" value={student.age ? `${student.age} años` : '—'} />
-                                                    <DarkBiometryField label="Peso" value={student.weight ? `${student.weight} kg` : '—'} />
-                                                    <DarkBiometryField label="Estatura" value={student.height ? `${student.height} cm` : '—'} />
-                                                    <DarkBiometryField label="Sangre" value={(student as any).bloodType || 'N/R'} />
                                                 </div>
                                             </div>
+                                        </div>
 
-                                            {/* 3. CONTACTO */}
-                                            <div className="col-span-12 lg:col-span-6 bg-[#0e0e11] rounded-2xl border border-white/5 p-6">
-                                                <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-5">Información de Contacto</p>
-                                                <div className="space-y-4">
-                                                    <DarkContactRow label="Celular Alumno" value={student.cellPhone} isLink={`tel:${student.cellPhone}`} icon="smartphone" />
-                                                    <DarkContactRow label="Email Personal" value={student.email} icon="alternate_email" />
-                                                    <DarkContactRow label="Nacimiento" value={formatDateDisplay(student.birthDate)} icon="cake" />
-                                                    <div className="pt-4 border-t border-white/5">
-                                                        <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-1.5">Dirección Residencial</p>
-                                                        <p className="text-white font-semibold text-sm">
-                                                            {student.guardian.address.street} {student.guardian.address.exteriorNumber}
-                                                            {student.guardian.address.interiorNumber ? `, Int. ${student.guardian.address.interiorNumber}` : ''}
+                                        {/* Progress bar */}
+                                        <div className="mt-8">
+                                            <div className="relative h-1.5 bg-white/[0.06] rounded-full overflow-hidden">
+                                                <motion.div
+                                                    initial={{ width: 0 }}
+                                                    animate={{ width: `${progressPercent}%` }}
+                                                    transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                                                    className="absolute inset-y-0 left-0 rounded-full"
+                                                    style={{ background: 'linear-gradient(90deg, #6366f1, #a855f7, #dc2626)' }}
+                                                />
+                                            </div>
+                                            <div className="flex justify-between mt-2">
+                                                <span className="text-xs text-zinc-600">Progreso al siguiente grado</span>
+                                                <span className="text-xs text-zinc-600">{student.attendance} / {requiredAttendance} clases requeridas</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Tabs */}
+                                    <div className="max-w-5xl mx-auto px-6 flex gap-1">
+                                        <ETab label="Expediente"      active={activeTab === 'info'}     onClick={() => setActiveTab('info')} />
+                                        <ETab label="Finanzas & Pagos" active={activeTab === 'payments'} onClick={() => setActiveTab('payments')} />
+                                    </div>
+                                </div>
+
+                                {/* ── CONTENT ── */}
+                                <div className="max-w-5xl mx-auto px-6 py-8 pb-24">
+                                    {activeTab === 'info' ? (
+                                        <motion.div key="info" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }}
+                                            className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                                            {/* CONTACT */}
+                                            <GlassCard label="Información de Contacto" icon="contacts">
+                                                <InfoRow label="Email"      value={student.email} mono />
+                                                <InfoRow label="Celular"    value={student.cellPhone} link={`tel:${student.cellPhone}`} />
+                                                <InfoRow label="Nacimiento" value={formatDateDisplay(student.birthDate)} />
+                                                <InfoRow label="Dirección"
+                                                    value={[
+                                                        `${student.guardian.address.street} ${student.guardian.address.exteriorNumber}`,
+                                                        student.guardian.address.interiorNumber ? `Int. ${student.guardian.address.interiorNumber}` : '',
+                                                        student.guardian.address.colony,
+                                                        `CP ${student.guardian.address.zipCode}`
+                                                    ].filter(Boolean).join(', ')}
+                                                />
+                                            </GlassCard>
+
+                                            {/* BIOMETRY */}
+                                            <GlassCard label="Biometría" icon="accessibility">
+                                                <div className="grid grid-cols-2 divide-x divide-y divide-white/[0.05]">
+                                                    <BigStat label="Edad"     value={student.age ? `${student.age} años` : '—'} />
+                                                    <BigStat label="Peso"     value={student.weight ? `${student.weight} kg` : '—'} />
+                                                    <BigStat label="Estatura" value={student.height ? `${student.height} cm` : '—'} />
+                                                    <BigStat label="Sangre"   value={(student as any).bloodType || 'N/R'} />
+                                                </div>
+                                            </GlassCard>
+
+                                            {/* GUARDIAN */}
+                                            <GlassCard label="Responsable / Emergencias" icon="family_history">
+                                                <InfoRow label="Nombre"         value={student.guardian.fullName || '—'} />
+                                                <InfoRow label="Parentesco"     value={student.guardian.relationship || '—'} />
+                                                {student.guardian.email && <InfoRow label="Email" value={student.guardian.email} mono />}
+                                                <InfoRow label="Tel. Principal" value={student.guardian.phones.main} link={`tel:${student.guardian.phones.main}`} />
+                                                {student.guardian.phones.secondary && <InfoRow label="Tel. Secundario" value={student.guardian.phones.secondary} link={`tel:${student.guardian.phones.secondary}`} />}
+                                                {student.guardian.phones.tertiary  && <InfoRow label="Tel. Extra"      value={student.guardian.phones.tertiary}   link={`tel:${student.guardian.phones.tertiary}`} />}
+                                            </GlassCard>
+
+                                            {/* META */}
+                                            <GlassCard label="Metadatos del Registro" icon="fingerprint">
+                                                <div className="px-5 py-5 space-y-4">
+                                                    <div>
+                                                        <p className="text-xs text-zinc-600 uppercase tracking-widest font-semibold mb-2">ID de Registro</p>
+                                                        <p className="text-xs font-mono text-zinc-500 break-all leading-relaxed">{student.id}</p>
+                                                    </div>
+                                                    <div className="border-t border-white/[0.05] pt-4">
+                                                        <p className="text-xs text-zinc-600 uppercase tracking-widest font-semibold mb-2">Última Asistencia</p>
+                                                        <p className="text-base font-bold text-zinc-300">
+                                                            {student.lastAttendance ? formatDateDisplay(student.lastAttendance) : '—'}
                                                         </p>
-                                                        <p className="text-gray-500 text-sm mt-0.5">{student.guardian.address.colony}, CP {student.guardian.address.zipCode}</p>
                                                     </div>
-                                                </div>
-                                            </div>
-
-                                            {/* 4. TUTOR LEGAL */}
-                                            <div className="col-span-12 lg:col-span-6 bg-[#0e0e11] rounded-2xl border border-white/5 p-6">
-                                                <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-5">Responsable / Emergencias</p>
-                                                <div className="space-y-4">
-                                                    <div className="grid grid-cols-2 gap-4">
-                                                        <DarkBiometryField label="Tutor" value={student.guardian.fullName || '—'} />
-                                                        <DarkBiometryField label="Parentesco" value={student.guardian.relationship || '—'} />
-                                                    </div>
-                                                    <div className="bg-white/3 rounded-xl border border-white/5 p-4 space-y-3 mt-2">
-                                                        <DarkEmergencyPhone label="Teléfono Principal" value={student.guardian.phones.main} />
-                                                        {student.guardian.phones.secondary && (
-                                                            <DarkEmergencyPhone label="Secundario" value={student.guardian.phones.secondary} />
-                                                        )}
-                                                        {student.guardian.phones.tertiary && (
-                                                            <DarkEmergencyPhone label="Contacto Extra" value={student.guardian.phones.tertiary} />
-                                                        )}
-                                                    </div>
-                                                    {student.guardian.email && (
-                                                        <div className="flex items-center gap-2 pt-1">
-                                                            <span className="material-symbols-outlined text-[16px] text-gray-600">alternate_email</span>
-                                                            <span className="text-gray-400 text-sm">{student.guardian.email}</span>
+                                                    {progressPercent >= 100 && (
+                                                        <div className="border-t border-white/[0.05] pt-4 flex items-start gap-3">
+                                                            <span className="material-symbols-outlined text-[20px] text-emerald-400 flex-shrink-0">verified</span>
+                                                            <p className="text-sm text-emerald-400 font-semibold leading-snug">Ha completado los requisitos para examen de grado.</p>
                                                         </div>
                                                     )}
                                                 </div>
-                                            </div>
+                                            </GlassCard>
+                                        </motion.div>
 
-                                        </div>
                                     ) : (
-                                        /* --- TAB 2: FINANZAS DARK --- */
-                                        <div className="space-y-4 animate-in fade-in duration-400">
-                                            {/* Hero Saldo */}
-                                            <div className="bg-[#0e0e11] rounded-2xl border border-white/5 p-8 flex flex-col items-center text-center">
-                                                <p className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] mb-3">Estado de Cuenta</p>
-                                                <h2 className={`text-6xl font-black tracking-tighter tabular-nums ${student.balance > 0 ? 'text-red-400' : 'text-white'}`}>
-                                                    ${student.balance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                                                </h2>
-                                                <div className={`mt-4 px-4 py-1.5 rounded-full text-[11px] font-bold uppercase tracking-widest border ${student.balance > 0 ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'}`}>
-                                                    {student.balance > 0 ? 'Adeudo Pendiente' : 'Al corriente'}
+                                        /* ── FINANCES ── */
+                                        <motion.div key="payments" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="space-y-5">
+
+                                            {/* Balance card */}
+                                            <div className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-[#0e0e13] p-7 flex items-center justify-between">
+                                                <div className="absolute top-0 left-0 w-80 h-full pointer-events-none"
+                                                    style={{ background: 'radial-gradient(ellipse at -10% center, rgba(220,38,38,0.09) 0%, transparent 70%)' }} />
+                                                <div className="relative">
+                                                    <p className="text-xs text-zinc-600 uppercase tracking-[0.15em] font-semibold mb-2">Estado de Cuenta</p>
+                                                    <h2 className={`text-5xl font-black tabular-nums tracking-tighter ${student.balance > 0 ? 'text-red-400' : 'text-white'}`}>
+                                                        ${student.balance.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                                    </h2>
+                                                </div>
+                                                <div className={`relative flex items-center gap-2.5 px-4 py-2.5 rounded-xl text-sm font-bold uppercase tracking-widest border ${student.balance > 0 ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'}`}>
+                                                    <span className={`w-2 h-2 rounded-full ${student.balance > 0 ? 'bg-red-400' : 'bg-emerald-400'}`} />
+                                                    {student.balance > 0 ? 'Adeudo pendiente' : 'Al corriente'}
                                                 </div>
                                             </div>
 
-                                            {/* Tabla de Pagos */}
-                                            <div className="bg-[#0e0e11] rounded-2xl border border-white/5 overflow-hidden">
-                                                <table className="w-full text-left">
-                                                    <thead className="border-b border-white/5">
-                                                        <tr>
-                                                            <th className="px-6 py-4 text-[10px] font-black text-gray-600 uppercase tracking-widest">Fecha</th>
-                                                            <th className="px-6 py-4 text-[10px] font-black text-gray-600 uppercase tracking-widest">Concepto</th>
-                                                            <th className="px-6 py-4 text-[10px] font-black text-gray-600 uppercase tracking-widest text-right">Monto</th>
-                                                            <th className="px-6 py-4 text-[10px] font-black text-gray-600 uppercase tracking-widest text-center">Estatus</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className="divide-y divide-white/5">
-                                                        {financialRecords.length > 0 ? (
-                                                            financialRecords.map(record => (
-                                                                <tr key={record.id} className="hover:bg-white/3 transition-colors">
-                                                                    <td className="px-6 py-4 text-sm font-bold text-gray-300">{formatDateDisplay(record.dueDate)}</td>
-                                                                    <td className="px-6 py-4 text-sm text-gray-400 font-medium">{record.concept}</td>
-                                                                    <td className="px-6 py-4 text-right font-black text-white tabular-nums">
-                                                                        ${(record.amount + record.penaltyAmount).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
-                                                                    </td>
-                                                                    <td className="px-6 py-4 text-center">
-                                                                        <DarkPaymentBadge status={record.status} />
-                                                                    </td>
-                                                                </tr>
-                                                            ))
-                                                        ) : (
-                                                            <tr>
-                                                                <td colSpan={4} className="px-8 py-20 text-center text-gray-700 italic font-medium text-sm">
-                                                                    No hay transacciones registradas para este alumno.
-                                                                </td>
-                                                            </tr>
-                                                        )}
-                                                    </tbody>
-                                                </table>
+                                            {/* ── SEARCH BAR ── */}
+                                            <div className="relative">
+                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-[18px] text-zinc-600 pointer-events-none select-none">
+                                                    search
+                                                </span>
+                                                <input
+                                                    type="text"
+                                                    placeholder="Buscar movimientos por concepto…"
+                                                    value={paymentSearch}
+                                                    onChange={e => setPaymentSearch(e.target.value)}
+                                                    className="w-full bg-[#0e0e13] border border-white/[0.08] rounded-xl pl-11 pr-4 py-3.5 text-sm text-white placeholder:text-zinc-600 outline-none focus:border-white/20 focus:bg-[#12121a] transition-all"
+                                                />
+                                                {paymentSearch && (
+                                                    <button onClick={() => setPaymentSearch('')}
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full bg-zinc-700 hover:bg-zinc-600 transition-colors">
+                                                        <span className="material-symbols-outlined text-[13px] text-zinc-300">close</span>
+                                                    </button>
+                                                )}
                                             </div>
-                                        </div>
+
+                                            {/* Transactions table */}
+                                            <div className="rounded-2xl border border-white/[0.07] bg-[#0e0e13] overflow-hidden">
+                                                {/* Table header */}
+                                                <div className="grid grid-cols-[1fr_2fr_1fr_1fr] border-b border-white/[0.06] bg-white/[0.02] px-5 py-3.5">
+                                                    <span className="text-xs font-semibold text-zinc-600 uppercase tracking-widest">Fecha</span>
+                                                    <span className="text-xs font-semibold text-zinc-600 uppercase tracking-widest">Concepto</span>
+                                                    <span className="text-xs font-semibold text-zinc-600 uppercase tracking-widest text-right">Monto</span>
+                                                    <span className="text-xs font-semibold text-zinc-600 uppercase tracking-widest text-right">Estatus</span>
+                                                </div>
+
+                                                {filteredRecords.length > 0 ? (
+                                                    <div className="divide-y divide-white/[0.04]">
+                                                        {filteredRecords.map(record => (
+                                                            <motion.div
+                                                                key={record.id}
+                                                                initial={{ opacity: 0 }}
+                                                                animate={{ opacity: 1 }}
+                                                                className="grid grid-cols-[1fr_2fr_1fr_1fr] px-5 py-4 hover:bg-white/[0.025] transition-colors items-center"
+                                                            >
+                                                                <span className="text-sm text-zinc-500">{formatDateDisplay(record.dueDate)}</span>
+                                                                <span className="text-sm font-medium text-zinc-200">{record.concept}</span>
+                                                                <span className="text-sm font-black text-white tabular-nums text-right">
+                                                                    ${(record.amount + record.penaltyAmount).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                                                </span>
+                                                                <div className="flex justify-end">
+                                                                    <EPaymentBadge status={record.status} />
+                                                                </div>
+                                                            </motion.div>
+                                                        ))}
+                                                    </div>
+                                                ) : (
+                                                    <div className="py-20 flex flex-col items-center justify-center gap-3">
+                                                        <span className="material-symbols-outlined text-[40px] text-zinc-800">search_off</span>
+                                                        <p className="text-zinc-600 text-sm font-medium">
+                                                            {paymentSearch ? `Sin resultados para "${paymentSearch}"` : 'Sin transacciones registradas.'}
+                                                        </p>
+                                                        {paymentSearch && (
+                                                            <button onClick={() => setPaymentSearch('')}
+                                                                className="text-xs text-zinc-500 hover:text-white transition-colors underline underline-offset-4">
+                                                                Limpiar búsqueda
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                )}
+
+                                                {filteredRecords.length > 0 && (
+                                                    <div className="border-t border-white/[0.05] px-5 py-3 flex items-center justify-between">
+                                                        <p className="text-xs text-zinc-600">
+                                                            {paymentSearch
+                                                                ? `${filteredRecords.length} de ${financialRecords.length} movimientos`
+                                                                : `${financialRecords.length} movimiento${financialRecords.length !== 1 ? 's' : ''}`}
+                                                        </p>
+                                                        {paymentSearch && (
+                                                            <button onClick={() => setPaymentSearch('')}
+                                                                className="text-xs text-zinc-500 hover:text-white transition-colors">
+                                                                Limpiar filtro ×
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                        </motion.div>
                                     )}
-                                </main>
-                            </>
+                                </div>
+                            </div>
                         )}
                     </motion.div>
                 </AnimatePresence>,
                 document.body
             )}
 
-            <UpdateCredentialsModal
-                isOpen={isEditingCredentials}
-                student={student}
-                onClose={() => setIsEditingCredentials(false)}
-            />
+            {isEditingCredentials && createPortal(
+                <UpdateCredentialsModal isOpen={isEditingCredentials} student={student} onClose={() => setIsEditingCredentials(false)} />,
+                document.body
+            )}
         </>
     );
 };
 
-// --- DARK ENTERPRISE COMPONENTS ---
+// ─── PRIMITIVES ──────────────────────────────────────────────────────────────
 
-const ActionBtn: React.FC<{ icon: string; title: string; onClick: () => void; color: string }> = ({ icon, title, onClick, color }) => (
-    <button
-        onClick={onClick}
-        title={title}
-        className={`p-2.5 rounded-xl transition-all flex items-center justify-center ${color}`}
-    >
-        <span className="material-symbols-outlined text-[20px]">{icon}</span>
-    </button>
+const HeroStat: React.FC<{ label: string; value: string; accent?: boolean; danger?: boolean; success?: boolean; muted?: boolean }> = ({ label, value, accent, danger, success, muted }) => (
+    <div>
+        <p className="text-[11px] text-zinc-600 uppercase tracking-widest font-semibold mb-1">{label}</p>
+        <p className={`text-xl font-black tabular-nums ${danger ? 'text-red-400' : success ? 'text-emerald-400' : accent ? 'text-indigo-400' : muted ? 'text-zinc-400' : 'text-white'}`}>
+            {value}
+        </p>
+    </div>
 );
 
-const DarkTabBtn: React.FC<{ active: boolean; onClick: () => void; label: string }> = ({ active, onClick, label }) => (
-    <button
-        onClick={onClick}
-        className={`py-4 px-5 border-b-2 text-sm font-bold transition-all ${
-            active ? 'border-white text-white' : 'border-transparent text-gray-600 hover:text-gray-400'
-        }`}
-    >
+const ETab: React.FC<{ label: string; active: boolean; onClick: () => void }> = ({ label, active, onClick }) => (
+    <button onClick={onClick}
+        className={`px-5 py-3.5 text-sm font-semibold border-b-2 transition-all -mb-px ${active ? 'border-white text-white' : 'border-transparent text-zinc-600 hover:text-zinc-400'}`}>
         {label}
     </button>
 );
 
-const DarkSectionTitle: React.FC<{ icon: string; title: string }> = ({ icon, title }) => (
-    <div className="flex items-center gap-3 mb-5 border-b border-white/5 pb-4">
-        <div className="size-9 bg-white/5 text-gray-400 rounded-xl flex items-center justify-center border border-white/5">
-            <span className="material-symbols-outlined text-[18px]">{icon}</span>
+const TopBtn: React.FC<{ icon: string; label: string; onClick: () => void }> = ({ icon, label, onClick }) => (
+    <button onClick={onClick}
+        className="h-8 px-3 flex items-center gap-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white hover:bg-white/8 transition-all">
+        <span className="material-symbols-outlined text-[15px]">{icon}</span>
+        {label}
+    </button>
+);
+
+const GlassCard: React.FC<{ label: string; icon: string; children: React.ReactNode }> = ({ label, icon, children }) => (
+    <div className="rounded-2xl border border-white/[0.07] bg-[#0e0e13] overflow-hidden">
+        <div className="px-5 py-4 border-b border-white/[0.05] flex items-center gap-3">
+            <span className="material-symbols-outlined text-[17px] text-zinc-600">{icon}</span>
+            <p className="text-xs font-semibold text-zinc-500 uppercase tracking-widest">{label}</p>
         </div>
-        <h3 className="text-sm font-black text-gray-300 uppercase tracking-wider">{title}</h3>
+        {children}
     </div>
 );
 
-const DarkEditInput: React.FC<{ label: string; value: string; onChange: (v: string) => void; type?: string }> = ({ label, value, onChange, type = 'text' }) => (
-    <div>
-        <label className="block text-[10px] font-black text-gray-600 uppercase tracking-widest mb-1.5">{label}</label>
-        <input
-            type={type}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            className="w-full bg-white/5 border border-white/8 rounded-xl px-4 py-3 text-sm font-medium text-white focus:bg-white/8 focus:border-white/20 focus:ring-0 transition-all outline-none placeholder:text-gray-700"
-        />
+const InfoRow: React.FC<{ label: string; value: string; link?: string; mono?: boolean }> = ({ label, value, link, mono }) => (
+    <div className="px-5 py-4 flex flex-col gap-1 border-b border-white/[0.04] last:border-0">
+        <span className="text-xs font-semibold text-zinc-600 uppercase tracking-wider">{label}</span>
+        {link
+            ? <a href={link} className={`text-white hover:text-indigo-400 transition-colors font-semibold ${mono ? 'font-mono text-sm' : 'text-base'}`}>{value}</a>
+            : <span className={`text-white font-semibold ${mono ? 'font-mono text-sm' : 'text-base'}`}>{value}</span>
+        }
     </div>
 );
 
-const DarkEditSelect: React.FC<{ label: string; value: string; onChange: (v: string) => void; options: string[] }> = ({ label, value, onChange, options }) => (
+const BigStat: React.FC<{ label: string; value: string }> = ({ label, value }) => (
+    <div className="px-5 py-6 flex flex-col gap-1.5">
+        <p className="text-xs text-zinc-600 uppercase tracking-widest font-semibold">{label}</p>
+        <p className="text-2xl font-black text-white">{value}</p>
+    </div>
+);
+
+const EditSection: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
     <div>
-        <label className="block text-[10px] font-black text-gray-600 uppercase tracking-widest mb-1.5">{label}</label>
-        <select
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            className="w-full bg-white/5 border border-white/8 rounded-xl px-4 py-3 text-sm font-medium text-white focus:bg-white/8 focus:border-white/20 focus:ring-0 transition-all outline-none appearance-none"
-        >
-            <option value="">Seleccionar...</option>
-            {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+        <div className="flex items-center gap-4 mb-6">
+            <p className="text-xs font-semibold text-zinc-500 uppercase tracking-widest flex-shrink-0">{label}</p>
+            <div className="flex-1 h-px bg-white/[0.06]" />
+        </div>
+        {children}
+    </div>
+);
+
+const EInput: React.FC<{ label: string; value: string; onChange: (v: string) => void; type?: string }> = ({ label, value, onChange, type = 'text' }) => (
+    <div>
+        <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-2">{label}</label>
+        <input type={type} value={value} onChange={e => onChange(e.target.value)}
+            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white font-medium px-4 py-3 outline-none focus:border-indigo-500/50 focus:bg-white/[0.06] transition-all" />
+    </div>
+);
+
+const ESelect: React.FC<{ label: string; value: string; onChange: (v: string) => void; options: string[] }> = ({ label, value, onChange, options }) => (
+    <div>
+        <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-2">{label}</label>
+        <select value={value} onChange={e => onChange(e.target.value)}
+            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white font-medium px-4 py-3 outline-none focus:border-indigo-500/50 transition-all appearance-none">
+            <option value="">—</option>
+            {options.map(o => <option key={o} value={o}>{o}</option>)}
         </select>
     </div>
 );
 
-const DarkBiometryField: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-    <div>
-        <p className="text-[10px] font-black text-gray-600 uppercase tracking-widest mb-1">{label}</p>
-        <p className="text-lg font-bold text-white">{value}</p>
-    </div>
-);
-
-const DarkContactRow: React.FC<{ label: string; value: string; isLink?: string; icon: string }> = ({ label, value, isLink, icon }) => (
-    <div className="flex items-center gap-3">
-        <div className="size-9 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-gray-600 flex-shrink-0">
-            <span className="material-symbols-outlined text-[18px]">{icon}</span>
-        </div>
-        <div>
-            <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">{label}</p>
-            {isLink ? (
-                <a href={isLink} className="text-white font-semibold text-sm hover:text-indigo-400 transition-colors">
-                    {value}
-                </a>
-            ) : (
-                <p className="text-white font-semibold text-sm">{value}</p>
-            )}
-        </div>
-    </div>
-);
-
-const DarkEmergencyPhone: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-    <div className="flex justify-between items-center">
-        <div>
-            <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">{label}</p>
-            <p className="text-base font-bold text-white">{value}</p>
-        </div>
-        <a
-            href={`tel:${value}`}
-            className="size-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center hover:bg-emerald-500/20 transition-colors"
-        >
-            <span className="material-symbols-outlined text-[18px] filled">call</span>
-        </a>
-    </div>
-);
-
-const DarkPaymentBadge: React.FC<{ status: string }> = ({ status }) => {
-    const config: any = {
-        paid:      { label: 'Pagado',     cls: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
-        pending:   { label: 'Pendiente',  cls: 'bg-amber-500/10  text-amber-400  border-amber-500/20' },
-        overdue:   { label: 'Vencido',    cls: 'bg-red-500/10    text-red-400    border-red-500/20' },
-        in_review: { label: 'En Revisión',cls: 'bg-blue-500/10   text-blue-400   border-blue-500/20' },
-        partial:   { label: 'Parcial',    cls: 'bg-orange-500/10 text-orange-400 border-orange-500/20' },
-        charged:   { label: 'Cargado',    cls: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+const EPaymentBadge: React.FC<{ status: string }> = ({ status }) => {
+    const map: Record<string, { label: string; cls: string }> = {
+        paid:      { label: 'Pagado',      cls: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/25' },
+        pending:   { label: 'Pendiente',   cls: 'text-amber-400   bg-amber-500/10   border-amber-500/25' },
+        overdue:   { label: 'Vencido',     cls: 'text-red-400     bg-red-500/10     border-red-500/25' },
+        in_review: { label: 'En Revisión', cls: 'text-blue-400    bg-blue-500/10    border-blue-500/25' },
+        partial:   { label: 'Parcial',     cls: 'text-orange-400  bg-orange-500/10  border-orange-500/25' },
+        charged:   { label: 'Cargado',     cls: 'text-purple-400  bg-purple-500/10  border-purple-500/25' },
     };
-    const { label, cls } = config[status] || config.pending;
-    return (
-        <span className={`px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border ${cls}`}>
-            {label}
-        </span>
-    );
+    const { label, cls } = map[status] || map.pending;
+    return <span className={`inline-block px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider border ${cls}`}>{label}</span>;
 };
 
 export default StudentDetailModal;

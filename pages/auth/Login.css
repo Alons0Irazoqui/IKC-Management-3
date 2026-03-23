@@ -265,7 +265,7 @@
     color: var(--text-primary) !important;
     font-family: inherit;
     font-size: 1rem !important;
-    padding: 1.8rem 1rem 0.6rem 1rem !important; /* Más aire para el texto al escribir */
+    padding: 2.1rem 1rem 0.8rem 1rem !important; /* Más altura para el texto y label */
     transition: var(--transition-fast) !important;
     outline: none !important;
     box-shadow: inset 0 2px 4px rgba(0,0,0,0.1) !important;
@@ -275,12 +275,23 @@
 .form-control:-webkit-autofill,
 .form-control:-webkit-autofill:hover, 
 .form-control:-webkit-autofill:focus, 
-.form-control:-webkit-autofill:active {
+.form-control:-webkit-autofill:active,
+.login-dark-theme input:-webkit-autofill,
+.login-dark-theme input:-webkit-autofill:hover,
+.login-dark-theme input:-webkit-autofill:focus,
+.login-dark-theme input:-webkit-autofill:active {
     -webkit-box-shadow: 0 0 0 30px var(--bg-input) inset !important;
     -webkit-text-fill-color: var(--text-primary) !important;
     background-color: var(--bg-input) !important;
     color: var(--text-primary) !important;
     transition: background-color 5000s ease-in-out 0s;
+}
+
+.login-dark-theme input:not([type="checkbox"]):not([type="radio"]):not(.form-control) {
+    height: 44px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    line-height: 44px !important;
 }
 
 .floating-label {

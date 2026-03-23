@@ -9,47 +9,106 @@ import { useToast } from '../../context/ToastContext';
 import { useConfirmation } from '../../context/ConfirmationContext';
 
 // --- MODERN STYLES FOR RBC (Clean Productivity Tool) ---
+/* === PREMIUM GOOGLE MATERIAL 3 DARK THEME === */
 const calendarStyles = `
 @import url('https://cdn.jsdelivr.net/npm/react-big-calendar@1.8.5/lib/css/react-big-calendar.css');
 
-/* Global Reset */
-.rbc-calendar { font-family: 'Inter', sans-serif; color: #111827; }
+.rbc-calendar {
+    font-family: 'Outfit', 'Inter', sans-serif;
+    color: #e2e8f0;
+    background-color: transparent;
+}
 
-/* Toolbar Hidden (We use custom header) */
+/* Global Border Reset */
+.rbc-calendar, .rbc-month-view, .rbc-time-view, .rbc-header, .rbc-month-row, .rbc-day-bg, .rbc-time-content, .rbc-time-header, .rbc-timeslot-group, .rbc-time-gutter {
+    border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Hide default toolbar */
 .rbc-toolbar { display: none; }
 
-/* Grid Structure - Ultra Clean */
-.rbc-header { 
-    padding: 20px 0; 
-    font-weight: 800; 
-    font-size: 11px; 
-    text-transform: uppercase; 
-    letter-spacing: 0.05em; 
-    color: #9CA3AF; 
-    border-bottom: 1px solid #F3F4F6; 
-}
-.rbc-time-view { border: none; }
-.rbc-time-header.rbc-overflowing { border-right: none; }
-.rbc-time-content { border-top: 1px solid #F3F4F6; border-left: none; }
-.rbc-timeslot-group { border-bottom: 1px solid #F9FAFB; min-height: 60px; } /* Taller slots */
-.rbc-day-slot { border-left: 1px solid #F3F4F6; }
-.rbc-today { background-color: #FAFAFA; }
-.rbc-time-view .rbc-row { min-height: 20px; }
-
-/* Events - Floating Blocks */
-.rbc-event {
+/* === HEADERS (Day Names) === */
+.rbc-header {
     background: transparent;
-    padding: 2px 4px;
-    border: none;
-    box-shadow: none;
-    border-radius: 0;
-    outline: none;
+    padding: 24px 0;
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: #94a3b8;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.04);
 }
-.rbc-event:focus { outline: none; }
-.rbc-event-label { display: none; } 
+.rbc-header + .rbc-header { border-left: none; }
+.rbc-header.rbc-today { background: rgba(255, 255, 255, 0.02); color: #fff; }
 
-/* Current Time Indicator */
-.rbc-current-time-indicator { background-color: #DC2626; height: 2px; }
+/* === TIME VIEW (Week/Day) === */
+.rbc-time-view {
+    border: none !important;
+    background: transparent;
+}
+.rbc-time-header-content {
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+.rbc-time-content {
+    border-top: none;
+    border-left: none;
+}
+.rbc-time-gutter .rbc-timeslot-group { border-right: none; }
+.rbc-timeslot-group {
+    min-height: 80px;
+    background: transparent;
+}
+.rbc-time-slot {
+    border-top: none;
+    color: #475569;
+    font-size: 11px;
+    font-weight: 500;
+}
+.rbc-day-slot { background: transparent; }
+.rbc-day-slot .rbc-events-container { margin-right: 4px; }
+
+/* Today Column in Time View */
+.rbc-day-slot.rbc-today {
+    background: rgba(255, 255, 255, 0.015);
+}
+
+/* === MONTH VIEW === */
+.rbc-month-view { border: none !important; }
+.rbc-month-row { border-top: 1px solid rgba(255, 255, 255, 0.06); }
+.rbc-day-bg { background: transparent; }
+.rbc-off-range-bg { background: rgba(0, 0, 0, 0.2); }
+.rbc-date-cell {
+    padding: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+}
+.rbc-date-cell.rbc-now { color: #f43f5e; font-size: 13px; font-weight: 800; }
+
+/* === EVENTS === */
+.rbc-event {
+    background: transparent !important;
+    padding: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+.rbc-event:focus, .rbc-event.rbc-selected { outline: none !important; }
+
+/* Event Label (small time string) */
+.rbc-event-label { display: none; }
+
+/* Slot Selection (Drag to create) */
+.rbc-slot-selection {
+    background: rgba(244, 63, 94, 0.1) !important;
+    border: 1px solid rgba(244, 63, 94, 0.4) !important;
+    border-radius: 8px;
+}
+
+/* === INDICATORS === */
+.rbc-current-time-indicator {
+    background-color: #f43f5e;
+    height: 2px;
+}
 .rbc-current-time-indicator::before {
     content: '';
     position: absolute;
@@ -58,8 +117,24 @@ const calendarStyles = `
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background-color: #DC2626;
+    background-color: #f43f5e;
+    box-shadow: 0 0 10px #f43f5e;
 }
+
+/* === SCROLLBARS === */
+.rbc-time-content::-webkit-scrollbar { width: 6px; }
+.rbc-time-content::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+.rbc-time-content::-webkit-scrollbar-track { background: transparent; }
+
+/* === AGENDA VIEW (Ensures Day view detail remains dark) === */
+.rbc-agenda-view { color: #e2e8f0; border: none; }
+.rbc-agenda-table {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #141416;
+    border-radius: 12px;
+    overflow: hidden;
+}
+.rbc-agenda-table thead tr th { border-bottom: 2px solid rgba(255, 255, 255, 0.05); color: #94a3b8; }
 `;
 
 // --- LOCALIZER ---
@@ -86,34 +161,43 @@ const EVENT_COLORS = [
 // 1. Event Card (The Floating Block)
 const EventCard = ({ event }: { event: CalendarEvent }) => {
     const isCancelled = event.status === 'cancelled';
-    const theme = EVENT_COLORS.find(c => c.value === event.color) || EVENT_COLORS[0];
     
     return (
         <div 
             className={`
-                h-full w-full rounded-lg border-l-[4px] shadow-sm hover:shadow-md transition-all p-2 flex flex-col justify-between overflow-hidden group cursor-pointer
-                ${isCancelled ? 'bg-red-50 border-red-400 opacity-80' : `bg-white hover:bg-gray-50 border-[${event.color}]`}
+                h-full w-full rounded-lg border-l-[4px] transition-all px-3 py-2 flex flex-col justify-center overflow-hidden cursor-pointer group
+                ${isCancelled ? 'opacity-40 grayscale-[0.5]' : 'hover:brightness-125 shadow-lg'}
             `}
-            style={{ borderLeftColor: isCancelled ? '#F87171' : event.color }}
+            style={{
+                borderLeftColor: isCancelled ? '#e11d48' : event.color,
+                backgroundColor: isCancelled
+                    ? 'rgba(225,29,72,0.12)'
+                    : `${event.color}0D`, // 5% opacity
+                border: isCancelled ? '1px solid rgba(225,29,72,0.15)' : `1px solid ${event.color}20`
+            }}
         >
-            <div>
-                <div className="flex items-center justify-between mb-1">
-                    <span className={`text-[10px] font-black uppercase tracking-wider ${isCancelled ? 'text-red-400 line-through' : 'text-gray-400'}`}>
+            <div className="flex flex-col gap-0.5 min-w-0">
+                <div className="flex items-center justify-between">
+                    <span className={`text-[9px] font-bold uppercase tracking-widest ${
+                        isCancelled ? 'text-red-400' : 'text-slate-500'
+                    }`}>
                         {format(event.start, 'HH:mm')}
                     </span>
-                    {isCancelled && <span className="material-symbols-outlined text-red-500 text-[14px]">block</span>}
+                    {isCancelled && <span className="material-symbols-outlined text-red-500 text-[11px]">cancel</span>}
                 </div>
                 
-                <h4 className={`text-xs font-bold leading-tight line-clamp-2 ${isCancelled ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
+                <h4 className={`text-[12px] font-bold leading-tight truncate ${
+                    isCancelled ? 'text-slate-600 line-through' : 'text-white'
+                }`}>
                     {event.title}
                 </h4>
-            </div>
-            
-            <div className={`flex items-center gap-1.5 text-[10px] font-bold mt-1 ${isCancelled ? 'text-red-400' : 'text-gray-500'}`}>
-                <div className={`size-4 rounded-full flex items-center justify-center ${isCancelled ? 'bg-red-100' : theme.light}`}>
-                    <span className={`material-symbols-outlined text-[10px] ${isCancelled ? 'text-red-500' : theme.text}`}>person</span>
+
+                <div className="flex items-center gap-1.5 mt-1 opacity-70">
+                    <div className="size-1.5 rounded-full" style={{ backgroundColor: event.color }}></div>
+                    <span className="text-[10px] font-medium text-slate-400 truncate">
+                        {event.instructor || event.instructorName || 'Academy'}
+                    </span>
                 </div>
-                <span className="truncate">{event.instructor || 'Sin instructor'}</span>
             </div>
         </div>
     );
@@ -168,13 +252,14 @@ const QuickEditModal: React.FC<{
         onSave({ ...event, ...formData, start: newStart, end: newEnd });
     };
 
-    const inputClass = "w-full bg-[#F9FAFB] border-none rounded-xl px-4 py-3 text-sm font-bold text-gray-900 focus:ring-2 focus:ring-red-500/20 focus:bg-white transition-all placeholder:text-gray-400";
-    const labelClass = "block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1";
+    const inputClass = "w-full bg-[#18181d] border border-[rgba(255,255,255,0.08)] rounded-xl px-4 py-3 text-sm font-bold text-[#dde1e7] focus:ring-2 focus:ring-red-500/20 focus:border-[#e11d48] focus:bg-[#1e1e25] transition-all placeholder:text-[#4b5563] outline-none";
+    const labelClass = "block text-[10px] font-black text-[#6b7280] uppercase tracking-widest mb-1.5 ml-1";
 
     return (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-gray-900/10 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" onClick={onClose}>
             <div 
-                className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden flex flex-col relative border border-gray-100 animate-in zoom-in-95 duration-200" 
+                className="rounded-[1.5rem] shadow-2xl w-full max-w-sm overflow-hidden flex flex-col relative animate-in zoom-in-95 duration-200" 
+                style={{ background: '#101014', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05)' }}
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header Actions */}
@@ -183,7 +268,8 @@ const QuickEditModal: React.FC<{
                         <button 
                             type="button" 
                             onClick={() => onDelete(event.id!)}
-                            className="size-10 flex items-center justify-center rounded-full bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
+                            className="size-10 flex items-center justify-center rounded-full text-red-400 hover:text-red-300 transition-colors"
+                            style={{ background: 'rgba(225,29,72,0.1)', border: '1px solid rgba(225,29,72,0.2)' }}
                             title="Eliminar sesión"
                         >
                             <span className="material-symbols-outlined text-[20px]">delete</span>
@@ -191,17 +277,18 @@ const QuickEditModal: React.FC<{
                     )}
                     <button 
                         onClick={onClose}
-                        className="size-10 flex items-center justify-center rounded-full bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors"
+                        className="size-10 flex items-center justify-center rounded-full text-[#6b7280] hover:text-[#dde1e7] transition-colors"
+                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
                     >
                         <span className="material-symbols-outlined text-[20px]">close</span>
                     </button>
                 </div>
 
                 <div className="p-8 pb-0">
-                    <h2 className="text-2xl font-black text-gray-900 tracking-tight leading-none mb-1">
+                    <h2 className="text-2xl font-black tracking-tight leading-none mb-1" style={{ color: '#dde1e7' }}>
                         {event.id ? 'Editar Sesión' : 'Nueva Clase'}
                     </h2>
-                    <p className="text-xs font-medium text-gray-400">Detalles del bloque horario</p>
+                    <p className="text-xs font-medium" style={{ color: '#6b7280' }}>Detalles del bloque horario</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-8 flex flex-col gap-5">
@@ -253,12 +340,11 @@ const QuickEditModal: React.FC<{
                         </div>
                         <div>
                             <label className={labelClass}>Estado</label>
-                            <select 
-                                value={formData.status}
-                                onChange={e => setFormData({...formData, status: e.target.value as any})}
-                                className={`${inputClass} ${formData.status === 'cancelled' ? 'text-red-600 bg-red-50' : 'text-green-600 bg-green-50'}`}
-                            >
-                                <option value="active">Activa</option>
+                                <select 
+                                    value={formData.status}
+                                    onChange={e => setFormData({...formData, status: e.target.value as any})}
+                                    className={`${inputClass} ${formData.status === 'cancelled' ? '!text-red-400 !bg-[rgba(225,29,72,0.1)]' : '!text-emerald-400 !bg-[rgba(16,185,129,0.08)]'}`}
+                                >                              <option value="active">Activa</option>
                                 <option value="cancelled">Cancelada</option>
                             </select>
                         </div>
@@ -273,7 +359,7 @@ const QuickEditModal: React.FC<{
                                     key={c.value}
                                     type="button"
                                     onClick={() => setFormData({...formData, color: c.value})}
-                                    className={`size-8 rounded-full flex items-center justify-center transition-all ${c.bg} ${formData.color === c.value ? 'ring-2 ring-offset-2 ring-gray-900 scale-110' : 'opacity-40 hover:opacity-100'}`}
+                                    className={`size-8 rounded-full flex items-center justify-center transition-all ${c.bg} ${formData.color === c.value ? 'ring-2 ring-offset-2 ring-offset-[#101014] ring-white scale-110' : 'opacity-30 hover:opacity-80'}`}
                                     title={c.label}
                                 >
                                     {formData.color === c.value && <span className="material-symbols-outlined text-white text-[14px]">check</span>}
@@ -283,7 +369,7 @@ const QuickEditModal: React.FC<{
                     </div>
 
                     {/* Submit Button */}
-                    <button type="submit" className="mt-4 w-full py-4 rounded-2xl bg-gray-900 text-white font-bold text-sm shadow-xl shadow-gray-900/20 hover:bg-black transition-all active:scale-95 flex items-center justify-center gap-2">
+                    <button type="submit" className="mt-4 w-full py-4 rounded-xl font-bold text-sm text-white transition-all active:scale-95 flex items-center justify-center gap-2" style={{ background: '#e11d48', boxShadow: '0 4px 16px rgba(225,29,72,0.3)' }}>
                         <span className="material-symbols-outlined text-[20px]">save</span>
                         Guardar Cambios
                     </button>
@@ -379,24 +465,31 @@ const ScheduleManager: React.FC = () => {
     }), []);
 
     return (
-        <div className="flex flex-col h-full bg-white relative font-sans">
+        <div className="flex flex-col h-full relative font-sans" style={{ background: 'transparent' }}>
             <style>{calendarStyles}</style>
             
             {/* --- CUSTOM TOOLBAR --- */}
-            <div className="px-8 py-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4 bg-white sticky top-0 z-20">
+            <div className="px-10 py-6 flex flex-col md:flex-row justify-between items-center gap-6 sticky top-0 z-20 backdrop-blur-md bg-[#0A0A0B]/80" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
                 <div className="flex items-center gap-6">
-                    <h1 className="text-3xl font-black tracking-tight text-gray-900 min-w-[200px] capitalize">
-                        {format(date, view === Views.MONTH ? 'MMMM yyyy' : 'MMMM', { locale: es })}
-                    </h1>
-                    <div className="flex bg-gray-100 p-1 rounded-xl">
-                        <button onClick={() => handleNavigate('PREV')} className="p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all text-gray-500 hover:text-gray-900"><span className="material-symbols-outlined text-lg">chevron_left</span></button>
-                        <button onClick={() => handleNavigate('TODAY')} className="px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-wider text-gray-600 hover:bg-white hover:shadow-sm transition-all">Hoy</button>
-                        <button onClick={() => handleNavigate('NEXT')} className="p-2 rounded-lg hover:bg-white hover:shadow-sm transition-all text-gray-500 hover:text-gray-900"><span className="material-symbols-outlined text-lg">chevron_right</span></button>
+                    <button onClick={() => setDate(new Date())} className="text-[11px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white/50 hover:text-white">
+                        Hoy
+                    </button>
+                    
+                    <div className="flex items-center gap-3">
+                        <button onClick={() => handleNavigate('PREV')} className="size-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-all text-white/40 hover:text-white">
+                            <span className="material-symbols-outlined text-[20px]">chevron_left</span>
+                        </button>
+                        <h1 className="text-xl md:text-2xl font-black tracking-tight text-white capitalize min-w-[140px] text-center">
+                            {format(date, view === Views.MONTH ? 'MMMM yyyy' : 'd MMMM', { locale: es })}
+                        </h1>
+                        <button onClick={() => handleNavigate('NEXT')} className="size-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-all text-white/40 hover:text-white">
+                            <span className="material-symbols-outlined text-[20px]">chevron_right</span>
+                        </button>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <div className="flex bg-gray-100 p-1 rounded-xl">
+                    <div className="flex p-1 rounded-xl bg-white/[0.03] border border-white/10">
                         {[
                             { id: Views.MONTH, label: 'Mes' },
                             { id: Views.WEEK, label: 'Semana' },
@@ -405,32 +498,33 @@ const ScheduleManager: React.FC = () => {
                             <button
                                 key={v.id}
                                 onClick={() => setView(v.id)}
-                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-                                    view === v.id 
-                                    ? 'bg-white text-gray-900 shadow-sm' 
-                                    : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200/50'
-                                }`}
+                                className={`px-5 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all`}
+                                style={view === v.id
+                                    ? { background: 'rgba(255,255,255,0.08)', color: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }
+                                    : { color: 'rgba(255,255,255,0.4)' }
+                                }
                             >
                                 {v.label}
                             </button>
                         ))}
                     </div>
+
                     <button 
                         onClick={() => {
                             const now = new Date();
                             now.setMinutes(0,0,0);
                             handleSelectSlot({ start: now, end: addMinutes(now, 60) });
                         }}
-                        className="bg-gray-900 hover:bg-black text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-gray-900/10 flex items-center gap-2 active:scale-95 transition-all"
+                        className="px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest bg-emerald-500 text-white hover:bg-emerald-400 shadow-[0_4px_20px_rgba(16,185,129,0.3)] transition-all active:scale-95 flex items-center gap-2"
                     >
-                        <span className="material-symbols-outlined text-[20px]">add</span>
-                        <span className="hidden md:inline">Nueva Clase</span>
+                        <span className="material-symbols-outlined text-[18px]">add</span>
+                        <span>Nueva Clase</span>
                     </button>
                 </div>
             </div>
 
             {/* --- CALENDAR --- */}
-            <div className="flex-1 p-6 overflow-hidden">
+            <div className="flex-1 p-4 overflow-hidden">
                 <Calendar
                     localizer={localizer}
                     events={scheduleEvents}

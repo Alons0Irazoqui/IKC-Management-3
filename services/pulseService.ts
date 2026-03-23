@@ -945,6 +945,11 @@ export const PulseService = {
         if (error) throw error;
     },
 
+    deleteEvent: async (eventId: string) => {
+        const { error } = await supabase.from('events').delete().eq('id', eventId);
+        if (error) throw error;
+    },
+
     savePayments: async (payments: TuitionRecord[]) => {
         if (!payments || payments.length === 0) return;
         const mapped = payments.map(p => {

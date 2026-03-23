@@ -1,13 +1,20 @@
 
 import { Student, ClassSession, ScheduleItem, Message, LibraryResource, AcademySettings, CalendarEvent, TuitionRecord } from './types';
 
-// Updated Ranks with granular attendance requirements for testing
+// Default Ranks — Sistema de Kyus de Karate
 export const defaultRanks = [
-    { id: 'rank-1', name: 'Blanca', color: 'white' as const, order: 1, requiredAttendance: 0 },
-    { id: 'rank-2', name: 'Amarilla', color: 'yellow' as const, order: 2, requiredAttendance: 24 },
-    { id: 'rank-3', name: 'Verde', color: 'green' as const, order: 3, requiredAttendance: 72 },
-    { id: 'rank-4', name: 'Café', color: 'brown' as const, order: 4, requiredAttendance: 150 },
-    { id: 'rank-5', name: 'Negra', color: 'black' as const, order: 5, requiredAttendance: 200 },
+    { id: 'rank-1',  name: '10 Kyu',    color: 'white'  as const, order: 1,  requiredAttendance: 0   },
+    { id: 'rank-2',  name: '9 Kyu',     color: 'white'  as const, order: 2,  requiredAttendance: 20  },
+    { id: 'rank-3',  name: '8 Kyu',     color: 'yellow' as const, order: 3,  requiredAttendance: 40  },
+    { id: 'rank-4',  name: '7 Kyu',     color: 'yellow' as const, order: 4,  requiredAttendance: 60  },
+    { id: 'rank-5',  name: '6 Kyu',     color: 'orange' as const, order: 5,  requiredAttendance: 80  },
+    { id: 'rank-6',  name: '5 Kyu',     color: 'orange' as const, order: 6,  requiredAttendance: 100 },
+    { id: 'rank-7',  name: '4 Kyu',     color: 'green'  as const, order: 7,  requiredAttendance: 120 },
+    { id: 'rank-8',  name: '3 Kyu',     color: 'brown'  as const, order: 8,  requiredAttendance: 150 },
+    { id: 'rank-9',  name: '2 Kyu',     color: 'brown'  as const, order: 9,  requiredAttendance: 180 },
+    { id: 'rank-10', name: '1 Kyu',     color: 'brown'  as const, order: 10, requiredAttendance: 220 },
+    { id: 'rank-11', name: 'Shodan Ho', color: 'black'  as const, order: 11, requiredAttendance: 280 },
+    { id: 'rank-12', name: 'Cinta Negra', color: 'black' as const, order: 12, requiredAttendance: 350 },
 ];
 
 export const defaultAcademySettings: AcademySettings = {

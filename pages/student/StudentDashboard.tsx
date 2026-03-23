@@ -118,342 +118,423 @@ const StudentDashboard: React.FC = () => {
     if (!liveStudent) return <div className="p-10 text-center">Cargando perfil...</div>;
 
     return (
-        <div className="max-w-[1600px] mx-auto p-6 md:p-10 flex flex-col gap-8 pb-24">
+        <div className="p-4 sm:p-6 md:p-8 lg:p-10 max-w-[1600px] mx-auto w-full flex flex-col gap-5 sm:gap-6 md:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
 
             {/* --- HEADER: WELCOME & SUMMARY --- */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-3 sm:gap-4 mb-1">
                 <div>
-                    <h2 className="text-4xl font-black tracking-tight text-text-main mb-1">
+                    <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] mb-1" style={{color: 'var(--color-brand)'}}>IKC Management</p>
+                    <h1 className="text-3xl sm:text-4xl font-black tracking-tighter" style={{color: 'var(--color-text-primary)'}}>
                         Hola, {liveStudent?.name.split(' ')[0]}
-                    </h2>
-                    <p className="text-text-secondary font-medium">
+                    </h1>
+                    <p className="mt-0.5 text-xs sm:text-sm hidden sm:block" style={{color: 'var(--color-text-muted)'}}>
                         {nextRankConfig
                             ? `Estás al ${Math.round(progressPercent)}% de tu camino hacia ${nextRankConfig.name}.`
                             : '¡Has alcanzado el máximo nivel registrado!'}
                     </p>
                 </div>
-                <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl shadow-sm border border-gray-100">
-                    <span className="text-xs font-bold uppercase text-text-secondary tracking-wider">Tu Rango Actual:</span>
-                    <span className={`px-3 py-1 rounded-lg text-xs font-bold uppercase bg-gray-100 text-gray-800 border border-gray-200`}>
-                        {liveStudent?.rank}
-                    </span>
+                
+                <div className="flex items-center gap-0 rounded-none shrink-0" style={{borderBottom: '2px solid var(--color-border-subtle)'}}>
+                    <div className="px-5 py-2 text-xs font-bold uppercase tracking-wider relative flex items-center gap-2"
+                         style={{color: 'var(--color-text-primary)', borderBottom: '2px solid var(--color-brand)', marginBottom: '-2px'}}>
+                         <span style={{color: 'var(--color-text-muted)'}}>Tu Rango Actual:</span> {liveStudent?.rank}
+                    </div>
                 </div>
             </div>
 
             {/* --- CRITICAL ALERT: EXAM --- */}
             {nextAssignedExam && (
-                <div
-                    onClick={() => setSelectedEvent(nextAssignedExam)}
-                    className="cursor-pointer relative overflow-hidden rounded-[2rem] bg-gray-900 text-white shadow-xl shadow-gray-900/20 group hover:scale-[1.01] transition-transform duration-300"
+                <div onClick={() => setSelectedEvent(nextAssignedExam)}
+                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-5 sm:p-6 mb-2 cursor-pointer transition-colors"
+                    style={{
+                        backgroundColor: 'rgba(252, 211, 77, 0.1)',
+                        border: '1px solid rgba(252, 211, 77, 0.2)',
+                        borderRadius: '10px'
+                    }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(252, 211, 77, 0.15)'}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(252, 211, 77, 0.1)'}
                 >
-                    <div className="absolute inset-0 bg-gradient-to-r from-purple-900 to-indigo-900 opacity-90"></div>
-                    <div className="relative z-10 p-8 flex flex-col md:flex-row items-center justify-between gap-6">
-                        <div className="flex items-center gap-6">
-                            <div className="size-16 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
-                                <span className="material-symbols-outlined text-4xl text-yellow-400 animate-pulse">stars</span>
-                            </div>
-                            <div>
-                                <div className="text-yellow-300 text-xs font-bold uppercase tracking-wider mb-1">Convocatoria Oficial</div>
-                                <h3 className="text-2xl font-black leading-tight">{nextAssignedExam.title}</h3>
-                                <p className="text-white/70 text-sm">Prepárate para tu evaluación.</p>
-                            </div>
+                    <div className="flex items-center gap-4">
+                        <span className="material-symbols-outlined text-3xl" style={{color: '#FCD34D'}}>stars</span>
+                        <div>
+                           <div className="text-[9px] font-bold uppercase tracking-[0.2em] mb-0.5" style={{color: '#FCD34D'}}>Convocatoria Oficial</div>
+                           <h3 className="text-base font-bold" style={{color: '#FEF3C7'}}>{nextAssignedExam.title}</h3>
                         </div>
-                        <button className="bg-white text-gray-900 px-6 py-3 rounded-xl font-bold text-sm shadow-lg group-hover:bg-gray-100 transition-colors">
-                            Ver Detalles
-                        </button>
                     </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded" style={{backgroundColor: '#FCD34D', color: '#78350F'}}>
+                        Ver Detalles
+                    </span>
                 </div>
             )}
 
-            {/* --- MAIN GRID: STATS & ACTIONS --- */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* ================================================================
+                FILA 1: KPIs
+                ================================================================ */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+                style={{
+                    border: '1px solid var(--color-border-subtle)',
+                    borderRadius: '10px',
+                    overflow: 'hidden',
+                    backgroundColor: 'var(--color-border-subtle)'
+                }}>
 
-                {/* 1. FINANCIAL STATUS WIDGET */}
-                <div className={`p-6 rounded-[2rem] border relative overflow-hidden flex flex-col justify-between h-[200px] group ${hasDebt ? 'bg-red-50 border-red-100' : 'bg-green-50 border-green-100'}`}>
+                {/* KPI 1 — Estado Financiero */}
+                <div className="flex flex-col justify-between p-7 group cursor-pointer transition-colors relative overflow-hidden"
+                    style={{backgroundColor: hasDebt ? 'rgba(239, 68, 68, 0.05)' : 'rgba(52, 211, 153, 0.05)'}}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = hasDebt ? 'rgba(239, 68, 68, 0.08)' : 'rgba(52, 211, 153, 0.08)'}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = hasDebt ? 'rgba(239, 68, 68, 0.05)' : 'rgba(52, 211, 153, 0.05)'}
+                    onClick={() => navigate('/student/payments')}
+                >
                     <div className="relative z-10">
-                        <div className={`size-12 rounded-2xl flex items-center justify-center mb-4 ${hasDebt ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}>
-                            <span className="material-symbols-outlined text-2xl">{hasDebt ? 'gpp_bad' : 'gpp_good'}</span>
-                        </div>
-                        <p className={`text-xs font-bold uppercase tracking-wider ${hasDebt ? 'text-red-600' : 'text-green-600'}`}>Estado de Cuenta</p>
-                        <h3 className={`text-2xl font-black ${hasDebt ? 'text-red-900' : 'text-green-900'}`}>
-                            {hasDebt ? `$${actualDebt.toFixed(2)}` : 'Al Corriente'}
-                        </h3>
-                    </div>
-
-                    {hasDebt && (
-                        <button
-                            onClick={() => navigate('/student/payments')}
-                            className="relative z-10 mt-auto w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm shadow-lg shadow-red-500/20 transition-all active:scale-95 flex items-center justify-center gap-2"
-                        >
-                            Pagar Ahora <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                        </button>
-                    )}
-                    {!hasDebt && (
-                        <p className="text-sm text-green-700 mt-auto relative z-10">¡Gracias por tu pago!</p>
-                    )}
-
-                    {/* Decor */}
-                    <span className={`material-symbols-outlined absolute -bottom-4 -right-4 text-[120px] opacity-10 pointer-events-none ${hasDebt ? 'text-red-500' : 'text-green-500'}`}>
-                        account_balance_wallet
-                    </span>
-                </div>
-
-                {/* 2. ATTENDANCE PROGRESS WIDGET */}
-                <div className="bg-white p-6 rounded-[2rem] shadow-card border border-gray-100 relative overflow-hidden h-[200px] flex flex-col">
-                    <div className="flex justify-between items-start mb-2">
-                        <div>
-                            <p className="text-xs font-bold text-text-secondary uppercase tracking-wider">Asistencias</p>
-                            <h3 className="text-2xl font-black text-text-main">{current} <span className="text-sm text-text-secondary font-medium">/ {required}</span></h3>
-                        </div>
-                        <div className="size-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
-                            <span className="material-symbols-outlined">directions_run</span>
-                        </div>
-                    </div>
-
-                    <div className="flex-1 flex flex-col justify-end">
-                        <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden mb-2">
-                            <div className="h-full bg-blue-500 rounded-full transition-all duration-1000" style={{ width: `${progressPercent}%` }}></div>
-                        </div>
-                        <p className="text-xs text-text-secondary">
-                            {progressPercent >= 100
-                                ? '¡Requisitos cumplidos!'
-                                : `Te faltan ${required - current} clases para examen.`}
+                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-3"
+                            style={{color: hasDebt ? '#FCA5A5' : '#6EE7B7'}}>Estado de Cuenta</p>
+                        <p className="text-3xl font-black tracking-tighter tabular-nums"
+                            style={{color: hasDebt ? '#EF4444' : '#34D399'}}>
+                            {hasDebt ? `$${actualDebt.toLocaleString('es-MX', { maximumFractionDigits: 0 })}` : 'Al Corriente'}
                         </p>
                     </div>
+                    <div className="flex items-center justify-between mt-5 pt-4 relative z-10" style={{borderTop: hasDebt ? '1px solid rgba(239, 68, 68, 0.15)' : '1px solid rgba(52, 211, 153, 0.15)'}}>
+                        <span className="text-[10px] font-medium" style={{color: hasDebt ? '#FCA5A5' : '#6EE7B7'}}>{hasDebt ? 'Vencido / Por pagar' : '¡Gracias por tu pago!'}</span>
+                        <span className="material-symbols-outlined" style={{fontSize: '16px', color: hasDebt ? '#EF4444' : '#34D399'}}>{hasDebt ? 'gpp_bad' : 'gpp_good'}</span>
+                    </div>
+                    {/* Background Icon */}
+                    <span className="material-symbols-outlined text-6xl opacity-[0.05] absolute right-0 top-0" style={{color: hasDebt ? '#EF4444' : '#34D399', transform: 'translate(15%, -15%)'}}>account_balance_wallet</span>
                 </div>
 
-                {/* 3. NEXT CLASS WIDGET (Hero) */}
-                <div className="lg:col-span-2 bg-gradient-to-br from-gray-900 to-gray-800 p-8 rounded-[2rem] text-white relative overflow-hidden shadow-2xl shadow-gray-900/20 group h-[200px] flex flex-col justify-center">
-                    <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <span className="material-symbols-outlined text-[140px]">schedule</span>
-                    </div>
-
+                {/* KPI 2 — Asistencias */}
+                <div className="flex flex-col justify-between p-7 group relative overflow-hidden"
+                    style={{backgroundColor: 'rgba(252, 111, 111, 0.05)'}}>
                     <div className="relative z-10">
-                        <div className="flex items-center gap-2 mb-3">
-                            <span className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border border-white/10">Próxima Clase</span>
+                        <div className="flex items-center justify-between mb-3">
+                            <p className="text-[9px] font-bold uppercase tracking-[0.2em]"
+                                style={{color: '#FCA5A5'}}>Asistencias</p>
                         </div>
+                        <p className="text-3xl font-black tracking-tighter"
+                            style={{color: '#FC6F6F'}}>{current} <span className="text-sm font-semibold" style={{color:'#FEF3C7'}}>/ {required}</span></p>
+                        
+                        <div className="w-full h-1.5 rounded-full overflow-hidden mt-3" style={{backgroundColor: 'rgba(252, 111, 111, 0.15)'}}>
+                            <div className="h-full rounded-full transition-all duration-1000" style={{ width: `${progressPercent}%`, backgroundColor: '#FC6F6F' }}></div>
+                        </div>
+                    </div>
+                    <div className="flex items-center justify-between mt-5 pt-4 relative z-10" style={{borderTop: '1px solid rgba(252, 111, 111, 0.15)'}}>
+                        <span className="text-[10px] font-medium" style={{color: '#FCA5A5'}}>
+                            {progressPercent >= 100 ? 'Requisitos cumplidos' : `Te faltan ${required - current} clases`}
+                        </span>
+                        <span className="material-symbols-outlined" style={{fontSize: '16px', color: '#FC6F6F'}}>directions_run</span>
+                    </div>
+                    {/* Background Icon */}
+                    <span className="material-symbols-outlined text-6xl opacity-[0.05] absolute right-0 top-0" style={{color: '#FC6F6F', transform: 'translate(15%, -15%)'}}>insights</span>
+                </div>
 
-                        {nextClass ? (
-                            <div>
-                                <h2 className="text-3xl md:text-4xl font-black leading-none mb-2">{nextClass.title}</h2>
-                                <div className="flex items-center gap-4 text-white/80">
-                                    <span className="font-medium text-lg">
-                                        {nextClass.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}
-                                    </span>
-                                    <span className="w-1 h-1 bg-white/50 rounded-full"></span>
-                                    <span className="text-sm uppercase tracking-wide font-bold">{nextClass.instructor}</span>
+                {/* KPI 3 y 4 (Juntos) — Próxima Clase */}
+                <div className="col-span-1 lg:col-span-2 flex flex-col justify-between p-7 group cursor-pointer transition-colors relative overflow-hidden"
+                    style={{backgroundColor: 'rgba(252, 111, 111, 0.05)'}}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(252, 111, 111, 0.08)'}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(252, 111, 111, 0.05)'}
+                    onClick={() => navigate('/student/schedule')}
+                >
+                    <div className="flex justify-between items-start relative z-10">
+                        <div>
+                            <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-4"
+                                style={{color: '#FCA5A5'}}>Próxima Clase</p>
+                            {nextClass ? (
+                                <>
+                                    <p className="text-3xl font-black tracking-tighter" style={{color: '#FC6F6F'}}>
+                                        {nextClass.title}
+                                    </p>
+                                    <p className="text-sm font-semibold mt-2" style={{color: '#FEF3C7'}}>
+                                        {nextClass.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })} · {nextClass.instructor}
+                                    </p>
+                                </>
+                            ) : (
+                                <>
+                                    <p className="text-2xl font-black tracking-tighter mt-1" style={{color: '#FC6F6F'}}>
+                                        Sin clases hoy
+                                    </p>
+                                    <p className="text-sm font-semibold mt-1" style={{color: '#FEF3C7'}}>
+                                        Consulta el calendario completo.
+                                    </p>
+                                </>
+                            )}
+                        </div>
+                    </div>
+                    <div className="flex items-center justify-between mt-5 pt-4 relative z-10" style={{borderTop: '1px solid rgba(252, 111, 111, 0.15)'}}>
+                        <span className="text-[10px] font-medium" style={{color: '#FCA5A5'}}>Ver calendario completo</span>
+                        <span className="material-symbols-outlined" style={{fontSize: '16px', color: '#FC6F6F'}}>arrow_forward</span>
+                    </div>
+                    {/* Background Icon */}
+                    <span className="material-symbols-outlined text-8xl opacity-[0.05] absolute right-0 top-0" style={{color: '#FC6F6F', transform: 'translate(10%, -20%)'}}>schedule</span>
+                </div>
+            </div>
+
+            {/* ================================================================
+                FILA 2: MIS CLASES & EVENTOS/RANGO
+                ================================================================ */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
+
+                {/* MIS CLASES */}
+                <div className="col-span-1 lg:col-span-8 flex flex-col"
+                    style={{
+                        backgroundColor: 'var(--color-bg-surface)',
+                        border: '1px solid var(--color-border-subtle)',
+                        borderRadius: '10px',
+                        overflow: 'hidden'
+                    }}>
+                    <div className="flex justify-between items-center px-7 py-5"
+                        style={{borderBottom: '1px solid var(--color-border-subtle)'}}>
+                        <div>
+                            <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-0.5"
+                                style={{color: 'var(--color-brand)'}}>Mis Grupos</p>
+                            <h3 className="text-sm font-semibold"
+                                style={{color: 'var(--color-text-primary)'}}>Mis Clases</h3>
+                        </div>
+                        <button onClick={() => navigate('/student/classes')}
+                            className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider transition-colors"
+                            style={{color: 'var(--color-brand)'}}>
+                            Ver Todo
+                            <span className="material-symbols-outlined" style={{fontSize: '14px'}}>arrow_forward</span>
+                        </button>
+                    </div>
+                    
+                    <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {myEnrolledClasses.length > 0 ? (
+                            myEnrolledClasses.map(cls => (
+                                <div key={cls.id} onClick={() => navigate(`/student/classes/${cls.id}`)} 
+                                     className="flex flex-col gap-3 p-5 cursor-pointer transition-colors"
+                                     style={{backgroundColor: 'var(--color-bg-app)', border: '1px solid var(--color-border-subtle)', borderRadius: '8px'}}
+                                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-border-strong)'}
+                                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-border-subtle)'}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-sm" style={{color: 'var(--color-text-muted)'}}>sports_martial_arts</span>
+                                            <span className="text-[9px] font-bold px-1.5 py-0.5 uppercase tracking-wider"
+                                                style={{color: 'var(--color-text-muted)', border: '1px solid var(--color-border-subtle)', borderRadius: '3px'}}>
+                                                {cls.studentCount} Alumnos
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-base mt-2" style={{color: 'var(--color-text-primary)'}}>{cls.name}</h4>
+                                        <p className="text-[11px] font-medium mt-1.5" style={{color: 'var(--color-text-muted)'}}>
+                                            <span className="material-symbols-outlined text-[11px] mr-1 align-middle">schedule</span> 
+                                            {cls.schedule}
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-2 pt-3 mt-auto" style={{borderTop: '1px solid var(--color-border-subtle)'}}>
+                                        <Avatar name={cls.instructor} className="size-5 rounded-full text-[9px]" />
+                                        <span className="text-[10px] font-medium" style={{color: 'var(--color-text-secondary)'}}>{cls.instructor}</span>
+                                    </div>
                                 </div>
-                            </div>
+                            ))
                         ) : (
-                            <div>
-                                <h2 className="text-2xl font-bold text-white/90">Sin clases hoy</h2>
-                                <p className="text-white/60 text-sm mt-1">Consulta el calendario completo.</p>
-                                <button onClick={() => navigate('/student/schedule')} className="mt-4 text-xs font-bold uppercase tracking-wider text-white border-b border-white/30 hover:border-white pb-0.5 transition-colors">
-                                    Ver Calendario
-                                </button>
+                            <div className="col-span-full py-16 text-center flex flex-col items-center gap-3">
+                                <span className="material-symbols-outlined" style={{fontSize: '28px', color: 'var(--color-border-strong)'}}>class</span>
+                                <p className="text-[10px] font-bold uppercase tracking-widest" style={{color: 'var(--color-text-muted)'}}>Sin grupos regulares</p>
                             </div>
                         )}
                     </div>
                 </div>
-            </div>
 
-            {/* --- SECONDARY SECTION: CLASSES & EXTRA --- */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-                {/* LEFT: MY ENROLLED CLASSES (List) */}
-                <div className="lg:col-span-2 bg-white rounded-[2.5rem] border border-gray-100 shadow-card p-8">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-xl font-bold text-text-main flex items-center gap-2">
-                            <span className="material-symbols-outlined text-primary">class</span>
-                            Mis Clases
-                        </h3>
-                        <button onClick={() => navigate('/student/classes')} className="text-sm font-bold text-primary hover:text-blue-700 transition-colors">
-                            Ver Todo
-                        </button>
-                    </div>
-
-                    {myEnrolledClasses.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {myEnrolledClasses.map(cls => (
-                                <div key={cls.id} onClick={() => navigate(`/student/classes/${cls.id}`)} className="p-4 rounded-2xl bg-gray-50 border border-gray-100 hover:bg-white hover:shadow-lg hover:border-gray-200 transition-all cursor-pointer group">
-                                    <div className="flex items-start justify-between mb-3">
-                                        <div className="size-10 rounded-full bg-white flex items-center justify-center shadow-sm text-text-secondary group-hover:text-primary transition-colors">
-                                            <span className="material-symbols-outlined">sports_martial_arts</span>
-                                        </div>
-                                        <span className="text-[10px] font-bold uppercase bg-white border border-gray-200 px-2 py-1 rounded text-text-secondary">
-                                            {cls.studentCount} Alumnos
-                                        </span>
-                                    </div>
-                                    <h4 className="font-bold text-text-main text-lg mb-1">{cls.name}</h4>
-                                    <p className="text-xs text-text-secondary mb-3 flex items-center gap-1">
-                                        <span className="material-symbols-outlined text-[12px]">schedule</span> {cls.schedule}
-                                    </p>
-                                    <div className="flex items-center gap-2 pt-3 border-t border-gray-200/50">
-                                        <Avatar name={cls.instructor} className="size-6 rounded-full text-[10px]" />
-                                        <span className="text-xs font-medium text-text-secondary">{cls.instructor}</span>
-                                    </div>
-                                </div>
-                            ))}
+                {/* EVENTOS PRÓXIMOS & RANGO */}
+                <div className="col-span-1 lg:col-span-4 flex flex-col gap-4 sm:gap-5">
+                    
+                    {/* Eventos Próximos */}
+                    <div style={{
+                        backgroundColor: 'var(--color-bg-surface)',
+                        border: '1px solid var(--color-border-subtle)',
+                        borderRadius: '10px',
+                        overflow: 'hidden'
+                    }}>
+                        <div className="px-7 py-5" style={{borderBottom: '1px solid var(--color-border-subtle)'}}>
+                            <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-0.5"
+                                style={{color: 'var(--color-text-muted)'}}>Agenda</p>
+                            <h3 className="text-sm font-semibold"
+                                style={{color: 'var(--color-text-primary)'}}>Eventos Próximos</h3>
                         </div>
-                    ) : (
-                        <div className="text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                            <p className="text-text-secondary text-sm">No estás inscrito en grupos regulares.</p>
-                        </div>
-                    )}
-                </div>
-
-                {/* RIGHT: EVENTS & BELT STATUS */}
-                <div className="flex flex-col gap-6">
-
-                    {/* Event List */}
-                    <div className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm">
-                        <h3 className="text-sm font-bold text-text-secondary uppercase tracking-wider mb-4">Eventos Próximos</h3>
-                        <div className="flex flex-col gap-3">
+                        <div className="p-0">
                             {marketplaceEvents.length > 0 ? (
-                                marketplaceEvents.map(evt => (
-                                    <div key={evt.id} onClick={() => setSelectedEvent(evt)} className="flex items-center gap-3 p-3 rounded-xl hover:bg-gray-50 cursor-pointer transition-colors border border-transparent hover:border-gray-100">
-                                        <div className={`size-10 rounded-lg flex flex-col items-center justify-center shrink-0 text-white shadow-sm ${evt.type === 'tournament' ? 'bg-orange-500' : 'bg-blue-500'}`}>
-                                            <span className="text-[10px] font-bold uppercase">{formatDateDisplay(evt.date, { month: 'short' })}</span>
-                                            <span className="text-sm font-black leading-none">{formatDateDisplay(evt.date, { day: 'numeric' })}</span>
-                                        </div>
-                                        <div className="min-w-0">
-                                            <p className="text-sm font-bold text-text-main truncate">{evt.title}</p>
-                                            <p className="text-xs text-text-secondary truncate">{evt.time} • {evt.type === 'exam' ? 'Examen' : 'Evento'}</p>
+                                marketplaceEvents.map((evt, i) => (
+                                    <div key={evt.id} onClick={() => setSelectedEvent(evt)} 
+                                        className="flex items-center justify-between px-6 py-4 cursor-pointer transition-colors"
+                                        style={{borderBottom: i < marketplaceEvents.length - 1 ? '1px solid var(--color-border-subtle)' : 'none'}}
+                                        onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'}
+                                        onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className="flex flex-col items-center justify-center">
+                                                <span className="text-[9px] font-bold uppercase" style={{color: 'var(--color-brand)'}}>
+                                                    {formatDateDisplay(evt.date, { month: 'short' })}
+                                                </span>
+                                                <span className="text-lg font-black leading-none" style={{color: 'var(--color-text-primary)'}}>
+                                                    {formatDateDisplay(evt.date, { day: 'numeric' })}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-bold" style={{color: 'var(--color-text-primary)'}}>{evt.title}</p>
+                                                <p className="text-[10px] font-medium mt-0.5" style={{color: 'var(--color-text-muted)'}}>
+                                                    {evt.time} · {evt.type === 'exam' ? 'Examen' : 'Evento'}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 ))
                             ) : (
-                                <p className="text-xs text-gray-400 italic">No hay eventos próximos.</p>
+                                <div className="py-10 text-center flex flex-col items-center gap-3">
+                                    <span className="material-symbols-outlined" style={{fontSize: '24px', color: 'var(--color-border-strong)'}}>event_busy</span>
+                                    <p className="text-[10px] font-bold uppercase tracking-widest" style={{color: 'var(--color-text-muted)'}}>Sin eventos programados</p>
+                                </div>
                             )}
                         </div>
                     </div>
 
-                    {/* Current Belt Card */}
+                    {/* Rango */}
                     {liveStudent && (
-                        <div className="bg-white rounded-[2rem] p-6 border border-gray-100 shadow-sm relative overflow-hidden flex flex-col justify-between min-h-[180px]">
-                            <div>
-                                <div className="flex justify-between items-start mb-2">
-                                    <div>
-                                        <span className="text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-600 px-2 py-1 rounded-md">
-                                            Tu Cinturón
-                                        </span>
-                                        <h3 className="text-xl font-black text-text-main mt-3 leading-none">
-                                            {liveStudent.rank}
-                                        </h3>
-                                    </div>
-                                    <div className="size-10 flex items-center justify-center rounded-full bg-gray-50 border border-gray-100">
-                                        <span className="material-symbols-outlined text-gray-400">workspace_premium</span>
-                                    </div>
-                                </div>
+                        <div style={{
+                            backgroundColor: 'var(--color-bg-surface)',
+                            border: '1px solid var(--color-border-subtle)',
+                            borderRadius: '10px',
+                            overflow: 'hidden'
+                        }}>
+                            <div className="px-7 py-5" style={{borderBottom: '1px solid var(--color-border-subtle)'}}>
+                                <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-0.5"
+                                    style={{color: 'var(--color-text-muted)'}}>Perfil</p>
+                                <h3 className="text-sm font-semibold"
+                                    style={{color: 'var(--color-text-primary)'}}>Tu Cinturón</h3>
+                            </div>
+                            <div className="p-7">
+                                <h3 className="text-xl font-black mb-4" style={{color: 'var(--color-text-primary)'}}>
+                                    {liveStudent.rank}
+                                </h3>
 
                                 {/* Belt Visual */}
-                                <div className={`mt-4 h-12 w-full rounded-lg shadow-sm border flex items-center justify-end pr-3 relative overflow-hidden ${liveStudent.rankColor === 'white' ? 'bg-slate-50 border-slate-200' :
-                                    liveStudent.rankColor === 'yellow' ? 'bg-yellow-300 border-yellow-400' :
-                                        liveStudent.rankColor === 'orange' ? 'bg-orange-400 border-orange-500' :
-                                            liveStudent.rankColor === 'green' ? 'bg-green-600 border-green-700' :
-                                                liveStudent.rankColor === 'blue' ? 'bg-blue-600 border-blue-700' :
-                                                    liveStudent.rankColor === 'purple' ? 'bg-purple-600 border-purple-700' :
-                                                        liveStudent.rankColor === 'brown' ? 'bg-[#5D4037] border-[#3E2723]' :
-                                                            'bg-gray-900 border-black'
-                                    }`}>
-                                    {/* Texture overlay */}
+                                <div className={`h-12 w-full rounded-md flex items-center justify-end pr-3 relative overflow-hidden ${
+                                    liveStudent.rankColor === 'white' ? 'bg-[#E5E7EB]' :
+                                    liveStudent.rankColor === 'yellow' ? 'bg-[#FCD34D]' :
+                                        liveStudent.rankColor === 'orange' ? 'bg-[#FB923C]' :
+                                            liveStudent.rankColor === 'green' ? 'bg-[#4ADE80]' :
+                                                liveStudent.rankColor === 'blue' ? 'bg-[#60A5FA]' :
+                                                    liveStudent.rankColor === 'purple' ? 'bg-[#FC6F6F]' :
+                                                        liveStudent.rankColor === 'brown' ? 'bg-[#78350F]' :
+                                                            'bg-[#DC2626]'
+                                    }`} style={{border: '1px solid var(--color-border-strong)'}}>
+                                    
                                     <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/fabric-of-squares.png')]"></div>
 
-                                    <div className={`relative h-full w-16 ${liveStudent.rankColor === 'black' ? 'bg-red-600' : 'bg-black'} flex items-center justify-center gap-1 shadow-lg`}>
+                                    <div className={`relative h-full w-16 ${liveStudent.rankColor === 'black' ? 'bg-[#DC2626]' : 'bg-[#111111]'} flex items-center justify-center gap-1 shadow-lg`}>
                                         {Array.from({ length: liveStudent.stripes || 0 }).map((_, i) => (
                                             <div key={i} className="w-1.5 h-7 bg-white/90 rounded-sm shadow-sm"></div>
                                         ))}
                                     </div>
                                 </div>
-                            </div>
 
-                            <div className="mt-4 pt-4 border-t border-gray-50 flex justify-between items-center text-xs">
-                                <span className="text-text-secondary font-medium">
-                                    {liveStudent.stripes > 0 ? `${liveStudent.stripes} ${liveStudent.stripes === 1 ? 'Grado' : 'Grados'}` : 'Sin grados'}
-                                </span>
-                                {nextRankConfig && (
-                                    <span className="text-primary font-bold">
-                                        Próximo: {nextRankConfig.name}
+                                <div className="mt-5 pt-4 flex justify-between items-center text-[10px] uppercase tracking-widest font-bold" style={{borderTop: '1px solid var(--color-border-subtle)'}}>
+                                    <span style={{color: 'var(--color-text-muted)'}}>
+                                        {liveStudent.stripes > 0 ? `${liveStudent.stripes} ${liveStudent.stripes === 1 ? 'Grado' : 'Grados'}` : 'Sin grados'}
                                     </span>
-                                )}
+                                    {nextRankConfig && (
+                                        <span style={{color: 'var(--color-brand)'}}>
+                                            Próximo: {nextRankConfig.name}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     )}
+
                 </div>
             </div>
 
-            {/* --- EVENT MODAL (Reused) --- */}
+            {/* --- EVENT MODAL (Dark Enterprise Style) --- */}
             {selectedEvent && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setSelectedEvent(null)}>
-                    <div className="bg-white rounded-[2rem] w-full max-w-lg shadow-2xl relative overflow-hidden" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200" onClick={() => setSelectedEvent(null)}>
+                    <div className="bg-[#0f0f0f] rounded-3xl w-full max-w-lg shadow-2xl relative overflow-hidden border border-zinc-800 animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
 
-                        <div className={`p-8 pb-12 relative ${selectedEvent.type === 'exam' ? 'bg-gray-900 text-white' :
-                            selectedEvent.type === 'tournament' ? 'bg-orange-500 text-white' :
-                                'bg-blue-600 text-white'
-                            }`}>
-                            <button onClick={() => setSelectedEvent(null)} className="absolute top-4 right-4 p-2 bg-white/20 hover:bg-white/30 rounded-full backdrop-blur-md transition-colors">
-                                <span className="material-symbols-outlined">close</span>
-                            </button>
-
-                            <div className="flex items-center gap-3 mb-4 opacity-90">
-                                <span className="material-symbols-outlined text-2xl">{getEventIcon(selectedEvent.type)}</span>
-                                <span className="text-sm font-bold uppercase tracking-wider">
-                                    {selectedEvent.type === 'exam' ? 'Examen de Grado' : 'Evento Oficial'}
-                                </span>
-                            </div>
-                            <h2 className="text-3xl font-black leading-tight">{selectedEvent.title}</h2>
-                        </div>
-
-                        <div className="p-8 -mt-6 bg-white rounded-t-[2rem] relative z-10 flex flex-col gap-6">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="bg-gray-50 p-4 rounded-2xl">
-                                    <p className="text-xs font-bold text-gray-400 uppercase mb-1">Fecha</p>
-                                    <p className="font-bold text-text-main">{formatDateDisplay(selectedEvent.date)}</p>
-                                </div>
-                                <div className="bg-gray-50 p-4 rounded-2xl">
-                                    <p className="text-xs font-bold text-gray-400 uppercase mb-1">Horario</p>
-                                    <p className="font-bold text-text-main">{selectedEvent.time}</p>
-                                </div>
-                            </div>
-
-                            <div>
-                                <h4 className="text-sm font-bold text-text-main mb-2">Detalles</h4>
-                                <p className="text-text-secondary text-sm leading-relaxed whitespace-pre-wrap">
-                                    {selectedEvent.description}
-                                </p>
-                            </div>
-
-                            <div className="pt-4 border-t border-gray-100">
-                                {selectedEvent.type === 'exam' && !selectedEvent.registrants?.includes(liveStudent?.id || '') ? (
-                                    <div className="bg-yellow-50 border border-yellow-100 rounded-xl p-4 flex items-start gap-3">
-                                        <span className="material-symbols-outlined text-yellow-600">info</span>
-                                        <div>
-                                            <p className="text-sm font-bold text-yellow-800">Inscripción Controlada</p>
-                                            <p className="text-xs text-yellow-700 mt-1">
-                                                Contacta a tu maestro para confirmar tu elegibilidad.
-                                            </p>
-                                        </div>
+                        <div className="flex items-start justify-between p-6 md:p-8 border-b border-zinc-900 bg-[#0a0a0a] sticky top-0 z-10">
+                            <div className="flex items-center gap-4">
+                                <button
+                                    onClick={() => setSelectedEvent(null)}
+                                    className="size-10 rounded-full bg-zinc-900 hover:bg-zinc-800 text-zinc-500 hover:text-white flex items-center justify-center transition-all border border-zinc-800/50"
+                                >
+                                    <span className="material-symbols-outlined text-xl">arrow_back</span>
+                                </button>
+                                <div className="flex flex-col gap-1.5">
+                                    <div className="flex items-center gap-2">
+                                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider flex items-center gap-1.5 border
+                                            ${selectedEvent.type === 'exam' ? 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' : 
+                                              selectedEvent.type === 'tournament' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' : 
+                                              'bg-blue-500/10 text-blue-400 border-blue-500/20'}`}>
+                                            <span className="material-symbols-outlined text-[12px] filled">{getEventIcon(selectedEvent.type)}</span>
+                                            {selectedEvent.type === 'exam' ? 'Examen de Grado' : 'Evento Oficial'}
+                                        </span>
                                     </div>
-                                ) : (
-                                    <>
-                                        {selectedEvent.registrants?.includes(liveStudent?.id || '') ? (
-                                            <div className="flex items-center justify-center gap-2 text-green-600 font-bold bg-green-50 px-4 py-3 rounded-xl border border-green-100">
-                                                <span className="material-symbols-outlined">check_circle</span>
-                                                Ya estás inscrito
-                                            </div>
-                                        ) : (
-                                            <button
-                                                onClick={handleRegister}
-                                                className="w-full py-4 bg-primary hover:bg-primary-hover text-white font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95"
-                                            >
-                                                <span>Confirmar Inscripción</span>
-                                                <span className="material-symbols-outlined">how_to_reg</span>
-                                            </button>
-                                        )}
-                                    </>
-                                )}
+                                    <h2 className="text-xl font-bold text-white/90 leading-tight">
+                                        {selectedEvent.title}
+                                    </h2>
+                                </div>
                             </div>
                         </div>
+
+                        <div className="flex-1 overflow-y-auto p-6 md:p-8 bg-[#0a0a0a]">
+                            <div className="grid grid-cols-2 gap-3 mb-6">
+                                <div className="bg-zinc-900/40 p-4 rounded-xl border border-zinc-800/50 flex flex-col justify-between">
+                                    <div className="flex items-center gap-2 text-zinc-500 mb-2">
+                                        <span className="material-symbols-outlined text-base">calendar_month</span>
+                                        <span className="text-[9px] font-bold uppercase tracking-widest">Fecha</span>
+                                    </div>
+                                    <p className="text-sm font-bold text-white tracking-tight">{formatDateDisplay(selectedEvent.date)}</p>
+                                </div>
+                                <div className="bg-zinc-900/40 p-4 rounded-xl border border-zinc-800/50 flex flex-col justify-between">
+                                    <div className="flex items-center gap-2 text-zinc-500 mb-2">
+                                        <span className="material-symbols-outlined text-base">schedule</span>
+                                        <span className="text-[9px] font-bold uppercase tracking-widest">Horario</span>
+                                    </div>
+                                    <p className="text-sm font-bold text-white tracking-tight">{selectedEvent.time}</p>
+                                </div>
+                            </div>
+
+                            <div className="mb-6 bg-zinc-900/20 rounded-xl p-5 border border-zinc-800/40">
+                                <h4 className="text-[9px] font-bold text-zinc-500 uppercase mb-3 tracking-[0.2em] flex items-center gap-2 opacity-60">
+                                    <span className="material-symbols-outlined text-[14px]">description</span>
+                                    Detalles
+                                </h4>
+                                <div className="text-[13px] text-zinc-400 font-medium leading-relaxed whitespace-pre-wrap break-words">
+                                    {selectedEvent.description}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-5 border-t border-zinc-900 bg-[#0a0a0a] flex flex-col justify-between items-center gap-4">
+                            {selectedEvent.type === 'exam' && !selectedEvent.registrants?.includes(liveStudent?.id || '') ? (
+                                <div className="bg-amber-500/5 border border-amber-500/10 rounded-xl p-4 flex items-start gap-3 w-full">
+                                    <span className="material-symbols-outlined text-amber-500">info</span>
+                                    <div>
+                                        <p className="text-sm font-bold text-amber-500/90">Inscripción Controlada</p>
+                                        <p className="text-xs text-amber-500/60 mt-1 font-medium">
+                                            Contacta a tu maestro para confirmar tu elegibilidad.
+                                        </p>
+                                    </div>
+                                </div>
+                            ) : (
+                                <>
+                                    {selectedEvent.registrants?.includes(liveStudent?.id || '') ? (
+                                        <div className="flex flex-col items-center justify-center gap-2 w-full text-emerald-500 font-bold bg-emerald-500/5 px-4 py-4 rounded-xl border border-emerald-500/10">
+                                            <span className="material-symbols-outlined text-2xl">check_circle</span>
+                                            <span className="text-xs uppercase tracking-widest">Ya estás inscrito</span>
+                                        </div>
+                                    ) : (
+                                        <button
+                                            onClick={handleRegister}
+                                            className="w-full py-4 bg-zinc-100 hover:bg-white text-zinc-950 font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 text-xs uppercase tracking-widest"
+                                        >
+                                            <span className="material-symbols-outlined text-lg">how_to_reg</span>
+                                            <span>Confirmar Inscripción</span>
+                                        </button>
+                                    )}
+                                </>
+                            )}
+                        </div>
+
                     </div>
                 </div>
             )}

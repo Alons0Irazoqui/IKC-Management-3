@@ -22,7 +22,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       />
       
       {/* CONTENT AREA with Premium Enterprise Background */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden relative" style={{backgroundColor: 'var(--color-bg-app)'}}>
+      <div className="flex-1 flex flex-col h-full overflow-hidden relative z-0 md:z-10" style={{backgroundColor: 'var(--color-bg-app)'}}>
         
         {/* Grid pattern — ultra-subtle, fades to edges */}
         <div style={{
@@ -65,7 +65,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         {/* 
             SCROLL CANVAS
         */}
-        <main className="flex-1 overflow-y-auto scrollbar-hide relative w-full" style={{zIndex: 1}}>
+        <main className="flex-1 overflow-y-auto relative w-full scroll-smooth">
             {children}
         </main>
       </div>

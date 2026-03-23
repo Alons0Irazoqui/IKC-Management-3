@@ -89,11 +89,11 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
 
     const getStatusConfig = (status: string) => {
         switch (status) {
-            case 'paid': return { label: 'Pagado', color: 'text-emerald-700', bg: 'bg-emerald-50', icon: 'check_circle' };
-            case 'overdue': return { label: 'Vencido', color: 'text-red-700', bg: 'bg-red-50', icon: 'warning' };
-            case 'partial': return { label: 'Parcial', color: 'text-amber-700', bg: 'bg-amber-50', icon: 'pie_chart' };
-            case 'in_review': return { label: 'Revisión', color: 'text-blue-700', bg: 'bg-blue-50', icon: 'hourglass_top' };
-            default: return { label: 'Pendiente', color: 'text-gray-600', bg: 'bg-gray-100', icon: 'pending' };
+            case 'paid': return { label: 'Pagado', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20', icon: 'check_circle' };
+            case 'overdue': return { label: 'Vencido', color: 'text-red-400', bg: 'bg-red-500/10', border: 'border-red-500/20', icon: 'warning' };
+            case 'partial': return { label: 'Parcial', color: 'text-amber-400', bg: 'bg-amber-500/10', border: 'border-amber-500/20', icon: 'pie_chart' };
+            case 'in_review': return { label: 'Revisión', color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20', icon: 'hourglass_top' };
+            default: return { label: 'Pendiente', color: 'text-zinc-400', bg: 'bg-zinc-800', border: 'border-zinc-700', icon: 'pending' };
         }
     };
 
@@ -139,143 +139,134 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+            <style>
+                {`
+                    input[type="number"].amount-input-override {
+                        padding-left: 45px !important;
+                    }
+                `}
+            </style>
             <div
-                className="bg-white rounded-3xl w-full max-w-4xl shadow-soft flex flex-col max-h-[90vh] overflow-hidden relative border border-gray-100 animate-in zoom-in-95 duration-300"
+                className="bg-[#0f0f0f] rounded-3xl w-full max-w-4xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden relative border border-zinc-800 animate-in zoom-in-95 duration-300"
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="flex items-start justify-between p-6 md:p-8 border-b border-gray-50 bg-white sticky top-0 z-10">
+                <div className="flex items-start justify-between p-6 md:p-8 border-b border-zinc-900 bg-[#0a0a0a] sticky top-0 z-10">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={onClose}
-                            className="size-10 rounded-full bg-gray-50 hover:bg-gray-100 text-gray-500 hover:text-slate-900 flex items-center justify-center transition-colors"
+                            className="size-10 rounded-full bg-zinc-900 hover:bg-zinc-800 text-zinc-500 hover:text-white flex items-center justify-center transition-all border border-zinc-800/50"
                         >
                             <span className="material-symbols-outlined text-xl">arrow_back</span>
                         </button>
-                        <div>
-                            <div className="flex items-center gap-3">
-                                <span className={`px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1.5 border border-transparent ${statusConfig.bg} ${statusConfig.color}`}>
-                                    <span className="material-symbols-outlined text-sm filled">{statusConfig.icon}</span>
+                        <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                                <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider flex items-center gap-1.5 border ${statusConfig.border} ${statusConfig.bg} ${statusConfig.color}`}>
+                                    <span className="material-symbols-outlined text-[12px] filled">{statusConfig.icon}</span>
                                     {statusConfig.label}
                                 </span>
-                                <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider bg-gray-50 px-2 py-0.5 rounded-md border border-gray-100">
+                                <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider bg-zinc-900 px-2 py-0.5 rounded-md border border-zinc-800">
                                     {record.category || 'General'}
                                 </span>
                             </div>
-                            <div className="flex items-baseline gap-2 mt-2">
-                                <h2 className="text-2xl font-black text-slate-900 leading-tight">
+                            <div className="flex items-baseline gap-2">
+                                <h2 className="text-xl font-bold text-white/90 leading-tight">
                                     {record.concept}
                                 </h2>
                                 {impliedPenalty > 0 && (
-                                    <span className="text-xs font-bold text-gray-400 hidden md:inline-block">
-                                        (Base + Recargo)
+                                    <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest hidden md:inline-block">
+                                        (Base + Mora)
                                     </span>
                                 )}
                             </div>
                         </div>
                     </div>
 
-                    {/* Header Costo Global Logic - Consistent with Abonos */}
                     <div className="hidden md:block text-right">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Costo Total</p>
-                        {impliedPenalty > 0 ? (
-                            <div className="flex flex-col items-end gap-0.5">
-                                <div className="flex items-center gap-2 text-xs font-medium text-gray-400">
-                                    <span>Base:</span>
-                                    <span className="tabular-nums">{formatMoney(baseAmount)}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-xs font-bold text-red-500 bg-red-50 px-1.5 py-0.5 rounded">
-                                    <span>+ Recargo:</span>
-                                    <span className="tabular-nums">{formatMoney(impliedPenalty)}</span>
-                                </div>
-                                <div className="border-t border-gray-100 w-full my-0.5"></div>
-                                <p className="text-3xl font-black text-slate-900 tabular-nums mt-1">{formatMoney(grandTotal)}</p>
-                            </div>
-                        ) : (
-                            <p className="text-3xl font-black text-slate-900 tabular-nums">{formatMoney(grandTotal)}</p>
-                        )}
+                        <p className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest mb-1 opacity-70">Importe Total</p>
+                        <p className="text-2xl font-bold text-white tabular-nums tracking-tight">{formatMoney(grandTotal)}</p>
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-6 md:p-8 bg-white">
+                <div className="flex-1 overflow-y-auto p-6 md:p-8 bg-[#0a0a0a] scrollbar-visible">
                     {isPayingManual ? (
                         <div className="animate-in slide-in-from-bottom-4 duration-300 flex flex-col gap-6">
                             {/* Becado / Scholarship Section */}
                             {role === 'master' && (
-                                <div className="bg-blue-50/50 border border-blue-100 rounded-2xl p-5">
+                                <div className="bg-blue-600/5 border border-blue-500/10 rounded-2xl p-5">
                                     <div className="flex justify-between items-center mb-4">
                                         <div>
-                                            <h4 className="text-sm font-bold text-blue-900 flex items-center gap-2">
+                                            <h4 className="text-sm font-bold text-blue-400 flex items-center gap-2 italic">
                                                 <span className="material-symbols-outlined text-lg">workspace_premium</span>
                                                 Ajuste por Beca o Descuento
                                             </h4>
-                                            <p className="text-[11px] text-blue-700 font-medium">Cambia el monto total que el alumno debe pagar por este concepto.</p>
+                                            <p className="text-[11px] text-zinc-500 font-medium">Cambia el monto total que el alumno debe pagar (Becas, descuentos).</p>
                                         </div>
                                         <button
                                             onClick={() => setIsAdjustingTotal(!isAdjustingTotal)}
-                                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${isAdjustingTotal ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-blue-600 border border-blue-200 hover:bg-blue-50'}`}
+                                            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest transition-all ${isAdjustingTotal ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : 'bg-zinc-900 text-zinc-400 border border-zinc-800 hover:bg-zinc-800 hover:text-white'}`}
                                         >
-                                            {isAdjustingTotal ? 'Cancelar Ajuste' : 'Ajustar Monto'}
+                                            {isAdjustingTotal ? 'Cancelar' : 'Ajustar'}
                                         </button>
                                     </div>
 
                                     {isAdjustingTotal && (
                                         <div className="flex items-end gap-3 animate-in fade-in slide-in-from-top-2">
                                             <div className="flex-1">
-                                                <label className="block text-[10px] font-bold text-blue-400 uppercase mb-1 ml-1">Nuevo Monto Total</label>
+                                                <label className="block text-[10px] font-bold text-zinc-600 uppercase mb-2 tracking-widest ml-1">Nuevo Monto Total</label>
                                                 <div className="relative">
-                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-400 font-bold">$</span>
+                                                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 font-bold">$</span>
                                                     <input
                                                         type="number"
                                                         value={adjustedTotal}
                                                         onChange={e => setAdjustedTotal(e.target.value)}
-                                                        className="w-full bg-white border border-blue-200 rounded-xl px-7 py-2.5 text-lg font-bold text-blue-900 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none"
+                                                        className="w-full bg-[#050505] border border-zinc-800 rounded-xl px-8 py-3 text-lg font-bold text-white focus:border-blue-500/50 transition-all outline-none amount-input-override"
                                                     />
                                                 </div>
                                             </div>
                                             <button
                                                 onClick={handleApplyAdjustment}
-                                                className="h-[46px] px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs uppercase tracking-wider transition-all shadow-lg shadow-blue-500/20 active:scale-95 flex items-center gap-2"
+                                                className="h-[50px] px-6 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-xs uppercase tracking-widest transition-all active:scale-95 flex items-center gap-2 shadow-lg shadow-blue-600/10"
                                             >
                                                 <span className="material-symbols-outlined text-lg">sync_alt</span>
-                                                Aplicar Beca
+                                                Aplicar
                                             </button>
                                         </div>
                                     )}
                                 </div>
                             )}
 
-                            <div className="bg-gray-50 rounded-2xl p-8 border border-gray-200">
-                                <h3 className="text-xl font-black text-slate-900 mb-6 flex items-center gap-2">
-                                    <span className="material-symbols-outlined text-emerald-600">point_of_sale</span>
+                            <div className="bg-zinc-900/40 rounded-2xl p-8 border border-zinc-800/50">
+                                <h3 className="text-xl font-bold text-white italic mb-6 flex items-center gap-3">
+                                    <span className="material-symbols-outlined text-emerald-500">point_of_sale</span>
                                     Registrar Pago Manual
                                 </h3>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="space-y-6">
                                         <div>
-                                            <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Monto del Pago</label>
+                                            <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-2 tracking-widest ml-1">Monto del Pago</label>
                                             <div className="relative">
-                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
+                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 font-bold">$</span>
                                                 <input
                                                     type="number"
                                                     value={manualAmount}
                                                     onChange={e => setManualAmount(e.target.value)}
-                                                    className="w-full bg-white border border-gray-200 rounded-xl px-8 py-4 text-2xl font-black text-slate-900 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none"
+                                                    className="w-full bg-[#050505] border border-zinc-800 rounded-xl px-8 py-4 text-2xl font-bold text-white focus:border-emerald-500/50 transition-all outline-none tabular-nums amount-input-override"
                                                 />
                                             </div>
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Método de Pago</label>
+                                            <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-2 tracking-widest ml-1">Método de Pago</label>
                                             <div className="grid grid-cols-3 gap-2">
                                                 {['Efectivo', 'Transferencia', 'Tarjeta'].map((m) => (
                                                     <button
                                                         key={m}
                                                         onClick={() => setManualMethod(m as any)}
-                                                        className={`py-3 rounded-xl text-xs font-bold transition-all border ${manualMethod === m
-                                                                ? 'bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-600/20'
-                                                                : 'bg-white text-slate-500 border-gray-200 hover:border-emerald-200 hover:text-emerald-600'
+                                                        className={`py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all border ${manualMethod === m
+                                                                ? 'bg-zinc-100 text-zinc-950 border-white shadow-lg'
+                                                                : 'bg-zinc-900 text-zinc-500 border-zinc-800 hover:border-zinc-700 hover:text-zinc-300'
                                                             }`}
                                                     >
                                                         {m}
@@ -286,26 +277,26 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
                                     </div>
 
                                     <div className="space-y-2">
-                                        <label className="block text-xs font-bold text-gray-400 uppercase mb-2 ml-1">Motivo o Nota del Maestro</label>
+                                        <label className="block text-[10px] font-bold text-zinc-500 uppercase mb-2 tracking-widest ml-1">Motivo o Nota del Maestro</label>
                                         <textarea
                                             value={manualNote}
                                             onChange={e => setManualNote(e.target.value)}
-                                            className="w-full bg-white border border-gray-200 rounded-xl p-4 text-sm font-medium focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all outline-none resize-none h-44"
+                                            className="w-full bg-[#050505] border border-zinc-800 rounded-xl p-4 text-[13px] font-normal text-white focus:border-zinc-700 transition-all outline-none resize-none h-44 placeholder:text-zinc-800"
                                             placeholder="Ej: Pago recibido en el dojo, alumno entregó efectivo..."
                                         />
                                     </div>
                                 </div>
 
-                                <div className="flex gap-4 mt-10 pt-8 border-t border-gray-100">
+                                <div className="flex gap-4 mt-10 pt-8 border-t border-zinc-900">
                                     <button
                                         onClick={() => setIsPayingManual(false)}
-                                        className="flex-1 py-4 bg-white border border-gray-200 rounded-xl font-bold text-slate-500 hover:bg-gray-100 transition-all uppercase tracking-wide text-xs"
+                                        className="flex-1 py-4 bg-zinc-900 border border-zinc-800 rounded-xl font-bold text-zinc-500 hover:bg-zinc-800 hover:text-white transition-all uppercase tracking-widest text-[10px]"
                                     >
                                         Cancelar
                                     </button>
                                     <button
                                         onClick={handleConfirmManualPayment}
-                                        className="flex-[2] py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all shadow-lg shadow-emerald-600/20 uppercase tracking-wide text-xs active:scale-95 flex items-center justify-center gap-2"
+                                        className="flex-[2] py-4 bg-zinc-100 hover:bg-white text-zinc-950 rounded-xl font-bold transition-all shadow-lg uppercase tracking-widest text-xs active:scale-95 flex items-center justify-center gap-2"
                                     >
                                         <span className="material-symbols-outlined text-lg">check_circle</span>
                                         Confirmar Liquidación
@@ -315,93 +306,106 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
                         </div>
                     ) : (
                         <>
-                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
                                 {/* Costo Global - Card Version with Breakdown */}
-                                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between h-auto min-h-[7rem]">
-                                    <div className="flex items-center gap-2 text-gray-400 mb-1">
-                                        <span className="material-symbols-outlined text-lg">receipt_long</span>
-                                        <span className="text-[10px] font-bold uppercase tracking-wider">Costo Global</span>
+                                <div className="bg-zinc-900/40 p-4 rounded-xl border border-zinc-800/50 flex flex-col justify-between min-h-[6rem]">
+                                    <div className="flex items-center gap-2 text-zinc-500 mb-1">
+                                        <span className="material-symbols-outlined text-base">receipt_long</span>
+                                        <span className="text-[9px] font-bold uppercase tracking-widest">Costo Global</span>
                                     </div>
 
                                     {impliedPenalty > 0 ? (
-                                        <div className="flex flex-col gap-0.5">
-                                            <div className="flex justify-between text-[10px] text-gray-400 font-medium">
-                                                <span>Base:</span>
-                                                <span>{formatMoney(baseAmount)}</span>
+                                        <div className="flex flex-col gap-0.5 mt-1.5">
+                                            <div className="flex justify-between text-[9px] text-zinc-500 font-medium">
+                                                <span className="uppercase tracking-tighter opacity-60">Base:</span>
+                                                <span className="tabular-nums">{formatMoney(baseAmount)}</span>
                                             </div>
-                                            <div className="flex justify-between text-[10px] text-red-500 font-bold">
-                                                <span>+ Recargo:</span>
-                                                <span>{formatMoney(impliedPenalty)}</span>
+                                            <div className="flex justify-between text-[9px] text-red-400/80 font-bold uppercase tracking-tighter">
+                                                <span>+ Mora:</span>
+                                                <span className="tabular-nums">{formatMoney(impliedPenalty)}</span>
                                             </div>
-                                            <div className="border-t border-gray-100 my-1"></div>
-                                            <span className="text-xl font-bold text-slate-900 tabular-nums">{formatMoney(grandTotal)}</span>
+                                            <div className="border-t border-zinc-800/50 my-1"></div>
+                                            <span className="text-lg font-bold text-white tabular-nums tracking-tight">{formatMoney(grandTotal)}</span>
                                         </div>
                                     ) : (
-                                        <span className="text-2xl font-bold text-slate-900 tabular-nums mt-auto">{formatMoney(grandTotal)}</span>
+                                        <span className="text-xl font-bold text-white tabular-nums tracking-tight mt-auto">{formatMoney(grandTotal)}</span>
                                     )}
                                 </div>
 
-                                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between h-auto min-h-[7rem]">
-                                    <div className="flex items-center gap-2 text-emerald-600 mb-1">
-                                        <span className="material-symbols-outlined text-lg">payments</span>
-                                        <span className="text-[10px] font-bold uppercase tracking-wider">Total Abonado</span>
+                                <div className="bg-emerald-500/5 p-4 rounded-xl border border-emerald-500/10 flex flex-col justify-between min-h-[6rem]">
+                                    <div className="flex items-center gap-2 text-emerald-500/80 mb-1">
+                                        <span className="material-symbols-outlined text-base">payments</span>
+                                        <span className="text-[9px] font-bold uppercase tracking-widest">Abonado</span>
                                     </div>
-                                    <span className="text-2xl font-bold text-emerald-700 tabular-nums mt-auto">{formatMoney(totalPaid)}</span>
+                                    <span className="text-xl font-bold text-emerald-400/90 tabular-nums tracking-tight mt-auto">{formatMoney(totalPaid)}</span>
                                 </div>
 
-                                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between h-auto min-h-[7rem]">
-                                    <div className="flex items-center gap-2 text-slate-600 mb-1">
-                                        <span className="material-symbols-outlined text-lg">pie_chart</span>
-                                        <span className="text-[10px] font-bold uppercase tracking-wider">Restante</span>
+                                <div className="bg-zinc-900/40 p-4 rounded-xl border border-zinc-800/50 flex flex-col justify-between min-h-[6rem]">
+                                    <div className="flex items-center gap-2 text-zinc-500 mb-1">
+                                        <span className="material-symbols-outlined text-base">pie_chart</span>
+                                        <span className="text-[9px] font-bold uppercase tracking-widest">Restante</span>
                                     </div>
-                                    <span className="text-2xl font-bold text-slate-900 tabular-nums mt-auto">{formatMoney(remainingDebt)}</span>
+                                    <span className="text-xl font-bold text-white/90 tabular-nums tracking-tight mt-auto">{formatMoney(remainingDebt)}</span>
                                 </div>
 
-                                <div className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between h-auto min-h-[7rem]">
-                                    <div className="flex items-center gap-2 text-gray-400 mb-1">
-                                        <span className="material-symbols-outlined text-lg">event</span>
-                                        <span className="text-[10px] font-bold uppercase tracking-wider">Vence</span>
+                                <div className="bg-zinc-900/40 p-4 rounded-xl border border-zinc-800/50 flex flex-col justify-between min-h-[6rem]">
+                                    <div className="flex items-center gap-2 text-zinc-500 mb-1">
+                                        <span className="material-symbols-outlined text-base">event</span>
+                                        <span className="text-[9px] font-bold uppercase tracking-widest">Vence</span>
                                     </div>
-                                    <span className="text-xl font-bold text-slate-900 tabular-nums mt-auto">{formatDateDisplay(record.dueDate)}</span>
+                                    <span className="text-lg font-bold text-white/90 tabular-nums tracking-tight mt-auto">{formatDateDisplay(record.dueDate)}</span>
                                 </div>
                             </div>
 
-                            <div className="bg-gray-50 rounded-2xl p-8 border border-gray-100">
-                                <h3 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-                                    <span className="material-symbols-outlined text-gray-400">history</span>
+                            {/* Descripción del movimiento con scroll */}
+                            {record.description && (
+                                <div className="mb-6 bg-zinc-900/20 rounded-xl p-5 border border-zinc-800/40">
+                                    <h4 className="text-[9px] font-bold text-zinc-500 uppercase mb-3 tracking-[0.2em] flex items-center gap-2 opacity-60">
+                                        <span className="material-symbols-outlined text-[14px]">description</span>
+                                        Descripción
+                                    </h4>
+                                    <div className="max-h-56 overflow-y-auto pr-3 text-[13px] text-zinc-400 font-medium leading-relaxed custom-scrollbar scroller-description selection:bg-red-600/30 whitespace-pre-wrap break-words scrollbar-visible">
+                                        {record.description}
+                                    </div>
+                                </div>
+                            )}
+
+                            <div className="bg-zinc-900/20 rounded-2xl p-8 border border-zinc-800/50">
+                                <h3 className="text-lg font-bold text-white italic mb-6 flex items-center gap-3">
+                                    <span className="material-symbols-outlined text-zinc-500">history</span>
                                     Historial de Movimientos
                                 </h3>
 
                                 {paymentHistory.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center py-10 text-gray-400 border-2 border-dashed border-gray-200 rounded-xl">
-                                        <span className="material-symbols-outlined text-4xl mb-2 opacity-50">savings</span>
-                                        <p className="text-sm font-medium">Aún no se han registrado pagos.</p>
+                                    <div className="flex flex-col items-center justify-center py-10 text-zinc-700 border border-dashed border-zinc-800 rounded-xl bg-zinc-900/5">
+                                        <span className="material-symbols-outlined text-4xl mb-2 opacity-30">savings</span>
+                                        <p className="text-xs font-bold uppercase tracking-widest opacity-30">Sin pagos registrados</p>
                                     </div>
                                 ) : (
                                     <div className="space-y-0 relative">
-                                        <div className="absolute top-2 bottom-2 left-[19px] w-0.5 bg-gray-200"></div>
+                                        <div className="absolute top-2 bottom-2 left-[19px] w-[1px] bg-zinc-800/50"></div>
                                         {paymentHistory.map((item, idx) => (
                                             <div key={idx} className="relative pl-12 pb-8 last:pb-0 group">
-                                                <div className="absolute left-0 top-1 size-10 rounded-full bg-white border-4 border-gray-100 flex items-center justify-center z-10 shadow-sm">
-                                                    <div className="size-3 bg-slate-400 rounded-full"></div>
+                                                <div className="absolute left-0 top-1 size-10 rounded-full bg-[#0a0a0a] border border-zinc-800 flex items-center justify-center z-10 shadow-sm">
+                                                    <div className="size-2 bg-zinc-600 rounded-full shadow-sm shadow-zinc-600/50"></div>
                                                 </div>
-                                                <div className="flex justify-between items-start bg-white p-4 rounded-xl border border-gray-100 hover:border-gray-200 transition-colors shadow-sm">
+                                                <div className="flex justify-between items-start bg-zinc-900/30 p-4 rounded-xl border border-zinc-800/40 hover:border-zinc-700 transition-colors shadow-sm">
                                                     <div>
-                                                        <p className="text-sm font-bold text-slate-900 capitalize">
+                                                        <p className="text-sm font-bold text-zinc-100 capitalize">
                                                             {formatDateDisplay(item.date, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                                                         </p>
-                                                        <div className="flex items-center gap-2 mt-1">
-                                                            <span className="text-xs font-bold text-gray-500 bg-gray-50 px-2 py-0.5 rounded border border-gray-200 uppercase tracking-wide">
+                                                        <div className="flex items-center gap-2 mt-2">
+                                                            <span className="text-[9px] font-bold text-zinc-400 bg-zinc-800 px-2 py-0.5 rounded border border-zinc-700/50 uppercase tracking-widest">
                                                                 {item.method || 'Sistema'}
                                                             </span>
-                                                            <span className="text-[10px] text-gray-400 tabular-nums">
+                                                            <span className="text-[10px] text-zinc-600 font-bold tabular-nums">
                                                                 {new Date(item.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                             </span>
                                                         </div>
                                                     </div>
                                                     <div className="text-right">
-                                                        <span className="text-lg font-bold text-slate-900 tabular-nums">{formatMoney(item.amount)}</span>
-                                                        <p className="text-[9px] font-bold text-emerald-600 uppercase tracking-wider">Abonado</p>
+                                                        <span className="text-lg font-bold text-white tabular-nums tracking-tighter">{formatMoney(item.amount)}</span>
+                                                        <p className="text-[9px] font-bold text-emerald-500/70 uppercase tracking-widest mt-0.5 italic">Abonado</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -414,25 +418,25 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
                 </div>
 
                 {!isPayingManual && (
-                    <div className="p-6 border-t border-gray-50 bg-white flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div className="p-5 border-t border-zinc-900 bg-[#0a0a0a] flex flex-col md:flex-row justify-between items-center gap-4">
                         <div className="flex items-center gap-3 w-full md:w-auto">
-                            <div className="size-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 font-bold border border-gray-100">
+                            <div className="size-9 rounded-full bg-zinc-900 flex items-center justify-center text-zinc-300 font-bold border border-zinc-800 italic text-xs">
                                 {(record.studentName || '?').charAt(0)}
                             </div>
                             <div>
-                                <p className="text-sm font-bold text-slate-900">{record.studentName || 'Estudiante'}</p>
-                                <p className="text-xs text-gray-500">Alumno</p>
+                                <p className="text-xs font-semibold text-zinc-100">{record.studentName || 'Estudiante'}</p>
+                                <p className="text-[9px] text-zinc-600 font-bold uppercase tracking-wider">Alumno</p>
                             </div>
                         </div>
 
-                        <div className="flex gap-3 w-full md:w-auto items-center">
+                        <div className="flex gap-2 w-full md:w-auto items-center">
                             {role === 'master' && onDelete && (
                                 <button
                                     onClick={onDelete}
-                                    className="mr-2 p-3 rounded-xl border border-red-100 text-red-500 hover:bg-red-50 hover:text-red-700 transition-colors active:scale-95"
+                                    className="mr-2 p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-600 hover:text-red-500 hover:bg-red-500/5 transition-all active:scale-95"
                                     title="Eliminar Registro"
                                 >
-                                    <span className="material-symbols-outlined text-xl">delete</span>
+                                    <span className="material-symbols-outlined text-lg">delete</span>
                                 </button>
                             )}
 
@@ -442,12 +446,12 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
                                         <button
                                             onClick={() => record.status !== 'in_review' && onPay(record)}
                                             disabled={record.status === 'in_review'}
-                                            className={`flex-1 md:flex-none px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all uppercase tracking-wide text-xs ${record.status === 'in_review'
-                                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                    : 'bg-gradient-to-br from-red-600 to-red-700 text-white shadow-lg shadow-red-600/20 active:scale-95'
+                                            className={`flex-1 md:flex-none px-6 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-all uppercase tracking-wider text-[11px] ${record.status === 'in_review'
+                                                    ? 'bg-zinc-900 text-zinc-600 cursor-not-allowed border border-zinc-800 opacity-50'
+                                                    : 'bg-zinc-100 text-zinc-950 shadow-sm active:scale-95 hover:bg-white'
                                                 }`}
                                         >
-                                            <span className="material-symbols-outlined text-lg">
+                                            <span className="material-symbols-outlined text-base">
                                                 {record.status === 'in_review' ? 'hourglass_top' : 'credit_card'}
                                             </span>
                                             {record.status === 'in_review' ? 'En Revisión' : 'Pagar'}
@@ -456,9 +460,9 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
                                     {(record.status === 'paid' || record.status === 'partial') && onDownloadReceipt && (
                                         <button
                                             onClick={() => onDownloadReceipt(record)}
-                                            className="flex-1 md:flex-none px-6 py-3 rounded-xl border border-gray-200 font-bold text-slate-700 hover:bg-gray-50 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wide"
+                                            className="flex-1 md:flex-none px-5 py-2.5 rounded-lg border border-zinc-800 bg-zinc-900 font-bold text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-all flex items-center justify-center gap-2 text-[11px] uppercase tracking-wider"
                                         >
-                                            <span className="material-symbols-outlined text-lg">download</span>
+                                            <span className="material-symbols-outlined text-base">download</span>
                                             Recibo
                                         </button>
                                     )}
@@ -470,9 +474,9 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
                                     {remainingDebt > 0 && (
                                         <button
                                             onClick={() => setIsPayingManual(true)}
-                                            className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold transition-all flex items-center justify-center gap-2 active:scale-95 text-xs uppercase tracking-wide shadow-lg shadow-emerald-600/20"
+                                            className="flex-1 md:flex-none px-6 py-2.5 rounded-lg bg-emerald-600/90 text-white font-bold transition-all flex items-center justify-center gap-2 active:scale-95 text-[11px] uppercase tracking-wider shadow-sm hover:bg-emerald-600"
                                         >
-                                            <span className="material-symbols-outlined text-lg">payments</span>
+                                            <span className="material-symbols-outlined text-base">payments</span>
                                             Marcar Pagado
                                         </button>
                                     )}
@@ -485,17 +489,17 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
                                                     onClose();
                                                 }
                                             }}
-                                            className="flex-1 md:flex-none px-6 py-3 rounded-xl bg-gradient-to-br from-red-600 to-red-700 text-white font-bold transition-all flex items-center justify-center gap-2 active:scale-95 text-xs uppercase tracking-wide shadow-lg shadow-red-600/20"
+                                            className="flex-1 md:flex-none px-6 py-2.5 rounded-lg bg-zinc-100 text-zinc-950 font-bold transition-all flex items-center justify-center gap-2 active:scale-95 text-[11px] uppercase tracking-wider shadow-sm hover:bg-white"
                                         >
-                                            <span className="material-symbols-outlined text-lg">fact_check</span>
+                                            <span className="material-symbols-outlined text-base">fact_check</span>
                                             Revisar
                                         </button>
                                     ) : (
                                         <button
                                             onClick={() => onDownloadReceipt && onDownloadReceipt(record)}
-                                            className="flex-1 md:flex-none px-6 py-3 rounded-xl border border-gray-200 font-bold text-slate-700 hover:bg-gray-50 transition-all flex items-center justify-center gap-2 text-xs uppercase tracking-wide"
+                                            className="flex-1 md:flex-none px-5 py-2.5 rounded-lg border border-zinc-800 bg-zinc-900 font-bold text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800 transition-all flex items-center justify-center gap-2 text-[11px] uppercase tracking-wider"
                                         >
-                                            <span className="material-symbols-outlined text-lg">print</span>
+                                            <span className="material-symbols-outlined text-base">print</span>
                                             Imprimir
                                         </button>
                                     )}

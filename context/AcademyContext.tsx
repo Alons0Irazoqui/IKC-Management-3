@@ -823,8 +823,15 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (currentUser?.role !== 'master') return;
         const newEvents = events.filter(e => e.id !== id);
         setEvents(newEvents);
-        // Needs delete method in service, skipping for now
-        addToast('Evento eliminado', 'success');
+        try {
+            await PulseService.deleteEvent(id);
+            addToast('Evento eliminado permanentemente', 'success');
+        } catch (e) {
+            console.error("Error deleting event from DB:", e);
+            addToast('Error al eliminar el evento de la base de datos', 'error');
+            // Optionally, we could rollback local state if DB delete fails
+            // setEvents(events); 
+        }
     };
 
     const registerForEvent = async (studentId: string, eventId: string) => {

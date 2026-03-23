@@ -54,7 +54,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
 
       <aside
         className={`
-          fixed md:static inset-y-0 left-0 z-50
+          fixed md:relative inset-y-0 left-0 z-50 md:z-0
           flex flex-col w-full md:w-64 h-full
           transform transition-transform duration-300 ease-out
           ${isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0'}

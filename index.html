@@ -22,23 +22,23 @@
               light: "rgba(225, 29, 72, 0.15)",
             },
             background: {
-              app:     "#050505",
+              app: "#050505",
               surface: "#0e0e11",
-              raised:  "#16161a",
-              hover:   "#1c1c21",
+              raised: "#16161a",
+              hover: "#1c1c21",
             },
             border: {
               subtle: "rgba(255,255,255,0.06)",
               strong: "rgba(255,255,255,0.12)",
             },
             text: {
-              primary:   "#ffffff",
+              primary: "#ffffff",
               secondary: "#a1a1aa",
-              muted:     "#71717a",
+              muted: "#71717a",
             },
             success: "#10b981",
             warning: "#f59e0b",
-            danger:  "#e11d48",
+            danger: "#e11d48",
           },
           fontFamily: {
             sans: ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica", "Arial", "sans-serif"],
@@ -54,35 +54,45 @@
        ========================================================================== */
     :root {
       /* ── FONDOS ── */
-      --color-bg-app:     #08080a;   /* Grafito ultra oscuro, no negro puro */
-      --color-bg-surface: #101014;   /* Paneles, sidebars, cards */
-      --color-bg-raised:  #18181d;   /* Inputs, elements ligeramente elevados */
-      --color-bg-hover:   #1e1e25;   /* Hover state de inputs y rows */
+      --color-bg-app: #08080a;
+      /* Grafito ultra oscuro, no negro puro */
+      --color-bg-surface: #101014;
+      /* Paneles, sidebars, cards */
+      --color-bg-raised: #18181d;
+      /* Inputs, elements ligeramente elevados */
+      --color-bg-hover: #1e1e25;
+      /* Hover state de inputs y rows */
 
       /* ── TEXTOS ── */
-      --color-text-primary:   #dde1e7;   /* Gris luna — suave, no blanco duro */
-      --color-text-secondary: #9ca3af;   /* Gris medio para etiquetas */
-      --color-text-muted:     #6b7280;   /* Muy atenuado para caps/labels */
+      --color-text-primary: #dde1e7;
+      /* Gris luna — suave, no blanco duro */
+      --color-text-secondary: #9ca3af;
+      /* Gris medio para etiquetas */
+      --color-text-muted: #6b7280;
+      /* Muy atenuado para caps/labels */
 
       /* ── BORDES ── */
       --color-border-subtle: rgba(255, 255, 255, 0.05);
       --color-border-strong: rgba(255, 255, 255, 0.10);
-      --color-border-focus:  rgba(255, 255, 255, 0.30);
+      --color-border-focus: rgba(255, 255, 255, 0.30);
 
       /* ── ACENTO / BRAND ── */
-      --color-brand:       #e11d48;              /* Rojo elegante */
+      --color-brand: #e11d48;
+      /* Rojo elegante */
       --color-brand-hover: #be185d;
-      --color-brand-glow:  rgba(225, 29, 72, 0.12);
+      --color-brand-glow: rgba(225, 29, 72, 0.12);
       --color-brand-glow-strong: rgba(225, 29, 72, 0.18);
 
       /* ── FONDO PREMIUM (Grid + Glow) ── */
-      --bg-grid-line: rgba(255, 255, 255, 0.025);  /* Más sutil — casi invisible */
-      --bg-grid-size: 40px 40px;                   /* Cuadros más grandes = más elegante */
+      --bg-grid-line: rgba(255, 255, 255, 0.025);
+      /* Más sutil — casi invisible */
+      --bg-grid-size: 40px 40px;
+      /* Cuadros más grandes = más elegante */
 
       /* ── SEMÁNTICOS ── */
       --color-success: #10b981;
       --color-warning: #f59e0b;
-      --color-danger:  #e11d48;
+      --color-danger: #e11d48;
 
       /* ── GEOMETRÍA ── */
       --radius-sm: 0.375rem;
@@ -98,7 +108,9 @@
     /* ==========================================================================
        BASE GLOBAL
        ========================================================================== */
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
       box-sizing: border-box;
     }
 
@@ -116,6 +128,7 @@
     .material-symbols-outlined {
       font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
+
     .material-symbols-outlined.filled {
       font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     }
@@ -200,19 +213,80 @@
        ENTERPRISE CARD POLISH
        ========================================================================== */
     /* Scrollbar premium — muy fino e invisible hasta hover */
-    ::-webkit-scrollbar { width: 4px; height: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--color-border-strong); border-radius: 4px; opacity: 0; transition: opacity 0.3s; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--color-border-focus); opacity: 1; }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    ::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--color-border-strong);
+      border-radius: 4px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--color-border-focus);
+      opacity: 1;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
 
     /* ==========================================================================
        SELECCIÓN DE TEXTO
        ========================================================================== */
-    ::selection {
-      background-color: var(--color-brand-glow);
-      color: var(--color-text-primary);
+    /* ==========================================================================
+       CUSTOM IKC LOADER — Dark Enterprise
+       ========================================================================== */
+    /* HTML: <div class="loader"></div> */
+    .loader {
+      width: fit-content;
+      font-size: 40px;
+      line-height: 1.5;
+      font-family: system-ui, sans-serif;
+      font-weight: bold;
+      text-transform: uppercase;
+      color: #ffffff48;
+      -webkit-text-stroke: 1px #00000000;
+      background:
+        radial-gradient(1.13em at 50% 1.6em, #f7f7f7 99%, #ffffff00 101%) calc(50% - 1.6em) 0/3.2em 100% text,
+        radial-gradient(1.13em at 50% -0.8em, #ffffff00 99%, #ffffff 101%) 50% .8em/3.2em 100% repeat-x text;
+      animation: l9 2s linear infinite, pulse 1.5s ease-in-out infinite;
+    }
+
+    .loader:before {
+      content: "IKC";
+    }
+
+    @keyframes l9 {
+      to {
+        background-position: calc(50% + 1.6em) 0, calc(50% + 3.2em) .8em
+      }
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      50% {
+        transform: scale(1.1);
+        opacity: 0.5;
+      }
     }
   </style>
   <script type="importmap">

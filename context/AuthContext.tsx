@@ -37,6 +37,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         const initAuth = async () => {
             console.log("AuthContext: Starting session init...");
+            const startTime = Date.now();
             try {
                 // 1. Check current session
                 const user = await PulseService.getCurrentUser();
@@ -47,7 +48,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             } catch (error) {
                 console.error("AuthContext: Error initializing session:", error);
             } finally {
-                if (mounted) setLoading(false);
+                // Ensure the loader is visible for at least 1.5s as requested
+                const elapsed = Date.now() - startTime;
+                const delay = Math.max(0, 2000 - elapsed);
+                setTimeout(() => {
+                    if (mounted) setLoading(false);
+                }, delay);
             }
 
             // 2. Intercept email confirmation redirects BEFORE processing normal auth state
@@ -157,7 +163,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!currentUser) return false;
         try {
             // Update Profile
-            const { error: profileError } = await supabase.from('profiles').update(updates).eq('id', currentUser.id);
+            const dbUpdates: any = { ...updates };
+            if (dbUpdates.avatarUrl !== undefined) {
+                dbUpdates.avatar_url = dbUpdates.avatarUrl;
+                delete dbUpdates.avatarUrl;
+            }
+            if (dbUpdates.academyId !== undefined) {
+                dbUpdates.academy_id = dbUpdates.academyId;
+                delete dbUpdates.academyId;
+            }
+            if (dbUpdates.studentId !== undefined) {
+                dbUpdates.student_id = dbUpdates.studentId;
+                delete dbUpdates.studentId;
+            }
+
+            const { error: profileError } = await supabase.from('profiles').update(dbUpdates).eq('id', currentUser.id);
             if (profileError) throw profileError;
 
             // If it's a student and they changed their name, keep the `students` table in sync

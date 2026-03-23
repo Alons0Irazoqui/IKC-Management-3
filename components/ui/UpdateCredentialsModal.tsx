@@ -47,7 +47,7 @@ const UpdateCredentialsModal: React.FC<UpdateCredentialsModalProps> = ({ isOpen,
     };
 
     return (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
             <div className="bg-[#0e0e11] rounded-2xl w-full max-w-md shadow-2xl animate-in fade-in zoom-in-95 duration-200 border border-white/5">
                 <div className="p-6 border-b border-white/5 flex justify-between items-center">
                     <div>

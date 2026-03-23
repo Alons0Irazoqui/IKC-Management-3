@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { useStore } from '../../context/StoreContext';
 import { useNavigate, Link } from 'react-router-dom';
@@ -7,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { studentRegistrationSchema, StudentRegistrationForm } from '../../schemas/authSchemas';
 import { useToast } from '../../context/ToastContext';
 import { PulseService } from '../../services/pulseService';
+import './Login.css';
 
 // --- SUB-COMPONENTS ---
 
@@ -30,18 +30,18 @@ const InputField: React.FC<InputFieldProps> = ({
   cols = 1
 }) => (
   <div className={cols === 2 ? 'col-span-1' : 'col-span-1 md:col-span-2'}>
-    <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5 ml-1">{label}</label>
+    <label className="block text-[10px] font-black text-zinc-500 uppercase mb-2 ml-1 tracking-widest">{label}</label>
     <div className="relative group">
       <input
         {...register(name)}
         type={type}
         placeholder={placeholder}
-        className={`w-full rounded-lg bg-gray-100 text-sm font-medium text-gray-900 py-3.5 px-4 transition-all placeholder:text-gray-400 focus:bg-white focus:outline-none focus:ring-0 focus:border-primary ${errors[name] ? 'bg-red-50 text-red-900' : ''
+        className={`w-full h-11 py-0 rounded-2xl bg-[#16161a] text-sm font-medium text-white px-5 transition-all placeholder:text-zinc-600 border border-white/5 focus:bg-[#1c1c21] focus:outline-none focus:ring-0 focus:border-[#e11d48] ${errors[name] ? 'border-[#e11d48]/50 bg-[#e11d48]/5' : ''
           }`}
       />
     </div>
     {errors[name] && (
-      <p className="mt-1 ml-1 text-xs font-semibold text-red-500">
+      <p className="mt-1.5 ml-1 text-[11px] font-bold text-[#e11d48]">
         {errors[name]?.message}
       </p>
     )}
@@ -132,130 +132,149 @@ const StudentRegistration: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 font-sans">
+    <div className="login-dark-theme min-h-screen relative overflow-hidden flex flex-col items-center justify-center p-6 font-sans">
+      <div className="enterprise-bg" />
+      <div className="ambient-glow" />
 
-      <div className="w-full max-w-2xl">
+      <div className="w-full max-w-2xl relative z-10">
         {/* Header */}
-        <div className="mb-10 text-center">
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight mb-2">Alta de Alumno</h1>
-          <div className="flex justify-center gap-2 mt-4">
+        <div className="mb-12 text-center space-y-4">
+          <h1 className="text-4xl font-black text-white tracking-tighter drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">ALTA DE ALUMNO</h1>
+          <div className="flex justify-center gap-2 mt-4 max-w-[200px] mx-auto">
             {STEPS.map((step) => (
-              <div key={step.id} className={`h-1 flex-1 rounded-full transition-all ${step.id <= currentStep ? 'bg-primary' : 'bg-gray-200'}`}></div>
+              <div key={step.id} className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${step.id <= currentStep ? 'bg-[#e11d48] shadow-[0_0_10px_rgba(225,29,72,0.5)]' : 'bg-white/10'}`}></div>
             ))}
           </div>
-          <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mt-2">{STEPS[currentStep - 1] ? `Paso ${currentStep} de ${STEPS.length}: ${STEPS[currentStep - 1].title}` : `Paso ${currentStep}`}</p>
+          <p className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.3em] mt-2">
+            {STEPS[currentStep - 1] ? `Paso ${currentStep} de ${STEPS.length}: ${STEPS[currentStep - 1].title}` : `Paso ${currentStep}`}
+          </p>
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit as any)} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="bg-[#0e0e11] p-10 rounded-[2.5rem] border border-white/5 shadow-2xl">
+          <form onSubmit={handleSubmit(onSubmit as any)} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
 
-          {/* STEP 1 */}
-          {currentStep === 1 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputField register={register} errors={errors} label="Código de Academia" name="academyCode" placeholder="Ej. ACAD-1234" cols={2} />
-              <InputField register={register} errors={errors} label="Email (Login)" name="email" type="email" placeholder="usuario@email.com" />
-              <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InputField register={register} errors={errors} label="Contraseña" name="password" type="password" placeholder="Mínimo 6 caracteres" cols={2} />
-                <InputField register={register} errors={errors} label="Confirmar" name="confirmPassword" type="password" placeholder="Repite la contraseña" cols={2} />
-              </div>
-            </div>
-          )}
-
-          {/* STEP 2 */}
-          {currentStep === 2 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="md:col-span-2 flex justify-center mb-4">
-                <div
-                  onClick={() => fileInputRef.current?.click()}
-                  className="size-24 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 cursor-pointer hover:bg-gray-200 transition-all overflow-hidden"
-                >
-                  {avatarPreview ? <img src={avatarPreview} className="w-full h-full object-cover" /> : <span className="material-symbols-outlined text-3xl">add_a_photo</span>}
-                </div>
-                <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageChange} />
-              </div>
-              <InputField register={register} errors={errors} label="Nombre Completo" name="name" placeholder="Nombre y Apellidos" />
-              <InputField register={register} errors={errors} label="Celular" name="cellPhone" type="tel" placeholder="10 dígitos" />
-
-              <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
-                <InputField register={register} errors={errors} label="Edad" name="age" type="number" placeholder="Años" cols={2} />
-                <InputField register={register} errors={errors} label="Peso (kg)" name="weight" type="number" placeholder="0" cols={2} />
-                <InputField register={register} errors={errors} label="Estatura" name="height" type="number" placeholder="0" cols={2} />
-
-                <div className="col-span-1">
-                  <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5 ml-1">T. Sangre</label>
-                  <select {...register('bloodType')} className="w-full rounded-lg bg-gray-100 px-4 py-3.5 text-sm font-medium text-gray-900 border-none focus:bg-white focus:ring-0 focus:border-primary">
-                    <option value="">--</option>
-                    {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(t => <option key={t} value={t}>{t}</option>)}
-                  </select>
+            {/* STEP 1 */}
+            {currentStep === 1 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <InputField register={register} errors={errors} label="Código de Academia" name="academyCode" placeholder="Ej. ACAD-1234" cols={2} />
+                <InputField register={register} errors={errors} label="Email (Login)" name="email" type="email" placeholder="usuario@email.com" />
+                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <InputField register={register} errors={errors} label="Contraseña" name="password" type="password" placeholder="Mínimo 6 caracteres" cols={2} />
+                  <InputField register={register} errors={errors} label="Confirmar" name="confirmPassword" type="password" placeholder="Repite la contraseña" cols={2} />
                 </div>
               </div>
-
-              <InputField register={register} errors={errors} label="Fecha Nacimiento" name="birthDate" type="date" />
-            </div>
-          )}
-
-          {/* STEP 3 */}
-          {currentStep === 3 && (
-            <div className="space-y-8">
-              <div>
-                <h3 className="text-xs font-black text-primary uppercase tracking-widest mb-4">Datos del Tutor</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <InputField register={register} errors={errors} label="Nombre Tutor" name="guardianName" placeholder="Nombre completo" />
-                  <div className="col-span-1">
-                    <label className="block text-xs font-bold text-gray-500 uppercase mb-1.5 ml-1">Parentesco</label>
-                    <select {...register('guardianRelationship')} className="w-full rounded-lg bg-gray-100 px-4 py-3.5 text-sm font-medium text-gray-900 border-none focus:bg-white focus:ring-0 focus:border-primary">
-                      {['Padre', 'Madre', 'Tutor Legal', 'Familiar', 'Otro'].map(o => <option key={o} value={o}>{o}</option>)}
-                    </select>
-                  </div>
-                  <InputField register={register} errors={errors} label="Email Tutor" name="guardianEmail" type="email" />
-                </div>
-              </div>
-              <div>
-                <h3 className="text-xs font-black text-primary uppercase tracking-widest mb-4">Contacto</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <InputField register={register} errors={errors} label="Tel. Principal" name="guardianMainPhone" type="tel" cols={2} />
-                  <InputField register={register} errors={errors} label="Tel. 2 (Opcional)" name="guardianSecondaryPhone" type="tel" cols={2} />
-                  <InputField register={register} errors={errors} label="Tel. 3 (Opcional)" name="guardianTertiaryPhone" type="tel" cols={2} />
-                </div>
-              </div>
-              <div>
-                <h3 className="text-xs font-black text-primary uppercase tracking-widest mb-4">Dirección</h3>
-                <div className="grid grid-cols-6 gap-4">
-                  <div className="col-span-4"><InputField register={register} errors={errors} label="Calle" name="street" cols={2} /></div>
-                  <div className="col-span-2"><InputField register={register} errors={errors} label="No. Ext" name="exteriorNumber" cols={2} /></div>
-                  <div className="col-span-2"><InputField register={register} errors={errors} label="Int" name="interiorNumber" cols={2} /></div>
-                  <div className="col-span-2"><InputField register={register} errors={errors} label="Colonia" name="colony" cols={2} /></div>
-                  <div className="col-span-2"><InputField register={register} errors={errors} label="CP" name="zipCode" cols={2} /></div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Terms Link (Step 3 only) */}
-          {currentStep === 3 && (
-            <div className="mt-8 mb-2 text-center text-xs text-gray-400 font-medium">
-              Al completar el registro, aceptas los <Link to="/terms" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">términos y condiciones</Link> de la plataforma.
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex items-center gap-4 mt-2">
-            {currentStep > 1 ? (
-              <button type="button" onClick={prevStep} className="px-6 py-4 rounded-lg bg-gray-100 text-gray-600 font-bold hover:bg-gray-200 transition-all text-sm">Atrás</button>
-            ) : (
-              <Link to="/login" className="px-6 py-4 rounded-lg bg-white text-gray-400 font-bold hover:text-gray-600 transition-all text-sm">Cancelar</Link>
             )}
 
-            <button
-              type="button"
-              onClick={currentStep === 3 ? handleSubmit(onSubmit as any) : nextStep}
-              disabled={isSubmitting}
-              className="flex-1 bg-primary hover:bg-red-600 text-white font-bold py-4 rounded-lg transition-all disabled:opacity-70"
-            >
-              {isSubmitting ? 'Procesando...' : (currentStep === 3 ? 'Finalizar Registro' : 'Siguiente')}
-            </button>
-          </div>
-        </form>
+            {/* STEP 2 */}
+            {currentStep === 2 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="md:col-span-2 flex justify-center mb-6">
+                  <div
+                    onClick={() => fileInputRef.current?.click()}
+                    className="size-28 bg-[#16161a] rounded-3xl flex items-center justify-center text-zinc-600 cursor-pointer hover:bg-[#1c1c21] hover:text-[#e11d48] transition-all overflow-hidden border border-white/5 shadow-inner group"
+                  >
+                    {avatarPreview ? <img src={avatarPreview} className="w-full h-full object-cover" /> : <span className="material-symbols-outlined text-4xl group-hover:scale-110 transition-transform">add_a_photo</span>}
+                  </div>
+                  <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageChange} />
+                </div>
+                <InputField register={register} errors={errors} label="Nombre Completo" name="name" placeholder="Nombre y Apellidos" />
+                <InputField register={register} errors={errors} label="Celular" name="cellPhone" type="tel" placeholder="10 dígitos" />
+
+                <div className="md:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-6">
+                  <InputField register={register} errors={errors} label="Edad" name="age" type="number" placeholder="0" cols={2} />
+                  <InputField register={register} errors={errors} label="Peso (kg)" name="weight" type="number" placeholder="0" cols={2} />
+                  <InputField register={register} errors={errors} label="Estatura" name="height" type="number" placeholder="0" cols={2} />
+
+                  <div className="col-span-1">
+                    <label className="block text-[10px] font-black text-zinc-500 uppercase mb-2 ml-1 tracking-widest">T. Sangre</label>
+                    <select {...register('bloodType')} className="w-full h-11 rounded-2xl bg-[#16161a] px-5 text-sm font-medium text-white border border-white/5 focus:border-[#e11d48] outline-none transition-all appearance-none shadow-inner">
+                      <option value="">--</option>
+                      {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </div>
+                </div>
+
+                <InputField register={register} errors={errors} label="Fecha Nacimiento" name="birthDate" type="date" />
+              </div>
+            )}
+
+            {/* STEP 3 */}
+            {currentStep === 3 && (
+              <div className="space-y-10">
+                <div>
+                  <h3 className="text-[10px] font-black text-[#e11d48] uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-lg">supervisor_account</span>
+                    Datos del Tutor
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <InputField register={register} errors={errors} label="Nombre Tutor" name="guardianName" placeholder="Nombre completo" />
+                    <div className="col-span-1">
+                      <label className="block text-[10px] font-black text-zinc-500 uppercase mb-2 ml-1 tracking-widest">Parentesco</label>
+                      <select {...register('guardianRelationship')} className="w-full h-11 rounded-2xl bg-[#16161a] px-5 text-sm font-medium text-white border border-white/5 focus:border-[#e11d48] outline-none transition-all appearance-none shadow-inner text-white">
+                        {['Padre', 'Madre', 'Tutor Legal', 'Familiar', 'Otro'].map(o => <option key={o} value={o}>{o}</option>)}
+                      </select>
+                    </div>
+                    <InputField register={register} errors={errors} label="Email Tutor" name="guardianEmail" type="email" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-[10px] font-black text-[#e11d48] uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-lg">call</span>
+                    Contacto Emergencia
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <InputField register={register} errors={errors} label="Tel. Principal" name="guardianMainPhone" type="tel" cols={2} />
+                    <InputField register={register} errors={errors} label="Tel. 2 (Opcional)" name="guardianSecondaryPhone" type="tel" cols={2} />
+                    <InputField register={register} errors={errors} label="Tel. 3 (Opcional)" name="guardianTertiaryPhone" type="tel" cols={2} />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-[10px] font-black text-[#e11d48] uppercase tracking-[0.3em] mb-6 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-lg">location_on</span>
+                    Ubicación
+                  </h3>
+                  <div className="grid grid-cols-6 gap-6">
+                    <div className="col-span-4"><InputField register={register} errors={errors} label="Calle" name="street" cols={2} /></div>
+                    <div className="col-span-2"><InputField register={register} errors={errors} label="No. Ext" name="exteriorNumber" cols={2} /></div>
+                    <div className="col-span-2"><InputField register={register} errors={errors} label="Int" name="interiorNumber" cols={2} /></div>
+                    <div className="col-span-2"><InputField register={register} errors={errors} label="Colonia" name="colony" cols={2} /></div>
+                    <div className="col-span-2"><InputField register={register} errors={errors} label="CP" name="zipCode" cols={2} /></div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Terms Link (Step 3 only) */}
+            {currentStep === 3 && (
+              <div className="mt-10 mb-2 text-center text-[11px] text-zinc-500 font-medium">
+                Al completar el registro, aceptas los <Link to="/terms" target="_blank" rel="noopener noreferrer" className="text-white hover:text-[#e11d48] underline transition-colors">términos y condiciones</Link> de IKC Management.
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex items-center gap-5 mt-10">
+              {currentStep > 1 ? (
+                <button type="button" onClick={prevStep} className="px-8 py-4 rounded-2xl bg-zinc-800 text-white font-black hover:bg-zinc-700 transition-all text-xs uppercase tracking-widest active:scale-95 border border-white/5 shadow-xl">Atrás</button>
+              ) : (
+                <Link to="/login" className="px-8 py-4 rounded-2xl bg-zinc-800 text-zinc-400 font-black hover:bg-zinc-700 hover:text-white transition-all text-xs uppercase tracking-widest active:scale-95 border border-white/5 shadow-xl">Cancelar</Link>
+              )}
+
+              <button
+                type="button"
+                onClick={currentStep === 3 ? handleSubmit(onSubmit as any) : nextStep}
+                disabled={isSubmitting}
+                className="flex-1 bg-white hover:bg-[#e11d48] text-black hover:text-white font-black py-4 rounded-2xl transition-all disabled:opacity-50 text-xs uppercase tracking-widest active:scale-95 shadow-xl shadow-black/40"
+              >
+                {isSubmitting ? 'PROCESANDO...' : (currentStep === 3 ? 'Finalizar Registro' : 'Siguiente')}
+              </button>
+            </div>
+          </form>
+        </div>
+        
+        <div className="mt-8 text-center">
+            <p className="text-zinc-500 text-xs font-medium uppercase tracking-widest">¿Ya tienes cuenta? <Link to="/login" className="text-white hover:text-[#e11d48] font-black transition-colors ml-1">Inicia sesión</Link></p>
+        </div>
       </div>
     </div>
   );
