@@ -171,16 +171,7 @@ const Settings: React.FC = () => {
         addToast('Código copiado al portapapeles', 'success');
     };
 
-    const beltColors: { value: RankColor; label: string; bg: string }[] = [
-        { value: 'white', label: 'Blanco', bg: 'bg-gray-100' },
-        { value: 'yellow', label: 'Amarillo', bg: 'bg-yellow-400' },
-        { value: 'orange', label: 'Naranja', bg: 'bg-orange-500' },
-        { value: 'green', label: 'Verde', bg: 'bg-green-600' },
-        { value: 'blue', label: 'Azul', bg: 'bg-blue-600' },
-        { value: 'purple', label: 'Morado', bg: 'bg-purple-600' },
-        { value: 'brown', label: 'Marrón', bg: 'bg-amber-800' },
-        { value: 'black', label: 'Negro', bg: 'bg-gray-900' },
-    ];
+
 
     const kyuOptions = [
         '10 Kyu', '9 Kyu', '8 Kyu', '7 Kyu', '6 Kyu',

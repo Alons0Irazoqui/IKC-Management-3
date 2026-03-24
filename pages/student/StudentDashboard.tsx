@@ -296,7 +296,7 @@ const StudentDashboard: React.FC = () => {
                         </button>
                     </div>
                     
-                    <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="p-4 flex flex-col gap-4 flex-1">
                         {myEnrolledClasses.length > 0 ? (
                             myEnrolledClasses.map(cls => (
                                 <div key={cls.id} onClick={() => navigate(`/student/classes/${cls.id}`)} 
@@ -333,13 +333,172 @@ const StudentDashboard: React.FC = () => {
                                 <p className="text-[10px] font-bold uppercase tracking-widest" style={{color: 'var(--color-text-muted)'}}>Sin grupos regulares</p>
                             </div>
                         )}
+
+                        {/* Mi Progreso — llena el espacio libre */}
+                        {myEnrolledClasses.length < 2 && (
+                            <div className="flex flex-col flex-1"
+                                style={{ backgroundColor: 'var(--color-bg-app)', border: '1px solid var(--color-border-subtle)', borderRadius: '8px', overflow: 'hidden' }}>
+
+                                {/* Header */}
+                                <div className="px-5 py-3.5 flex items-center justify-between" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+                                    <p className="text-[9px] font-bold uppercase tracking-[0.2em]" style={{ color: 'var(--color-brand)' }}>Progreso al siguiente Kyu</p>
+                                    <span className="text-[10px] font-black tabular-nums" style={{ color: 'var(--color-text-muted)' }}>
+                                        {current} / {required} clases
+                                    </span>
+                                </div>
+
+                                {/* Cuerpo que se estira */}
+                                <div className="flex flex-col flex-1 justify-between px-5 py-5 gap-5">
+
+                                    {/* Número grande + label */}
+                                    <div className="flex items-end gap-3">
+                                        <p className="text-5xl font-black tabular-nums leading-none" style={{ color: 'var(--color-brand)' }}>
+                                            {Math.round(progressPercent)}%
+                                        </p>
+                                        <p className="text-[10px] font-bold uppercase tracking-wider mb-1.5" style={{ color: 'var(--color-text-muted)' }}>
+                                            {nextRankConfig ? `hacia ${nextRankConfig.name}` : 'Nivel máximo alcanzado'}
+                                        </p>
+                                    </div>
+
+                                    {/* Barra de progreso */}
+                                    <div className="w-full rounded-full overflow-hidden" style={{ height: '5px', background: 'var(--color-border-subtle)' }}>
+                                        <div className="h-full rounded-full transition-all duration-1000"
+                                            style={{
+                                                width: `${progressPercent}%`,
+                                                background: progressPercent >= 100
+                                                    ? 'linear-gradient(90deg, #34D399, #6EE7B7)'
+                                                    : 'var(--color-brand)'
+                                            }}
+                                        />
+                                    </div>
+
+                                    {/* Stats simples */}
+                                    <div className="flex flex-col gap-3" style={{ borderTop: '1px solid var(--color-border-subtle)', paddingTop: '16px' }}>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-[10px] font-medium" style={{ color: 'var(--color-text-muted)' }}>Clases completadas</span>
+                                            <span className="text-[10px] font-black tabular-nums" style={{ color: 'var(--color-text-primary)' }}>{current}</span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-[10px] font-medium" style={{ color: 'var(--color-text-muted)' }}>Clases restantes</span>
+                                            <span className="text-[10px] font-black tabular-nums" style={{ color: 'var(--color-text-primary)' }}>
+                                                {progressPercent >= 100 ? '—' : Math.max(0, required - current)}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-[10px] font-medium" style={{ color: 'var(--color-text-muted)' }}>Rango actual</span>
+                                            <span className="text-[10px] font-black" style={{ color: 'var(--color-brand)' }}>{currentRankConfig?.name || liveStudent.rank}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
 
-                {/* EVENTOS PRÓXIMOS & RANGO */}
+                {/* RANGO & EVENTOS PRÓXIMOS */}
                 <div className="col-span-1 lg:col-span-4 flex flex-col gap-4 sm:gap-5">
-                    
-                    {/* Eventos Próximos */}
+
+                    {/* Tu Cinturón — PRIMERO */}
+                    {liveStudent && (
+                        <div style={{
+                            backgroundColor: 'var(--color-bg-surface)',
+                            border: '1px solid var(--color-border-subtle)',
+                            borderRadius: '10px',
+                            overflow: 'hidden'
+                        }}>
+                            {/* Header */}
+                            <div className="px-7 py-5" style={{borderBottom: '1px solid var(--color-border-subtle)'}}>
+                                <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-0.5"
+                                    style={{color: 'var(--color-text-muted)'}}>Perfil</p>
+                                <h3 className="text-sm font-semibold"
+                                    style={{color: 'var(--color-text-primary)'}}>Tu Cinturón</h3>
+                            </div>
+
+                            {/* Belt Image — grande y centrada */}
+                            {(() => {
+                                const kyuImageMap: Record<string, string> = {
+                                    '10 Kyu':     '/Grados/10%20kyu.png',
+                                    '9 Kyu':      '/Grados/9%20kyu.png',
+                                    '8 Kyu':      '/Grados/8%20kyu.png',
+                                    '7 Kyu':      '/Grados/7%20kyu.png',
+                                    '6 Kyu':      '/Grados/6%20kyu.png',
+                                    '5 Kyu':      '/Grados/5%20kyu.png',
+                                    '4 Kyu':      '/Grados/4%20kyu.png',
+                                    '3 Kyu':      '/Grados/3%20kyu.png',
+                                    '2 Kyu':      '/Grados/2%20kyu.png',
+                                    '1 Kyu':      '/Grados/1%20kyu.png',
+                                    'Shodan Ho':  '/Grados/1%20kyu.png',
+                                    'Cinta Negra':'/Grados/negra.png',
+                                };
+                                const beltImg = kyuImageMap[currentRankConfig?.name] || null;
+                                return (
+                                    <div className="relative flex flex-col items-center justify-center px-7 pt-8 pb-5"
+                                        style={{ background: 'radial-gradient(ellipse at 50% 60%, rgba(220,38,38,0.07) 0%, transparent 70%)' }}>
+
+                                        {/* Kyu badge */}
+                                        <span className="mb-5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-[0.2em]"
+                                            style={{ background: 'rgba(220,38,38,0.12)', color: 'var(--color-brand)', border: '1px solid rgba(220,38,38,0.2)' }}>
+                                            {currentRankConfig?.name || liveStudent.rank}
+                                        </span>
+
+                                        {/* Belt image */}
+                                        {beltImg ? (
+                                            <img
+                                                src={beltImg}
+                                                alt={`Cinturón ${currentRankConfig?.name}`}
+                                                className="object-contain drop-shadow-xl"
+                                                style={{ width: '100%', maxWidth: '220px', height: '160px' }}
+                                            />
+                                        ) : (
+                                            <div className="w-full h-24 rounded-xl flex items-center justify-center text-xs font-bold uppercase tracking-widest"
+                                                style={{ border: '1px dashed var(--color-border-strong)', color: 'var(--color-text-muted)' }}>
+                                                Sin imagen de grado
+                                            </div>
+                                        )}
+
+                                        {/* Nombre del cinturón */}
+                                        <h2 className="mt-5 text-2xl font-black tracking-tight text-center"
+                                            style={{ color: 'var(--color-text-primary)' }}>
+                                            {liveStudent.rank}
+                                        </h2>
+
+                                        {/* Progress bar hacia el siguiente nivel */}
+                                        {nextRankConfig && (
+                                            <div className="w-full mt-5">
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <span className="text-[9px] font-bold uppercase tracking-widest"
+                                                        style={{ color: 'var(--color-text-muted)' }}>Progreso</span>
+                                                    <span className="text-[9px] font-black tabular-nums"
+                                                        style={{ color: 'var(--color-brand)' }}>
+                                                        {current} / {required} clases
+                                                    </span>
+                                                </div>
+                                                <div className="w-full rounded-full overflow-hidden" style={{ height: '5px', background: 'var(--color-border-subtle)' }}>
+                                                    <div className="h-full rounded-full transition-all duration-1000"
+                                                        style={{ width: `${progressPercent}%`, background: 'var(--color-brand)' }} />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })()}
+
+                            {/* Footer */}
+                            <div className="px-7 py-4 flex justify-between items-center text-[10px] uppercase tracking-widest font-bold"
+                                style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
+                                <span style={{ color: 'var(--color-text-muted)' }}>
+                                    {liveStudent.stripes > 0 ? `${liveStudent.stripes} ${liveStudent.stripes === 1 ? 'Grado' : 'Grados'}` : 'Sin grados'}
+                                </span>
+                                {nextRankConfig && (
+                                    <span style={{ color: 'var(--color-brand)' }}>
+                                        Próximo: {nextRankConfig.name}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Eventos Próximos — SEGUNDO */}
                     <div style={{
                         backgroundColor: 'var(--color-bg-surface)',
                         border: '1px solid var(--color-border-subtle)',
@@ -387,60 +546,6 @@ const StudentDashboard: React.FC = () => {
                             )}
                         </div>
                     </div>
-
-                    {/* Rango */}
-                    {liveStudent && (
-                        <div style={{
-                            backgroundColor: 'var(--color-bg-surface)',
-                            border: '1px solid var(--color-border-subtle)',
-                            borderRadius: '10px',
-                            overflow: 'hidden'
-                        }}>
-                            <div className="px-7 py-5" style={{borderBottom: '1px solid var(--color-border-subtle)'}}>
-                                <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-0.5"
-                                    style={{color: 'var(--color-text-muted)'}}>Perfil</p>
-                                <h3 className="text-sm font-semibold"
-                                    style={{color: 'var(--color-text-primary)'}}>Tu Cinturón</h3>
-                            </div>
-                            <div className="p-7">
-                                <h3 className="text-xl font-black mb-4" style={{color: 'var(--color-text-primary)'}}>
-                                    {liveStudent.rank}
-                                </h3>
-
-                                {/* Belt Visual */}
-                                <div className={`h-12 w-full rounded-md flex items-center justify-end pr-3 relative overflow-hidden ${
-                                    liveStudent.rankColor === 'white' ? 'bg-[#E5E7EB]' :
-                                    liveStudent.rankColor === 'yellow' ? 'bg-[#FCD34D]' :
-                                        liveStudent.rankColor === 'orange' ? 'bg-[#FB923C]' :
-                                            liveStudent.rankColor === 'green' ? 'bg-[#4ADE80]' :
-                                                liveStudent.rankColor === 'blue' ? 'bg-[#60A5FA]' :
-                                                    liveStudent.rankColor === 'purple' ? 'bg-[#FC6F6F]' :
-                                                        liveStudent.rankColor === 'brown' ? 'bg-[#78350F]' :
-                                                            'bg-[#DC2626]'
-                                    }`} style={{border: '1px solid var(--color-border-strong)'}}>
-                                    
-                                    <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/fabric-of-squares.png')]"></div>
-
-                                    <div className={`relative h-full w-16 ${liveStudent.rankColor === 'black' ? 'bg-[#DC2626]' : 'bg-[#111111]'} flex items-center justify-center gap-1 shadow-lg`}>
-                                        {Array.from({ length: liveStudent.stripes || 0 }).map((_, i) => (
-                                            <div key={i} className="w-1.5 h-7 bg-white/90 rounded-sm shadow-sm"></div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                <div className="mt-5 pt-4 flex justify-between items-center text-[10px] uppercase tracking-widest font-bold" style={{borderTop: '1px solid var(--color-border-subtle)'}}>
-                                    <span style={{color: 'var(--color-text-muted)'}}>
-                                        {liveStudent.stripes > 0 ? `${liveStudent.stripes} ${liveStudent.stripes === 1 ? 'Grado' : 'Grados'}` : 'Sin grados'}
-                                    </span>
-                                    {nextRankConfig && (
-                                        <span style={{color: 'var(--color-brand)'}}>
-                                            Próximo: {nextRankConfig.name}
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    )}
 
                 </div>
             </div>
