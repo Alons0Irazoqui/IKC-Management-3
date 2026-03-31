@@ -69,6 +69,35 @@ const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
         });
     };
 
+    const handlePromote = () => {
+        const ranks = academySettings.ranks || [];
+        const currentIndex = ranks.findIndex(r => r.id === student.rankId || r.name === student.rank);
+        
+        if (currentIndex === -1 || currentIndex === ranks.length - 1) {
+            addToast('El estudiante ya se encuentra en el grado más alto.', 'error');
+            return;
+        }
+
+        const nextRank = ranks[currentIndex + 1];
+
+        confirm({
+            title: 'Promover Alumno',
+            message: `¿Deseas promover a ${student.name} de ${student.rank} a ${nextRank.name}?`,
+            type: 'info',
+            confirmText: 'Promover',
+            onConfirm: () => {
+                updateStudent({
+                    ...student,
+                    rank: nextRank.name,
+                    rankId: nextRank.id,
+                    rankColor: nextRank.color,
+                    attendance: 0 // Reset class count for the new rank (keeps history intact)
+                });
+                addToast(`${student.name} ha sido promovido a ${nextRank.name} exitosamente`, 'success');
+            }
+        });
+    };
+
     const handleSaveChanges = () => {
         if (!formData) return;
         if (!formData.name || !formData.email) { addToast('Nombre y Email son obligatorios', 'error'); return; }
@@ -96,6 +125,22 @@ const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
         inactive:   { label: 'Inactivo',        dot: 'bg-zinc-500',    badgeBg: 'bg-zinc-800 border-zinc-700',             badgeText: 'text-zinc-500' },
     };
     const sMap = statusMap[student.status] || statusMap.inactive;
+
+    const kyuImageMap: Record<string, string> = {
+        'Blanca':       '/Grados/10%20kyu.png',
+        'Blanca Av.':   '/Grados/9%20kyu.png',
+        'Amarilla':     '/Grados/8%20kyu.png',
+        'Amarilla Av.': '/Grados/7%20kyu.png',
+        'Verde':        '/Grados/6%20kyu.png',
+        'Verde Av.':    '/Grados/5%20kyu.png',
+        'Azul':         '/Grados/4%20kyu.png',
+        'Azul Av.':     '/Grados/3%20kyu.png',
+        'Cafe':         '/Grados/2%20kyu.png',
+        'Cafe Av.':     '/Grados/1%20kyu.png',
+        'Shodan Ho':    '/Grados/1%20kyu.png',
+        'Negra':        '/Grados/negra.png',
+    };
+    const beltImg = kyuImageMap[student.rank] || null;
 
     return (
         <>
@@ -237,6 +282,11 @@ const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                                                     <span className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border border-indigo-500/25 bg-indigo-500/10 text-indigo-400">
                                                         {student.rank}
                                                     </span>
+                                                    <button onClick={handlePromote}
+                                                        className="h-8 px-3 rounded-lg text-[11px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors border border-emerald-500/20 flex items-center gap-1.5">
+                                                        <span className="material-symbols-outlined text-[14px]">upgrade</span>
+                                                        Promover
+                                                    </button>
                                                 </div>
                                                 {/* Stats row */}
                                                 <div className="flex items-center gap-6 flex-wrap">
@@ -253,6 +303,16 @@ const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
 
                                                 </div>
                                             </div>
+                                            
+                                            {/* Belt Graphic (Right Side) */}
+                                            {beltImg && (
+                                                <div className="hidden sm:flex flex-col items-center justify-center flex-shrink-0 w-48 md:w-64 relative">
+                                                    {/* Destello rojo de fondo */}
+                                                    <div className="absolute inset-0 pointer-events-none opacity-80" 
+                                                         style={{ background: 'radial-gradient(circle at center, rgba(220,38,38,0.2) 0%, transparent 60%)' }} />
+                                                    <img src={beltImg} alt={`Cinturón ${student.rank}`} className="w-full object-contain drop-shadow-[0_15px_25px_rgba(0,0,0,0.6)] relative z-10" style={{ maxHeight: '150px' }} />
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Progress bar */}

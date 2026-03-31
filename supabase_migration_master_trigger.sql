@@ -138,7 +138,7 @@ BEGIN
       COALESCE(new.raw_user_meta_data->>'academy_name', 'Nueva Academia'),
       new_academy_code,
       new.id,
-      '{"modules": {"library": true, "payments": true, "attendance": true}, "paymentSettings": {"currency": "MXN", "taxRate": 0, "lateFeeAmount": 150, "lateFeeDay": 10, "paymentDay": 1, "monthlyTuition": 500}, "ranks": [{"id": "r1", "name": "Blanca", "color": "#FFFFFF"}, {"id": "r2", "name": "Amarilla", "color": "#FFFF00"}, {"id": "r3", "name": "Verde", "color": "#008000"}, {"id": "r4", "name": "Cafe", "color": "#8B4513"}, {"id": "r5", "name": "Negra", "color": "#000000"}]}'::jsonb
+      '{"modules": {"library": true, "payments": true, "attendance": true}, "paymentSettings": {"currency": "MXN", "taxRate": 0, "lateFeeAmount": 150, "lateFeeDay": 10, "paymentDay": 1, "monthlyTuition": 500}, "ranks": [{"id": "rank-1","name": "Blanca","color": "10 Kyu","order": 1,"requiredAttendance": 0},{"id": "rank-2","name": "Blanca Av.","color": "9 Kyu","order": 2,"requiredAttendance": 20},{"id": "rank-3","name": "Amarilla","color": "8 Kyu","order": 3,"requiredAttendance": 40},{"id": "rank-4","name": "Amarilla Av.","color": "7 Kyu","order": 4,"requiredAttendance": 60},{"id": "rank-5","name": "Verde","color": "6 Kyu","order": 5,"requiredAttendance": 80},{"id": "rank-6","name": "Verde Av.","color": "5 Kyu","order": 6,"requiredAttendance": 100},{"id": "rank-7","name": "Azul","color": "4 Kyu","order": 7,"requiredAttendance": 120},{"id": "rank-8","name": "Azul Av.","color": "3 Kyu","order": 8,"requiredAttendance": 150},{"id": "rank-9","name": "Cafe","color": "2 Kyu","order": 9,"requiredAttendance": 180},{"id": "rank-10","name": "Cafe Av.","color": "1 Kyu","order": 10,"requiredAttendance": 220},{"id": "rank-11","name": "Shodan Ho","color": "Shodan Ho","order": 11,"requiredAttendance": 280},{"id": "rank-12","name": "Negra","color": "Cinta Negra","order": 12,"requiredAttendance": 350}]}'::jsonb
     );
 
     -- Insert into profiles
@@ -245,6 +245,12 @@ DROP POLICY IF EXISTS "Academies are viewable by everyone" ON public.academies;
 CREATE POLICY "Academies are viewable by everyone" 
 ON public.academies FOR SELECT 
 USING (true);
+
+-- Allow masters to update their own academy configuration
+DROP POLICY IF EXISTS "Masters can update their own academy" ON public.academies;
+CREATE POLICY "Masters can update their own academy" 
+ON public.academies FOR UPDATE 
+USING (auth.uid() = owner_id);
 
 -- 3. STUDENTS
 ALTER TABLE public.students ENABLE ROW LEVEL SECURITY;

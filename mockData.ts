@@ -3,18 +3,18 @@ import { Student, ClassSession, ScheduleItem, Message, LibraryResource, AcademyS
 
 // Default Ranks — Sistema de Kyus de Karate
 export const defaultRanks = [
-    { id: 'rank-1',  name: '10 Kyu',    color: 'white'  as const, order: 1,  requiredAttendance: 0   },
-    { id: 'rank-2',  name: '9 Kyu',     color: 'white'  as const, order: 2,  requiredAttendance: 20  },
-    { id: 'rank-3',  name: '8 Kyu',     color: 'yellow' as const, order: 3,  requiredAttendance: 40  },
-    { id: 'rank-4',  name: '7 Kyu',     color: 'yellow' as const, order: 4,  requiredAttendance: 60  },
-    { id: 'rank-5',  name: '6 Kyu',     color: 'orange' as const, order: 5,  requiredAttendance: 80  },
-    { id: 'rank-6',  name: '5 Kyu',     color: 'orange' as const, order: 6,  requiredAttendance: 100 },
-    { id: 'rank-7',  name: '4 Kyu',     color: 'green'  as const, order: 7,  requiredAttendance: 120 },
-    { id: 'rank-8',  name: '3 Kyu',     color: 'brown'  as const, order: 8,  requiredAttendance: 150 },
-    { id: 'rank-9',  name: '2 Kyu',     color: 'brown'  as const, order: 9,  requiredAttendance: 180 },
-    { id: 'rank-10', name: '1 Kyu',     color: 'brown'  as const, order: 10, requiredAttendance: 220 },
-    { id: 'rank-11', name: 'Shodan Ho', color: 'black'  as const, order: 11, requiredAttendance: 280 },
-    { id: 'rank-12', name: 'Cinta Negra', color: 'black' as const, order: 12, requiredAttendance: 350 },
+    { id: 'rank-1',  name: 'Blanca',       color: '10 Kyu' as any,      order: 1,  requiredAttendance: 0   },
+    { id: 'rank-2',  name: 'Blanca Av.',   color: '9 Kyu' as any,       order: 2,  requiredAttendance: 20  },
+    { id: 'rank-3',  name: 'Amarilla',     color: '8 Kyu' as any,       order: 3,  requiredAttendance: 40  },
+    { id: 'rank-4',  name: 'Amarilla Av.', color: '7 Kyu' as any,       order: 4,  requiredAttendance: 60  },
+    { id: 'rank-5',  name: 'Verde',        color: '6 Kyu' as any,       order: 5,  requiredAttendance: 80  },
+    { id: 'rank-6',  name: 'Verde Av.',    color: '5 Kyu' as any,       order: 6,  requiredAttendance: 100 },
+    { id: 'rank-7',  name: 'Azul',         color: '4 Kyu' as any,       order: 7,  requiredAttendance: 120 },
+    { id: 'rank-8',  name: 'Azul Av.',     color: '3 Kyu' as any,       order: 8,  requiredAttendance: 150 },
+    { id: 'rank-9',  name: 'Cafe',         color: '2 Kyu' as any,       order: 9,  requiredAttendance: 180 },
+    { id: 'rank-10', name: 'Cafe Av.',     color: '1 Kyu' as any,       order: 10, requiredAttendance: 220 },
+    { id: 'rank-11', name: 'Shodan Ho',    color: 'Shodan Ho' as any,   order: 11, requiredAttendance: 280 },
+    { id: 'rank-12', name: 'Negra',        color: 'Cinta Negra' as any, order: 12, requiredAttendance: 350 },
 ];
 
 export const defaultAcademySettings: AcademySettings = {

@@ -162,20 +162,19 @@ const MasterDashboard: React.FC = () => {
         // Mapa de colores estáticos hexadecimales (Enterprise Palette)
         const getColor = (rankName: string) => {
             const lower = rankName.toLowerCase();
-            if (lower.includes('white') || lower.includes('blanco')) return '#E5E7EB'; // Gray 200
-            if (lower.includes('yellow') || lower.includes('amarillo')) return '#FCD34D'; // Amber 300
-            if (lower.includes('orange') || lower.includes('naranja')) return '#FB923C'; // Orange 400
-            if (lower.includes('green') || lower.includes('verde')) return '#4ADE80'; // Green 400
-            if (lower.includes('blue') || lower.includes('azul')) return '#60A5FA'; // Blue 400
-            if (lower.includes('purple') || lower.includes('morado')) return '#A78BFA'; // Violet 400
-            if (lower.includes('brown') || lower.includes('marrón') || lower.includes('marron')) return '#78350F'; // Amber 900
-            if (lower.includes('black') || lower.includes('negro')) return '#DC2626'; // Red 600 (Black Belt Highlight)
+            if (lower.includes('blanca')) return '#E5E7EB'; // Gray 200
+            if (lower.includes('amarilla')) return '#FCD34D'; // Amber 300
+            if (lower.includes('verde')) return '#4ADE80'; // Green 400
+            if (lower.includes('azul')) return '#60A5FA'; // Blue 400
+            if (lower.includes('cafe')) return '#78350F'; // Amber 900
+            if (lower.includes('shodan ho')) return '#78350F'; // Brown
+            if (lower.includes('negra')) return '#000000'; // Black
             return '#9CA3AF'; // Default Gray
         };
 
         // Orden lógico aproximado para la visualización
         const orderMap: Record<string, number> = { 
-            white: 1, yellow: 2, orange: 3, green: 4, blue: 5, purple: 6, brown: 7, black: 8 
+            blanca: 1, amarilla: 2, verde: 3, azul: 4, cafe: 5, 'shodan ho': 6, negra: 7 
         };
 
         return Object.entries(distribution).map(([name, value]) => {
@@ -413,7 +412,7 @@ const MasterDashboard: React.FC = () => {
                                         <Cell key={`cell-${index}`} fill={entry.fill} />
                                     ))}
                                 </Pie>
-                                <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)', backgroundColor: '#111114', color: '#f4f4f5' }} />
+                                <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)', backgroundColor: '#111114', color: '#f4f4f5' }} itemStyle={{ color: '#f4f4f5' }} />
                             </PieChart>
                         </ResponsiveContainer>
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none flex-col">
