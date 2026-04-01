@@ -36,12 +36,8 @@ const InputField: React.FC<InputFieldProps> = ({
         {...register(name)}
         type={type}
         placeholder={placeholder}
-        className={`block w-full rounded-xl p-3 text-sm outline-none transition-all placeholder:text-zinc-600 ${
-          errors[name]
-            ? 'border-[#e11d48]/50 bg-[#e11d48]/5 border border-solid'
-            : ''
-        }`}
-        style={{ backgroundColor: '#16161a', borderColor: errors[name] ? undefined : 'rgba(255,255,255,0.08)', borderStyle: 'solid', borderWidth: '1px', color: '#ffffff' }}
+        className="block w-full rounded-xl px-4 py-2 text-sm outline-none transition-all placeholder:text-zinc-600"
+        style={{ backgroundColor: '#16161a', border: `1px solid ${errors[name] ? 'rgba(225,29,72,0.6)' : 'rgba(255,255,255,0.08)'}`, color: '#ffffff' }}
       />
     </div>
     {errors[name] && (
@@ -194,7 +190,7 @@ const StudentRegistration: React.FC = () => {
                     <label className="block text-[10px] font-black text-zinc-500 uppercase mb-2 ml-1 tracking-widest">T. Sangre</label>
                     <select
                       {...register('bloodType')}
-                      className="block w-full rounded-xl p-3 text-sm outline-none transition-all appearance-none"
+                      className="block w-full rounded-xl px-4 py-3 text-sm leading-normal focus:ring-1 outline-none transition-all appearance-none"
                       style={{ backgroundColor: '#16161a', borderColor: 'rgba(255,255,255,0.08)', borderStyle: 'solid', borderWidth: '1px', color: '#ffffff' }}
                     >
                       <option value="">--</option>
@@ -221,7 +217,7 @@ const StudentRegistration: React.FC = () => {
                       <label className="block text-[10px] font-black text-zinc-500 uppercase mb-2 ml-1 tracking-widest">Parentesco</label>
                       <select
                         {...register('guardianRelationship')}
-                        className="block w-full rounded-xl p-3 text-sm outline-none transition-all appearance-none"
+                        className="block w-full rounded-xl px-4 py-3 text-sm leading-normal focus:ring-1 outline-none transition-all appearance-none"
                         style={{ backgroundColor: '#16161a', borderColor: 'rgba(255,255,255,0.08)', borderStyle: 'solid', borderWidth: '1px', color: '#ffffff' }}
                       >
                         {['Padre', 'Madre', 'Tutor Legal', 'Familiar', 'Otro'].map(o => <option key={o} value={o}>{o}</option>)}

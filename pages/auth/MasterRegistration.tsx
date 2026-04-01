@@ -63,8 +63,8 @@ const MasterRegistration: React.FC = () => {
             <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Nombre Maestro</label>
             <input
               {...register('name')}
-              className="block w-full rounded-xl p-3 text-sm outline-none transition-all placeholder:text-zinc-600"
-              style={{ backgroundColor: '#16161a', borderColor: 'rgba(255,255,255,0.08)', borderStyle: 'solid', borderWidth: '1px', color: '#ffffff' }}
+              className="block w-full rounded-xl px-4 py-2 text-sm outline-none transition-all placeholder:text-zinc-600"
+              style={{ backgroundColor: '#16161a', border: '1px solid rgba(255,255,255,0.08)', color: '#ffffff' }}
               placeholder="p. ej. Sensei Alejandro"
               type="text"
             />
@@ -75,8 +75,8 @@ const MasterRegistration: React.FC = () => {
             <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Email Corporativo</label>
             <input
               {...register('email')}
-              className="block w-full rounded-xl p-3 text-sm outline-none transition-all placeholder:text-zinc-600"
-              style={{ backgroundColor: '#16161a', borderColor: 'rgba(255,255,255,0.08)', borderStyle: 'solid', borderWidth: '1px', color: '#ffffff' }}
+              className="block w-full rounded-xl px-4 py-2 text-sm outline-none transition-all placeholder:text-zinc-600"
+              style={{ backgroundColor: '#16161a', border: '1px solid rgba(255,255,255,0.08)', color: '#ffffff' }}
               placeholder="ejemplo@ikc.com"
               type="email"
             />
@@ -87,8 +87,8 @@ const MasterRegistration: React.FC = () => {
             <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Nombre Academia</label>
             <input
               {...register('academyName')}
-              className="block w-full rounded-xl p-3 text-sm outline-none transition-all placeholder:text-zinc-600"
-              style={{ backgroundColor: '#16161a', borderColor: 'rgba(255,255,255,0.08)', borderStyle: 'solid', borderWidth: '1px', color: '#ffffff' }}
+              className="block w-full rounded-xl px-4 py-2 text-sm outline-none transition-all placeholder:text-zinc-600"
+              style={{ backgroundColor: '#16161a', border: '1px solid rgba(255,255,255,0.08)', color: '#ffffff' }}
               placeholder="IKC Central"
               type="text"
             />
@@ -100,8 +100,8 @@ const MasterRegistration: React.FC = () => {
               <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Contraseña</label>
               <input
                 {...register('password')}
-                className="block w-full rounded-xl p-3 text-sm outline-none transition-all placeholder:text-zinc-600"
-                style={{ backgroundColor: '#16161a', borderColor: 'rgba(255,255,255,0.08)', borderStyle: 'solid', borderWidth: '1px', color: '#ffffff' }}
+                className="block w-full rounded-xl px-4 py-2 text-sm outline-none transition-all placeholder:text-zinc-600"
+                style={{ backgroundColor: '#16161a', border: '1px solid rgba(255,255,255,0.08)', color: '#ffffff' }}
                 placeholder="••••••••"
                 type="password"
               />
@@ -110,8 +110,8 @@ const MasterRegistration: React.FC = () => {
               <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1">Confirmar</label>
               <input
                 {...register('confirmPassword')}
-                className="block w-full rounded-xl p-3 text-sm outline-none transition-all placeholder:text-zinc-600"
-                style={{ backgroundColor: '#16161a', borderColor: 'rgba(255,255,255,0.08)', borderStyle: 'solid', borderWidth: '1px', color: '#ffffff' }}
+                className="block w-full rounded-xl px-4 py-2 text-sm outline-none transition-all placeholder:text-zinc-600"
+                style={{ backgroundColor: '#16161a', border: '1px solid rgba(255,255,255,0.08)', color: '#ffffff' }}
                 placeholder="••••••••"
                 type="password"
               />

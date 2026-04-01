@@ -181,8 +181,9 @@
     /* ============================================================
        OVERRIDES PARA EL LOGIN (floating labels necesitan más padding)
        ============================================================ */
-    .login-dark-theme input[type="email"],
-    .login-dark-theme input[type="password"] {
+    /* Floating-label padding SOLO para el formulario de Login (/login) */
+    .auth-side input[type="email"],
+    .auth-side input[type="password"] {
       padding-top: 1.75rem !important;
       padding-bottom: 0.5rem !important;
       padding-left: 1rem !important;
@@ -190,13 +191,13 @@
       font-size: 1rem !important;
     }
 
-    .login-dark-theme input[type="email"]::placeholder,
-    .login-dark-theme input[type="password"]::placeholder {
+    .auth-side input[type="email"]::placeholder,
+    .auth-side input[type="password"]::placeholder {
       color: transparent !important;
     }
 
-    .login-dark-theme input[type="email"]:focus,
-    .login-dark-theme input[type="password"]:focus {
+    .auth-side input[type="email"]:focus,
+    .auth-side input[type="password"]:focus {
       background-color: var(--color-bg-hover) !important;
       border-color: var(--color-brand) !important;
       box-shadow: 0 0 0 1px var(--color-brand) !important;
