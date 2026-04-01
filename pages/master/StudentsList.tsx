@@ -29,9 +29,6 @@ const StudentsList: React.FC = () => {
     const [filterRank, setFilterRank] = useState('all');
     const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
 
-    useEffect(() => {
-        refreshData();
-    }, []);
 
     const [showModal, setShowModal] = useState(false);
     const [viewingStudent, setViewingStudent] = useState<Student | null>(null);

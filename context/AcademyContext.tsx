@@ -295,6 +295,9 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 }, 500);
             }
         } else {
+            setStudents([]);
+            setClasses([]);
+            setEvents([]);
             setIsLoading(false);
         }
     }, [currentUser]);

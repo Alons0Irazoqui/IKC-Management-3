@@ -125,6 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     const login = async (email: string, pass: string): Promise<LoginResult> => {
+        isLoggingOut.current = false;
         try {
             const user = await PulseService.login(email, pass);
             setCurrentUser(user); // Optimistic update
@@ -141,17 +142,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // 1. Set guard to block SIGNED_IN events during logout
         isLoggingOut.current = true;
 
-        // 2. Optimistic Cleanup (Immediate)
+        // 2. Optimistic Cleanup (Immediate) — loading=true keeps ProtectedRoute in spinner mode
+        //    so the Login page never flashes before the full-page redirect fires.
+        setLoading(true);
         setCurrentUser(null);
-        setLoading(false);
         addToast('Sesión cerrada correctamente', 'info');
 
         // 3. Server Cleanup — await so the session is fully cleared before next login
         try {
             await PulseService.logout();
+            window.location.href = '/login';
         } catch (error) {
             // Ignore network errors on logout, user is already gone locally.
             console.warn("Supabase signOut error (ignorable):", error);
+            window.location.href = '/login';
         } finally {
             // Release the guard after a small buffer so any pending
             // SIGNED_OUT / stale SIGNED_IN events from Supabase have time to fire and be ignored
