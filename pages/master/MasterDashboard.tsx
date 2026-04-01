@@ -205,22 +205,22 @@ const MasterDashboard: React.FC = () => {
     }, [students]);
 
     return (
-        <div className="p-4 sm:p-6 md:p-8 lg:p-10 max-w-[1600px] mx-auto w-full flex flex-col gap-5 sm:gap-6 md:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
+        <div className="p-6 md:p-8 lg:p-10 max-w-[1600px] mx-auto w-full flex flex-col gap-6 md:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
             
             {/* --- HEADER --- */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 sm:gap-4 mb-1">
                 <div>
-                    <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] mb-1" style={{color: 'var(--color-brand)'}}>IKC Management</p>
+                    <p className="text-xs md:text-[9px] font-bold uppercase tracking-[0.2em] mb-1" style={{color: 'var(--color-brand)'}}>IKC Management</p>
                     <h1 className="text-3xl sm:text-4xl font-black tracking-tighter" style={{color: 'var(--color-text-primary)'}}>Dashboard</h1>
-                    <p className="mt-0.5 text-xs sm:text-sm hidden sm:block" style={{color: 'var(--color-text-muted)'}}>Panel de control &mdash; {new Date().toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                    <p className="mt-0.5 text-xs sm:hidden" style={{color: 'var(--color-text-muted)'}}>{new Date().toLocaleDateString('es-MX', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                    <p className="mt-0.5 text-sm md:text-xs hidden sm:block" style={{color: 'var(--color-text-muted)'}}>Panel de control &mdash; {new Date().toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    <p className="mt-0.5 text-base md:text-xs sm:hidden" style={{color: 'var(--color-text-muted)'}}>{new Date().toLocaleDateString('es-MX', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                 </div>
                 
                 {/* Time range selector — Google-style pill segmented control */}
                 <div className="flex items-center gap-0 rounded-none" style={{borderBottom: '2px solid var(--color-border-subtle)'}}>
                     <button 
                         onClick={() => setTimeRange('month')}
-                        className="px-5 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-200 relative"
+                        className="px-5 py-3 md:py-2 min-h-[48px] md:min-h-0 text-sm md:text-xs font-bold uppercase tracking-wider transition-all duration-200 relative"
                         style={timeRange === 'month' 
                             ? {color: 'var(--color-text-primary)', borderBottom: '2px solid var(--color-brand)', marginBottom: '-2px'}
                             : {color: 'var(--color-text-muted)', borderBottom: '2px solid transparent', marginBottom: '-2px'}}
@@ -229,7 +229,7 @@ const MasterDashboard: React.FC = () => {
                     </button>
                     <button 
                         onClick={() => setTimeRange('year')}
-                        className="px-5 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-200"
+                        className="px-5 py-3 md:py-2 min-h-[48px] md:min-h-0 text-sm md:text-xs font-bold uppercase tracking-wider transition-all duration-200"
                         style={timeRange === 'year' 
                             ? {color: 'var(--color-text-primary)', borderBottom: '2px solid var(--color-brand)', marginBottom: '-2px'}
                             : {color: 'var(--color-text-muted)', borderBottom: '2px solid transparent', marginBottom: '-2px'}}
@@ -254,7 +254,7 @@ const MasterDashboard: React.FC = () => {
                 <div className="flex flex-col justify-between p-7 group"
                     style={{backgroundColor: 'var(--color-bg-surface)'}}>
                     <div>
-                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-3"
+                        <p className="text-xs md:text-[9px] font-bold uppercase tracking-[0.2em] mb-3"
                             style={{color: 'var(--color-text-muted)'}}>Ingresos / {timeRange === 'month' ? 'Mes' : 'Año'}</p>
                         <p className="text-3xl font-black tracking-tighter tabular-nums"
                             style={{color: 'var(--color-text-primary)'}}>
@@ -262,7 +262,7 @@ const MasterDashboard: React.FC = () => {
                         </p>
                     </div>
                     <div className="flex items-center justify-between mt-5 pt-4" style={{borderTop: '1px solid var(--color-border-subtle)'}}>
-                        <span className="text-[10px] font-medium" style={{color: 'var(--color-text-muted)'}}>Total acumulado</span>
+                        <span className="text-xs md:text-[10px] font-medium" style={{color: 'var(--color-text-muted)'}}>Total acumulado</span>
                         <span className="material-symbols-outlined" style={{fontSize: '16px', color: 'var(--color-brand)'}}>trending_up</span>
                     </div>
                 </div>
@@ -274,13 +274,13 @@ const MasterDashboard: React.FC = () => {
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-surface)'}
                     onClick={() => navigate('/master/students')}>
                     <div>
-                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-3"
+                        <p className="text-xs md:text-[9px] font-bold uppercase tracking-[0.2em] mb-3"
                             style={{color: 'var(--color-text-muted)'}}>Alumnos Inscritos</p>
                         <p className="text-3xl font-black tracking-tighter"
                             style={{color: 'var(--color-text-primary)'}}>{students.length}</p>
                     </div>
                     <div className="flex items-center justify-between mt-5 pt-4" style={{borderTop: '1px solid var(--color-border-subtle)'}}>
-                        <span className="text-[10px] font-medium" style={{color: 'var(--color-text-muted)'}}>Ver estudiantes</span>
+                        <span className="text-xs md:text-[10px] font-medium" style={{color: 'var(--color-text-muted)'}}>Ver estudiantes</span>
                         <span className="material-symbols-outlined" style={{fontSize: '16px', color: 'var(--color-text-muted)'}}>arrow_forward</span>
                     </div>
                 </div>
@@ -301,7 +301,7 @@ const MasterDashboard: React.FC = () => {
                             style={{color: 'var(--color-text-primary)'}}>+{newStudentsCount}</p>
                     </div>
                     <div className="flex items-center justify-between mt-5 pt-4" style={{borderTop: '1px solid var(--color-border-subtle)'}}>
-                        <span className="text-[10px] font-medium" style={{color: 'var(--color-text-muted)'}}>Nuevos registros</span>
+                        <span className="text-xs md:text-[10px] font-medium" style={{color: 'var(--color-text-muted)'}}>Nuevos registros</span>
                         <span className="material-symbols-outlined" style={{fontSize: '16px', color: 'var(--color-text-muted)'}}>person_add</span>
                     </div>
                 </div>
@@ -313,7 +313,7 @@ const MasterDashboard: React.FC = () => {
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-surface)'}
                     onClick={() => navigate('/master/finance')}>
                     <div>
-                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-3"
+                        <p className="text-xs md:text-[9px] font-bold uppercase tracking-[0.2em] mb-3"
                             style={{color: 'var(--color-text-muted)'}}>Por Cobrar</p>
                         <p className="text-3xl font-black tracking-tighter tabular-nums"
                             style={{color: 'var(--color-text-primary)'}}>
@@ -327,7 +327,7 @@ const MasterDashboard: React.FC = () => {
                         )}
                     </div>
                     <div className="flex items-center justify-between mt-5 pt-4" style={{borderTop: '1px solid var(--color-border-subtle)'}}>
-                        <span className="text-[10px] font-medium" style={{color: 'var(--color-text-muted)'}}>Ver finanzas</span>
+                        <span className="text-xs md:text-[10px] font-medium" style={{color: 'var(--color-text-muted)'}}>Ver finanzas</span>
                         <span className="material-symbols-outlined" style={{fontSize: '16px', color: 'var(--color-brand)'}}>account_balance_wallet</span>
                     </div>
                 </div>
@@ -451,7 +451,7 @@ const MasterDashboard: React.FC = () => {
                 <div className="flex justify-between items-center px-7 py-5"
                     style={{borderBottom: '1px solid var(--color-border-subtle)'}}>
                     <div>
-                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-0.5"
+                        <p className="text-xs md:text-[9px] font-bold uppercase tracking-[0.2em] mb-0.5"
                             style={{color: 'var(--color-brand)'}}>Alertas</p>
                         <h3 className="text-sm font-semibold"
                             style={{color: 'var(--color-text-primary)'}}>Pagos Pendientes</h3>
@@ -524,7 +524,7 @@ const MasterDashboard: React.FC = () => {
                                     placeholder="Buscar por concepto o alumno..."
                                     value={incomeSearch}
                                     onChange={(e) => setIncomeSearch(e.target.value)}
-                                    className="w-full md:w-64 pl-9 pr-4 py-2 rounded-xl text-sm outline-none transition-all font-medium placeholder:font-normal"
+                                    className="w-full md:w-64 pl-9 pr-4 py-3 md:py-2 min-h-[48px] md:min-h-0 rounded-xl text-base md:text-sm outline-none transition-all font-medium placeholder:font-normal"
                                 />
                                 {incomeSearch && (
                                     <button onClick={() => setIncomeSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
@@ -535,7 +535,7 @@ const MasterDashboard: React.FC = () => {
                             <select
                                 value={incomeMonthFilter}
                                 onChange={(e) => setIncomeMonthFilter(e.target.value)}
-                                className="w-full md:w-48 px-4 py-2 rounded-xl text-sm font-bold outline-none transition-all cursor-pointer appearance-none"
+                                className="w-full md:w-48 px-4 py-3 md:py-2 min-h-[48px] md:min-h-0 rounded-xl text-base md:text-sm font-bold outline-none transition-all cursor-pointer appearance-none"
                                 style={{color: 'var(--color-text-primary)'}}
                             >
                                 <option value="">Todos los Meses</option>
@@ -579,7 +579,7 @@ const MasterDashboard: React.FC = () => {
                         {/* Listado */}
                         <div className="rounded-3xl overflow-hidden flex-1 flex flex-col min-h-[400px]" style={{backgroundColor: 'var(--color-bg-surface)', border: '1px solid var(--color-border-subtle)'}}>
                             <div className="overflow-x-auto">
-                                <table className="w-full text-left">
+                                <table className="w-full text-left min-w-[700px] md:min-w-full">
                                     <thead className="text-xs font-bold uppercase tracking-wider sticky top-0 z-10" style={{backgroundColor: 'var(--color-bg-raised)', color: 'var(--color-text-muted)'}}>
                                         <tr>
                                             <th className="px-6 py-4 w-32">Fecha</th>

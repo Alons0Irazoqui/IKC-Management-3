@@ -81,7 +81,7 @@ const Communication: React.FC = () => {
             {activeTab === 'inbox' && (
                 <button 
                     onClick={() => { setActiveTab('compose'); setSelectedMessageId(null); }}
-                    className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-medium shadow-sm flex items-center gap-2 transition-all"
+                    className="bg-primary hover:bg-primary-hover text-white px-5 py-3 md:py-2.5 min-h-[48px] md:min-h-0 rounded-xl font-medium shadow-sm flex items-center gap-2 transition-all w-full sm:w-auto mt-4 sm:mt-0 justify-center sm:justify-start"
                 >
                     <span className="material-symbols-outlined text-[20px]">edit</span>
                     Redactar
@@ -100,7 +100,7 @@ const Communication: React.FC = () => {
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="Buscar mensajes..." 
-                            className="w-full rounded-xl bg-gray-50 border-none text-sm pl-10 pr-4 py-2.5 focus:ring-2 focus:ring-primary/20 transition-all" 
+                            className="w-full rounded-xl bg-gray-50 border-none text-[16px] md:text-sm pl-10 pr-4 py-3 md:py-2.5 min-h-[48px] md:min-h-0 focus:ring-2 focus:ring-primary/20 transition-all outline-none" 
                         />
                     </div>
                 </div>
@@ -134,7 +134,7 @@ const Communication: React.FC = () => {
                     <div className="p-8 flex flex-col h-full animate-fadeIn overflow-y-auto">
                         <div className="flex items-center justify-between mb-6">
                             <h2 className="text-xl font-bold text-text-main">Nuevo Mensaje</h2>
-                            <button onClick={() => setActiveTab('inbox')} className="text-text-secondary hover:text-text-main md:hidden">
+                            <button onClick={() => setActiveTab('inbox')} className="text-text-secondary hover:text-text-main md:hidden p-2 min-h-[48px] min-w-[48px] flex items-center justify-center rounded-lg">
                                 Cancelar
                             </button>
                         </div>
@@ -144,7 +144,7 @@ const Communication: React.FC = () => {
                                 <select 
                                     value={recipientId} 
                                     onChange={(e) => setRecipientId(e.target.value)}
-                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:ring-primary"
+                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 min-h-[48px] text-[16px] md:text-sm focus:border-primary focus:ring-primary outline-none"
                                 >
                                     <option value="all">📢 Todos los Alumnos (Anuncio Global)</option>
                                     <optgroup label="Alumnos Individuales">
@@ -162,7 +162,7 @@ const Communication: React.FC = () => {
                                     value={subject}
                                     onChange={(e) => setSubject(e.target.value)}
                                     placeholder="Ej. Cambio de horario" 
-                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:border-primary focus:ring-primary" 
+                                    className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 min-h-[48px] text-[16px] md:text-sm focus:border-primary focus:ring-primary outline-none" 
                                 />
                             </div>
                             
@@ -176,9 +176,9 @@ const Communication: React.FC = () => {
                                 ></textarea>
                             </div>
                         </div>
-                        <div className="mt-6 flex justify-end gap-3">
-                             <button onClick={() => setActiveTab('inbox')} className="px-5 py-2.5 rounded-xl border border-gray-200 text-text-secondary font-medium hover:bg-white transition-colors">Cancelar</button>
-                             <button onClick={handleSend} className="bg-primary hover:bg-primary-hover text-white px-6 py-2.5 rounded-xl font-medium shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2">
+                        <div className="mt-6 flex flex-col md:flex-row justify-end gap-3 flex-wrap">
+                             <button onClick={() => setActiveTab('inbox')} className="w-full md:w-auto px-5 py-3 md:py-2.5 min-h-[48px] md:min-h-0 rounded-xl border border-gray-200 text-text-secondary font-medium hover:bg-white transition-colors flex justify-center items-center">Cancelar</button>
+                             <button onClick={handleSend} className="w-full md:w-auto bg-primary hover:bg-primary-hover text-white px-6 py-3 md:py-2.5 min-h-[48px] md:min-h-0 rounded-xl font-medium shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2">
                                 <span className="material-symbols-outlined">send</span>
                                 Enviar
                              </button>
@@ -199,15 +199,15 @@ const Communication: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-                            <button onClick={() => setSelectedMessageId(null)} className="md:hidden text-text-secondary p-2">
+                            <button onClick={() => setSelectedMessageId(null)} className="md:hidden text-text-secondary p-2 min-h-[48px] min-w-[48px] flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors">
                                 <span className="material-symbols-outlined">close</span>
                             </button>
                         </div>
                         <div className="flex-1 p-8 overflow-y-auto whitespace-pre-wrap text-text-main leading-relaxed">
                             {selectedMessage.content}
                         </div>
-                        <div className="p-6 border-t border-gray-100 bg-white flex justify-end">
-                            <button className="px-5 py-2.5 rounded-xl border border-gray-200 text-text-main font-medium hover:bg-gray-50 flex items-center gap-2 transition-colors">
+                        <div className="p-6 border-t border-gray-100 bg-white flex justify-end flex-wrap gap-3">
+                            <button className="w-full md:w-auto px-5 py-3 md:py-2.5 min-h-[48px] md:min-h-0 rounded-xl border border-gray-200 text-text-main font-medium hover:bg-gray-50 flex items-center justify-center gap-2 transition-colors">
                                 <span className="material-symbols-outlined">reply</span>
                                 Responder
                             </button>

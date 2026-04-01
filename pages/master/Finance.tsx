@@ -400,9 +400,9 @@ const Finance: React.FC = () => {
         <div className="px-6 py-8 md:px-10 max-w-[1600px] mx-auto w-full">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-8">
                 <div>
-                    <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] mb-1" style={{color: 'var(--color-brand)'}}>IKC Management</p>
+                    <p className="text-xs md:text-[10px] font-bold uppercase tracking-[0.2em] mb-1" style={{color: 'var(--color-brand)'}}>IKC Management</p>
                     <h1 className="text-3xl sm:text-4xl font-black tracking-tighter" style={{color: 'var(--color-text-primary)'}}>Tesorería</h1>
-                    <p className="mt-1 text-xs sm:text-sm" style={{color: 'var(--color-text-muted)'}}>Control de flujos, conciliación y auditoría de pagos.</p>
+                    <p className="mt-1 text-base md:text-sm" style={{color: 'var(--color-text-muted)'}}>Control de flujos, conciliación y auditoría de pagos.</p>
                 </div>
                 
                 <div className="flex flex-wrap gap-3">
@@ -430,7 +430,7 @@ const Finance: React.FC = () => {
                 {/* Review */}
                 <div onClick={() => setActiveTab('review')} className={`flex flex-col justify-between p-6 cursor-pointer transition-all ${activeTab === 'review' ? 'bg-zinc-900/50' : 'bg-[#0a0a0d] hover:bg-zinc-900/30'}`}>
                     <div>
-                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-3" style={{color: 'var(--color-text-muted)'}}>Por Revisar</p>
+                        <p className="text-xs md:text-[9px] font-bold uppercase tracking-[0.2em] mb-3" style={{color: 'var(--color-text-muted)'}}>Por Revisar</p>
                         <p className="text-3xl font-black tracking-tighter" style={{color: activeTab === 'review' ? 'var(--color-brand)' : 'var(--color-text-primary)'}}>{stats.review}</p>
                     </div>
                     <div className="flex items-center justify-between mt-5 pt-4" style={{borderTop: '1px solid var(--color-border-subtle)'}}>
@@ -442,7 +442,7 @@ const Finance: React.FC = () => {
                 {/* Pending */}
                 <div onClick={() => setActiveTab('pending')} className={`flex flex-col justify-between p-6 cursor-pointer transition-all ${activeTab === 'pending' ? 'bg-zinc-900/50' : 'bg-[#0a0a0d] hover:bg-zinc-900/30'}`}>
                     <div>
-                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-3" style={{color: 'var(--color-text-muted)'}}>Pendientes / Parciales</p>
+                        <p className="text-xs md:text-[9px] font-bold uppercase tracking-[0.2em] mb-3" style={{color: 'var(--color-text-muted)'}}>Pendientes / Parciales</p>
                         <p className="text-3xl font-black tracking-tighter" style={{color: activeTab === 'pending' ? 'var(--color-brand)' : 'var(--color-text-primary)'}}>{stats.pending}</p>
                     </div>
                     <div className="flex items-center justify-between mt-5 pt-4" style={{borderTop: '1px solid var(--color-border-subtle)'}}>
@@ -454,7 +454,7 @@ const Finance: React.FC = () => {
                 {/* Overdue */}
                 <div onClick={() => setActiveTab('overdue')} className={`flex flex-col justify-between p-6 cursor-pointer transition-all ${activeTab === 'overdue' ? 'bg-zinc-900/50' : 'bg-[#0a0a0d] hover:bg-zinc-900/30'}`}>
                     <div>
-                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-3" style={{color: 'var(--color-text-muted)'}}>Vencidos</p>
+                        <p className="text-xs md:text-[9px] font-bold uppercase tracking-[0.2em] mb-3" style={{color: 'var(--color-text-muted)'}}>Vencidos</p>
                         <p className="text-3xl font-black tracking-tighter" style={{color: activeTab === 'overdue' ? 'var(--color-brand)' : 'var(--color-text-primary)'}}>{stats.overdue}</p>
                     </div>
                     <div className="flex items-center justify-between mt-5 pt-4" style={{borderTop: '1px solid var(--color-border-subtle)'}}>
@@ -466,7 +466,7 @@ const Finance: React.FC = () => {
                 {/* All History */}
                 <div onClick={() => setShowAllMovementsModal(true)} className="flex flex-col justify-between p-6 cursor-pointer bg-[#0a0a0d] hover:bg-zinc-900/50 transition-all">
                     <div>
-                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-3" style={{color: 'var(--color-text-muted)'}}>Historial Completo</p>
+                        <p className="text-xs md:text-[9px] font-bold uppercase tracking-[0.2em] mb-3" style={{color: 'var(--color-text-muted)'}}>Historial Completo</p>
                         <p className="text-3xl font-black tracking-tighter" style={{color: 'var(--color-text-primary)'}}>{records.length}</p>
                     </div>
                     <div className="flex items-center justify-between mt-5 pt-4" style={{borderTop: '1px solid var(--color-border-subtle)'}}>
@@ -479,11 +479,11 @@ const Finance: React.FC = () => {
             {/* Filter & Search Area */}
             <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-6">
                 <div className="flex items-center gap-0 border-b-2" style={{borderColor: 'var(--color-border-subtle)'}}>
-                    <button onClick={() => setActiveTab('paid')} className={`px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest transition-all relative ${activeTab === 'paid' ? 'text-white' : 'text-zinc-500'}`}>
+                    <button onClick={() => setActiveTab('paid')} className={`px-6 py-4 md:py-2.5 min-h-[48px] md:min-h-0 text-xs md:text-[10px] font-bold uppercase tracking-widest transition-all relative ${activeTab === 'paid' ? 'text-white' : 'text-zinc-500'}`}>
                         Pagados
                         {activeTab === 'paid' && <div className="absolute bottom-[-2px] left-0 right-0 h-[2px] bg-red-600 animate-in fade-in duration-300"></div>}
                     </button>
-                    <button onClick={() => setActiveTab('all')} className={`px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest transition-all relative ${activeTab === 'all' ? 'text-white' : 'text-zinc-500'}`}>
+                    <button onClick={() => setActiveTab('all')} className={`px-6 py-4 md:py-2.5 min-h-[48px] md:min-h-0 text-xs md:text-[10px] font-bold uppercase tracking-widest transition-all relative ${activeTab === 'all' ? 'text-white' : 'text-zinc-500'}`}>
                         Todos
                         {activeTab === 'all' && <div className="absolute bottom-[-2px] left-0 right-0 h-[2px] bg-red-600 animate-in fade-in duration-300"></div>}
                     </button>
@@ -503,7 +503,7 @@ const Finance: React.FC = () => {
                         value={searchQuery} 
                         onChange={e => setSearchQuery(e.target.value)} 
                         placeholder="Buscar alumno o concepto..." 
-                        className="w-full pr-5 py-3 !bg-[#0a0a0d] !border-zinc-800 rounded-2xl text-xs font-semibold text-white focus:!border-red-600/50 transition-all placeholder:text-zinc-800 outline-none search-finance-override" 
+                        className="w-full pr-5 py-4 min-h-[48px] !bg-[#0a0a0d] !border-zinc-800 rounded-2xl text-base md:text-sm font-semibold text-white focus:!border-red-600/50 transition-all placeholder:text-zinc-800 outline-none search-finance-override" 
                     />
                 </div>
             </div>
@@ -519,132 +519,134 @@ const Finance: React.FC = () => {
                         icon="account_balance"
                     />
                 ) : (
-                    <table className="w-full text-left border-collapse">
-                        <thead className="sticky top-0 z-10" style={{backgroundColor: 'var(--color-bg-raised)', borderBottom: '1px solid var(--color-border-subtle)'}}>
-                            <tr>
-                                <th className="px-8 py-5 text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Fecha</th>
-                                <th className="px-6 py-5 text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Alumno</th>
-                                <th className="px-6 py-5 text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Concepto</th>
-                                <th className="px-6 py-5 text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Estado</th>
-                                <th className="px-6 py-5 text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em] text-right">Importe</th>
-                                <th className="px-8 py-5 text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em] text-right">Acción</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-zinc-800/30">
-                            {groupedTransactions.map(group => {
-                                const { mainRecord, isBatch, totalOriginalAmount, totalRemainingDebt, declaredAmount } = group;
-                                const isPaid = mainRecord.status === 'paid';
-                                const isPartial = mainRecord.status === 'partial' || (declaredAmount !== undefined && declaredAmount < totalOriginalAmount);
-                                const paidSoFar = totalOriginalAmount - totalRemainingDebt;
-                                const isMensualidad = mainRecord.category === 'Mensualidad' || mainRecord.concept.toLowerCase().includes('mensualidad');
-                                const breakdownTooltip = `Total: $${totalOriginalAmount} \nPagado: $${paidSoFar} \nRestante: $${totalRemainingDebt}`;
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse min-w-[800px]">
+                            <thead className="sticky top-0 z-10" style={{backgroundColor: 'var(--color-bg-raised)', borderBottom: '1px solid var(--color-border-subtle)'}}>
+                                <tr>
+                                    <th className="px-8 py-5 text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Fecha</th>
+                                    <th className="px-6 py-5 text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Alumno</th>
+                                    <th className="px-6 py-5 text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Concepto</th>
+                                    <th className="px-6 py-5 text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Estado</th>
+                                    <th className="px-6 py-5 text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em] text-right">Importe</th>
+                                    <th className="px-8 py-5 text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em] text-right">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-zinc-800/30">
+                                {groupedTransactions.map(group => {
+                                    const { mainRecord, isBatch, totalOriginalAmount, totalRemainingDebt, declaredAmount } = group;
+                                    const isPaid = mainRecord.status === 'paid';
+                                    const isPartial = mainRecord.status === 'partial' || (declaredAmount !== undefined && declaredAmount < totalOriginalAmount);
+                                    const paidSoFar = totalOriginalAmount - totalRemainingDebt;
+                                    const isMensualidad = mainRecord.category === 'Mensualidad' || mainRecord.concept.toLowerCase().includes('mensualidad');
+                                    const breakdownTooltip = `Total: $${totalOriginalAmount} \nPagado: $${paidSoFar} \nRestante: $${totalRemainingDebt}`;
 
-                                return (
-                                        <tr 
-                                            key={group.id} 
-                                            className="transition-colors group cursor-pointer border-b last:border-0"
-                                            style={{borderColor: 'var(--color-border-subtle)'}}
-                                            onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-hover)'}
-                                            onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = ''}
-                                            onClick={() => setViewDetailRecord(group.mainRecord)}
-                                        >
-                                            <td className="px-8 py-6">
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-[13px] tabular-nums" style={{color: 'var(--color-text-primary)'}}>{formatDateDisplay(mainRecord.dueDate)}</span>
-                                                    {mainRecord.paymentDate && (
-                                                        <span className="text-[10px] font-bold mt-1 uppercase tracking-wider" style={{color: 'var(--color-brand)'}}>
-                                                            Pagado: {formatDateDisplay(mainRecord.paymentDate)}
-                                                        </span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-6 font-bold text-[13px]" style={{color: 'var(--color-text-primary)'}}>
-                                                {mainRecord.studentName}
-                                            </td>
-                                            <td className="px-6 py-6 text-[13px] font-medium" style={{color: 'var(--color-text-secondary)'}}>
-                                                {isBatch ? (
-                                                    <div className="flex flex-col gap-1">
-                                                        <span className="font-black text-[10px] uppercase tracking-wider flex items-center gap-1.5" style={{color: 'var(--color-text-primary)'}}>
-                                                            <span className="material-symbols-outlined text-[14px]">layers</span>
-                                                            Lote ({group.itemCount})
-                                                        </span>
-                                                        <span className="text-[11px] truncate max-w-[200px]" style={{color: 'var(--color-text-muted)'}}>
-                                                            {group.records.map(r => r.concept).join(', ')}
-                                                        </span>
-                                                    </div>
-                                                ) : (
-                                                    <span>{mainRecord.concept}</span>
-                                                )}
-                                                {mainRecord.method && <span className="ml-2 text-[9px] px-1.5 py-0.5 rounded uppercase tracking-widest font-black" style={{backgroundColor: 'var(--color-bg-raised)', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-strong)'}}>{mainRecord.method}</span>}
-                                            </td>
-                                            <td className="px-6 py-6">
-                                                <StatusBadge status={mainRecord.status} amount={mainRecord.amount} penalty={mainRecord.penaltyAmount} />
-                                            </td>
-                                            
-                                            <td className="px-6 py-6 text-right" title={breakdownTooltip}>
-                                                {mainRecord.status === 'in_review' && !isBatch && isMensualidad ? (
-                                                    <div className="flex justify-end">
-                                                        <DebtAmountEditor 
-                                                            item={mainRecord} 
-                                                            onUpdate={(id, val) => updateRecordAmount(id, val)} 
-                                                        />
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex flex-col items-end">
-                                                        <span className="font-black text-sm tabular-nums tracking-tight" style={{color: isPaid ? 'var(--color-success)' : 'var(--color-text-primary)'}}>
-                                                            ${totalOriginalAmount.toFixed(2)}
-                                                        </span>
-                                                        {isPartial && !isPaid && (
-                                                            <div className="mt-2 flex flex-col items-end gap-1.5">
-                                                                <div className="h-1 w-16 bg-zinc-900 rounded-full overflow-hidden">
-                                                                    <div 
-                                                                        className="h-full rounded-full shadow-sm" 
-                                                                        style={{ backgroundColor: 'var(--color-success)', width: `${(paidSoFar / totalOriginalAmount) * 100}%` }}
-                                                                    ></div>
-                                                                </div>
-                                                                <span className="text-[9px] font-black tabular-nums uppercase tracking-tighter" style={{color: 'var(--color-success)'}}>
-                                                                    Abonado: ${paidSoFar.toFixed(2)}
-                                                                </span>
-                                                            </div>
+                                    return (
+                                            <tr 
+                                                key={group.id} 
+                                                className="transition-colors group cursor-pointer border-b last:border-0"
+                                                style={{borderColor: 'var(--color-border-subtle)'}}
+                                                onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-hover)'}
+                                                onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = ''}
+                                                onClick={() => setViewDetailRecord(group.mainRecord)}
+                                            >
+                                                <td className="px-8 py-6">
+                                                    <div className="flex flex-col">
+                                                        <span className="font-bold text-[13px] tabular-nums" style={{color: 'var(--color-text-primary)'}}>{formatDateDisplay(mainRecord.dueDate)}</span>
+                                                        {mainRecord.paymentDate && (
+                                                            <span className="text-[10px] font-bold mt-1 uppercase tracking-wider" style={{color: 'var(--color-brand)'}}>
+                                                                Pagado: {formatDateDisplay(mainRecord.paymentDate)}
+                                                            </span>
                                                         )}
                                                     </div>
-                                                )}
-                                            </td>
-                                            
-                                            <td className="px-8 py-6 text-right">
-                                                {mainRecord.status === 'in_review' ? (
-                                                    <button 
-                                                        onClick={(e) => { e.stopPropagation(); setSelectedGroup(group); }}
-                                                        className="bg-zinc-900 border border-zinc-800 text-zinc-400 text-[9px] font-bold px-4 py-2 rounded-lg transition-all active:scale-95 flex items-center gap-2 ml-auto uppercase tracking-wider hover:bg-zinc-800 hover:text-white"
-                                                    >
-                                                        <span className="material-symbols-outlined text-xs">visibility</span>
-                                                        Validar
-                                                    </button>
-                                                ) : (mainRecord.status === 'paid' || mainRecord.status === 'partial') ? (
-                                                    <button 
-                                                        onClick={(e) => {
-                                                            e.stopPropagation();
-                                                            if (group.isBatch) {
-                                                                group.records.forEach(r => generateReceipt(r, academySettings, currentUser));
-                                                            } else {
-                                                                generateReceipt(mainRecord, academySettings, currentUser);
-                                                            }
-                                                        }}
-                                                        className="size-8 bg-zinc-900 border border-zinc-800 text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-lg flex items-center justify-center ml-auto transition-all"
-                                                    >
-                                                        <span className="material-symbols-outlined text-base">
-                                                            {group.isBatch ? 'folder_open' : 'receipt_long'}
-                                                        </span>
-                                                    </button>
-                                                ) : (
-                                                    <span className="text-zinc-800 text-xs">-</span>
-                                                )}
-                                            </td>
-                                        </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                                                </td>
+                                                <td className="px-6 py-6 font-bold text-[13px]" style={{color: 'var(--color-text-primary)'}}>
+                                                    {mainRecord.studentName}
+                                                </td>
+                                                <td className="px-6 py-6 text-[13px] font-medium" style={{color: 'var(--color-text-secondary)'}}>
+                                                    {isBatch ? (
+                                                        <div className="flex flex-col gap-1">
+                                                            <span className="font-black text-[10px] uppercase tracking-wider flex items-center gap-1.5" style={{color: 'var(--color-text-primary)'}}>
+                                                                <span className="material-symbols-outlined text-[14px]">layers</span>
+                                                                Lote ({group.itemCount})
+                                                            </span>
+                                                            <span className="text-[11px] truncate max-w-[200px]" style={{color: 'var(--color-text-muted)'}}>
+                                                                {group.records.map(r => r.concept).join(', ')}
+                                                            </span>
+                                                        </div>
+                                                    ) : (
+                                                        <span>{mainRecord.concept}</span>
+                                                    )}
+                                                    {mainRecord.method && <span className="ml-2 text-[9px] px-1.5 py-0.5 rounded uppercase tracking-widest font-black" style={{backgroundColor: 'var(--color-bg-raised)', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-strong)'}}>{mainRecord.method}</span>}
+                                                </td>
+                                                <td className="px-6 py-6">
+                                                    <StatusBadge status={mainRecord.status} amount={mainRecord.amount} penalty={mainRecord.penaltyAmount} />
+                                                </td>
+                                                
+                                                <td className="px-6 py-6 text-right" title={breakdownTooltip}>
+                                                    {mainRecord.status === 'in_review' && !isBatch && isMensualidad ? (
+                                                        <div className="flex justify-end">
+                                                            <DebtAmountEditor 
+                                                                item={mainRecord} 
+                                                                onUpdate={(id, val) => updateRecordAmount(id, val)} 
+                                                            />
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex flex-col items-end">
+                                                            <span className="font-black text-sm tabular-nums tracking-tight" style={{color: isPaid ? 'var(--color-success)' : 'var(--color-text-primary)'}}>
+                                                                ${totalOriginalAmount.toFixed(2)}
+                                                            </span>
+                                                            {isPartial && !isPaid && (
+                                                                <div className="mt-2 flex flex-col items-end gap-1.5">
+                                                                    <div className="h-1 w-16 bg-zinc-900 rounded-full overflow-hidden">
+                                                                        <div 
+                                                                            className="h-full rounded-full shadow-sm" 
+                                                                            style={{ backgroundColor: 'var(--color-success)', width: `${(paidSoFar / totalOriginalAmount) * 100}%` }}
+                                                                        ></div>
+                                                                    </div>
+                                                                    <span className="text-[9px] font-black tabular-nums uppercase tracking-tighter" style={{color: 'var(--color-success)'}}>
+                                                                        Abonado: ${paidSoFar.toFixed(2)}
+                                                                    </span>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </td>
+                                                
+                                                <td className="px-8 py-6 text-right">
+                                                    {mainRecord.status === 'in_review' ? (
+                                                        <button 
+                                                            onClick={(e) => { e.stopPropagation(); setSelectedGroup(group); }}
+                                                            className="min-h-[44px] md:min-h-0 bg-zinc-900 border border-zinc-800 text-zinc-400 text-xs md:text-[9px] font-bold px-4 py-2 rounded-lg transition-all active:scale-95 flex items-center gap-2 ml-auto uppercase tracking-wider hover:bg-zinc-800 hover:text-white"
+                                                        >
+                                                            <span className="material-symbols-outlined text-xs">visibility</span>
+                                                            Validar
+                                                        </button>
+                                                    ) : (mainRecord.status === 'paid' || mainRecord.status === 'partial') ? (
+                                                        <button 
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                if (group.isBatch) {
+                                                                    group.records.forEach(r => generateReceipt(r, academySettings, currentUser));
+                                                                } else {
+                                                                    generateReceipt(mainRecord, academySettings, currentUser);
+                                                                }
+                                                            }}
+                                                            className="size-12 md:size-8 bg-zinc-900 border border-zinc-800 text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-lg flex items-center justify-center ml-auto transition-all"
+                                                        >
+                                                            <span className="material-symbols-outlined text-base">
+                                                                {group.isBatch ? 'folder_open' : 'receipt_long'}
+                                                            </span>
+                                                        </button>
+                                                    ) : (
+                                                        <span className="text-zinc-800 text-xs">-</span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
                 )}
             </div>
             
@@ -784,7 +786,7 @@ const Finance: React.FC = () => {
                                 placeholder="Buscar alumno o concepto..."
                                 value={modalSearch}
                                 onChange={(e) => setModalSearch(e.target.value)}
-                                className="w-full md:w-80 pr-4 py-3 bg-[#050505] !border-zinc-800 rounded-2xl text-sm text-white outline-none focus:!border-red-600/50 transition-all font-semibold placeholder:font-normal placeholder:text-zinc-800 search-modal-finance-override"
+                                className="w-full md:w-80 pr-4 py-3 min-h-[48px] md:min-h-0 bg-[#050505] !border-zinc-800 rounded-2xl text-base md:text-sm text-white outline-none focus:!border-red-600/50 transition-all font-semibold placeholder:font-normal placeholder:text-zinc-800 search-modal-finance-override"
                             />
                             {modalSearch && (
                                 <button onClick={() => setModalSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-700 hover:text-white">
@@ -795,7 +797,7 @@ const Finance: React.FC = () => {
                         <select
                             value={modalMonthFilter}
                             onChange={(e) => setModalMonthFilter(e.target.value)}
-                            className="w-full md:w-56 px-5 py-3 bg-[#050505] !border-zinc-800 rounded-2xl text-[11px] font-black text-zinc-400 outline-none focus:!border-red-600 transition-all cursor-pointer appearance-none uppercase tracking-widest"
+                            className="w-full md:w-56 px-5 py-3 min-h-[48px] md:min-h-0 bg-[#050505] !border-zinc-800 rounded-2xl text-[11px] font-black text-zinc-400 outline-none focus:!border-red-600 transition-all cursor-pointer appearance-none uppercase tracking-widest"
                         >
                             <option value="">Todos los Meses</option>
                             {uniqueModalMonths.map(m => {

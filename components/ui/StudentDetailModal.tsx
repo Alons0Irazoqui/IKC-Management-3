@@ -168,7 +168,7 @@ const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                                         <span className="text-white text-sm font-semibold">{student.name}</span>
                                     </div>
                                     <button onClick={handleSaveChanges}
-                                        className="px-5 py-2 rounded-lg text-sm font-semibold text-black bg-white hover:bg-zinc-200 transition-all shadow-lg">
+                                        className="px-5 py-3 md:py-2 rounded-lg text-base md:text-sm font-semibold text-black bg-white hover:bg-zinc-200 transition-all shadow-lg min-h-[48px] md:min-h-[40px]">
                                         Guardar Cambios
                                     </button>
                                 </header>
@@ -226,15 +226,15 @@ const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                                             <TopBtn icon="key"    label="Acceso"  onClick={() => setIsEditingCredentials(true)} />
                                             <div className="w-px h-4 bg-white/10 mx-1.5" />
                                             <button onClick={handleDelete} disabled={isDeleting}
-                                                className="h-8 px-3 flex items-center gap-1.5 rounded-lg text-xs font-semibold text-red-500/80 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-40">
+                                                className="h-12 md:h-8 px-4 md:px-3 flex items-center gap-1.5 rounded-lg text-sm md:text-xs font-semibold text-red-500/80 hover:text-red-400 hover:bg-red-500/10 transition-all disabled:opacity-40">
                                                 {isDeleting
                                                     ? <svg className="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>
                                                     : <span className="material-symbols-outlined text-[15px]">delete</span>}
                                                 Eliminar
                                             </button>
                                             <div className="w-px h-4 bg-white/10 mx-1.5" />
-                                            <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg text-zinc-600 hover:text-white hover:bg-white/8 transition-all">
-                                                <span className="material-symbols-outlined text-[20px]">close</span>
+                                            <button onClick={onClose} className="w-12 h-12 md:w-8 md:h-8 flex items-center justify-center rounded-lg text-zinc-600 hover:text-white hover:bg-white/8 transition-all">
+                                                <span className="material-symbols-outlined text-[24px] md:text-[20px]">close</span>
                                             </button>
                                         </div>
                                     </div>
@@ -283,8 +283,8 @@ const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                                                         {student.rank}
                                                     </span>
                                                     <button onClick={handlePromote}
-                                                        className="h-8 px-3 rounded-lg text-[11px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors border border-emerald-500/20 flex items-center gap-1.5">
-                                                        <span className="material-symbols-outlined text-[14px]">upgrade</span>
+                                                        className="h-12 md:h-8 px-4 md:px-3 rounded-lg text-xs md:text-[11px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 transition-colors border border-emerald-500/20 flex items-center gap-1.5">
+                                                        <span className="material-symbols-outlined text-[16px] md:text-[14px]">upgrade</span>
                                                         Promover
                                                     </button>
                                                 </div>
@@ -537,15 +537,15 @@ const HeroStat: React.FC<{ label: string; value: string; accent?: boolean; dange
 
 const ETab: React.FC<{ label: string; active: boolean; onClick: () => void }> = ({ label, active, onClick }) => (
     <button onClick={onClick}
-        className={`px-5 py-3.5 text-sm font-semibold border-b-2 transition-all -mb-px ${active ? 'border-white text-white' : 'border-transparent text-zinc-600 hover:text-zinc-400'}`}>
+        className={`px-5 py-3.5 text-base md:text-sm font-semibold border-b-2 transition-all -mb-px min-h-[48px] ${active ? 'border-white text-white' : 'border-transparent text-zinc-600 hover:text-zinc-400'}`}>
         {label}
     </button>
 );
 
 const TopBtn: React.FC<{ icon: string; label: string; onClick: () => void }> = ({ icon, label, onClick }) => (
     <button onClick={onClick}
-        className="h-8 px-3 flex items-center gap-1.5 rounded-lg text-xs font-semibold text-zinc-400 hover:text-white hover:bg-white/8 transition-all">
-        <span className="material-symbols-outlined text-[15px]">{icon}</span>
+        className="h-12 md:h-8 px-4 md:px-3 flex items-center gap-1.5 rounded-lg text-sm md:text-xs font-semibold text-zinc-400 hover:text-white hover:bg-white/8 transition-all">
+        <span className="material-symbols-outlined text-[18px] md:text-[15px]">{icon}</span>
         {label}
     </button>
 );
@@ -591,7 +591,7 @@ const EInput: React.FC<{ label: string; value: string; onChange: (v: string) => 
     <div>
         <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-2">{label}</label>
         <input type={type} value={value} onChange={e => onChange(e.target.value)}
-            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white font-medium px-4 py-3 outline-none focus:border-indigo-500/50 focus:bg-white/[0.06] transition-all" />
+            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl text-base md:text-sm text-white font-medium px-4 py-3 min-h-[48px] outline-none focus:border-indigo-500/50 focus:bg-white/[0.06] transition-all" />
     </div>
 );
 
@@ -599,7 +599,7 @@ const ESelect: React.FC<{ label: string; value: string; onChange: (v: string) =>
     <div>
         <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-2">{label}</label>
         <select value={value} onChange={e => onChange(e.target.value)}
-            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl text-sm text-white font-medium px-4 py-3 outline-none focus:border-indigo-500/50 transition-all appearance-none">
+            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl text-base md:text-sm text-white font-medium px-4 py-3 min-h-[48px] outline-none focus:border-indigo-500/50 transition-all appearance-none">
             <option value="">—</option>
             {options.map(o => <option key={o} value={o}>{o}</option>)}
         </select>

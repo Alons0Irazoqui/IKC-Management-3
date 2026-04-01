@@ -80,7 +80,7 @@ const StudentClassDetail: React.FC = () => {
             return (
                 <div className="fixed inset-0 z-[60] flex flex-col animate-in fade-in duration-300" style={{backgroundColor: 'var(--color-bg-app)'}}>
                     <div className="px-6 py-5 flex items-center gap-4 sticky top-0 z-10 backdrop-blur-md" style={{backgroundColor: 'rgba(10, 10, 10, 0.8)', borderBottom: '1px solid var(--color-border-subtle)'}}>
-                        <button onClick={() => setSelectedMonth(null)} className="p-2 rounded-full transition-colors" style={{color: 'var(--color-text-muted)'}} onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}>
+                        <button onClick={() => setSelectedMonth(null)} className="p-2 rounded-full transition-colors min-h-[48px] min-w-[48px] flex items-center justify-center" style={{color: 'var(--color-text-muted)'}} onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}>
                             <span className="material-symbols-outlined">arrow_back</span>
                         </button>
                         <div>
@@ -193,7 +193,7 @@ const StudentClassDetail: React.FC = () => {
         return (
             <div className="fixed inset-0 z-[60] flex flex-col animate-in fade-in duration-300" style={{backgroundColor: 'var(--color-bg-app)'}}>
                 <div className="px-6 py-5 flex items-center gap-4 sticky top-0 z-10 backdrop-blur-md" style={{backgroundColor: 'rgba(10, 10, 10, 0.8)', borderBottom: '1px solid var(--color-border-subtle)'}}>
-                    <button onClick={() => setShowMonthly(false)} className="p-2 rounded-full transition-colors" style={{color: 'var(--color-text-muted)'}} onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}>
+                    <button onClick={() => setShowMonthly(false)} className="p-2 rounded-full transition-colors min-h-[48px] min-w-[48px] flex items-center justify-center" style={{color: 'var(--color-text-muted)'}} onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}>
                         <span className="material-symbols-outlined">arrow_back</span>
                     </button>
                     <div>
@@ -267,7 +267,7 @@ const StudentClassDetail: React.FC = () => {
                 <div className="relative z-10 max-w-[1400px] mx-auto w-full">
                     <button
                         onClick={() => navigate(-1)}
-                        className="flex items-center gap-2 mb-6 transition-colors text-[9px] font-bold uppercase tracking-[0.2em]"
+                        className="flex items-center gap-2 mb-6 min-h-[48px] transition-colors text-[9px] font-bold uppercase tracking-[0.2em]"
                         style={{color: 'var(--color-text-muted)'}}
                         onMouseEnter={e => (e.currentTarget as HTMLElement).style.color = 'var(--color-text-primary)'}
                         onMouseLeave={e => (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)'}
@@ -298,7 +298,7 @@ const StudentClassDetail: React.FC = () => {
                         {/* Monthly Link Button */}
                         <button
                             onClick={() => { setShowMonthly(true); setSelectedMonth(null); }}
-                            className="flex items-center gap-2 px-5 py-3.5 text-[10px] font-bold transition-all active:scale-95 uppercase tracking-widest rounded-xl shadow-[0_4px_20px_rgba(56,189,248,0.1)] leading-none"
+                            className="flex items-center justify-center gap-2 px-5 py-3.5 min-h-[48px] text-[10px] sm:text-xs font-bold transition-all active:scale-95 uppercase tracking-widest rounded-xl shadow-[0_4px_20px_rgba(56,189,248,0.1)] leading-none w-full md:w-auto"
                             style={{background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(56, 189, 248, 0.02) 100%)', border: '1px solid rgba(56, 189, 248, 0.3)', color: '#FC6F6F'}}
                             onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'linear-gradient(135deg, rgba(252, 111, 111, 0.15) 0%, rgba(252, 111, 111, 0.05) 100%)'}
                             onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(56, 189, 248, 0.02) 100%)'}

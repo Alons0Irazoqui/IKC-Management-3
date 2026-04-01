@@ -289,7 +289,7 @@ const StudentDashboard: React.FC = () => {
                                 style={{color: 'var(--color-text-primary)'}}>Mis Clases</h3>
                         </div>
                         <button onClick={() => navigate('/student/classes')}
-                            className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider transition-colors"
+                            className="flex items-center justify-center min-h-[48px] gap-1.5 text-xs font-bold uppercase tracking-wider transition-colors"
                             style={{color: 'var(--color-brand)'}}>
                             Ver Todo
                             <span className="material-symbols-outlined" style={{fontSize: '14px'}}>arrow_forward</span>
@@ -559,9 +559,9 @@ const StudentDashboard: React.FC = () => {
                             <div className="flex items-center gap-4">
                                 <button
                                     onClick={() => setSelectedEvent(null)}
-                                    className="size-10 rounded-full bg-zinc-900 hover:bg-zinc-800 text-zinc-500 hover:text-white flex items-center justify-center transition-all border border-zinc-800/50"
+                                    className="size-12 md:size-10 rounded-full bg-zinc-900 hover:bg-zinc-800 text-zinc-500 hover:text-white flex items-center justify-center transition-all border border-zinc-800/50"
                                 >
-                                    <span className="material-symbols-outlined text-xl">arrow_back</span>
+                                    <span className="material-symbols-outlined text-[20px] md:text-xl">arrow_back</span>
                                 </button>
                                 <div className="flex flex-col gap-1.5">
                                     <div className="flex items-center gap-2">
@@ -630,9 +630,9 @@ const StudentDashboard: React.FC = () => {
                                     ) : (
                                         <button
                                             onClick={handleRegister}
-                                            className="w-full py-4 bg-zinc-100 hover:bg-white text-zinc-950 font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 text-xs uppercase tracking-widest"
+                                            className="w-full py-4 min-h-[48px] bg-zinc-100 hover:bg-white text-zinc-950 font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 text-[14px] md:text-xs uppercase tracking-widest"
                                         >
-                                            <span className="material-symbols-outlined text-lg">how_to_reg</span>
+                                            <span className="material-symbols-outlined text-xl md:text-lg">how_to_reg</span>
                                             <span>Confirmar Inscripción</span>
                                         </button>
                                     )}

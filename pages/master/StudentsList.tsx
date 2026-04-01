@@ -269,14 +269,14 @@ const StudentsList: React.FC = () => {
                 {/* ── Header & Controls ── */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                     <div>
-                        <p className="text-[9px] font-bold uppercase tracking-[0.25em] mb-1" style={{ color: 'var(--color-brand)' }}>IKC Management</p>
+                        <p className="text-xs md:text-[9px] font-bold uppercase tracking-[0.25em] mb-1" style={{ color: 'var(--color-brand)' }}>IKC Management</p>
                         <h2 className="text-2xl sm:text-3xl font-black tracking-tight" style={{ color: 'var(--color-text-primary)' }}>Gestión de Alumnos</h2>
-                        <p className="text-xs sm:text-sm mt-0.5" style={{ color: 'var(--color-text-muted)' }}>Administra tu lista de estudiantes y contactos de emergencia.</p>
+                        <p className="text-base md:text-sm mt-0.5" style={{ color: 'var(--color-text-muted)' }}>Administra tu lista de estudiantes y contactos de emergencia.</p>
                     </div>
 
                     <div className="flex items-center gap-2">
                         <button onClick={handleExport}
-                            className="p-2.5 rounded-md transition-all"
+                            className="p-2.5 min-h-[48px] min-w-[48px] md:min-h-0 md:min-w-0 flex items-center justify-center rounded-md transition-all"
                             title="Exportar CSV"
                             style={{ color: 'var(--color-text-muted)', border: '1px solid var(--color-border-subtle)', backgroundColor: 'var(--color-bg-surface)' }}
                             onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = 'var(--color-text-primary)'; }}
@@ -286,14 +286,14 @@ const StudentsList: React.FC = () => {
 
                         <div className="flex p-0.5 rounded-md" style={{ border: '1px solid var(--color-border-subtle)', backgroundColor: 'var(--color-bg-surface)' }}>
                             <button onClick={() => setViewMode('grid')}
-                                className="p-2.5 rounded transition-all"
+                                className="p-2.5 min-h-[48px] min-w-[48px] md:min-h-[36px] md:min-w-[36px] flex items-center justify-center rounded transition-all"
                                 style={viewMode === 'grid'
                                     ? { color: 'var(--color-brand)', backgroundColor: 'var(--color-bg-raised)' }
                                     : { color: 'var(--color-text-muted)' }}>
                                 <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>grid_view</span>
                             </button>
                             <button onClick={() => setViewMode('table')}
-                                className="p-2.5 rounded transition-all"
+                                className="p-2.5 min-h-[48px] min-w-[48px] md:min-h-[36px] md:min-w-[36px] flex items-center justify-center rounded transition-all"
                                 style={viewMode === 'table'
                                     ? { color: 'var(--color-brand)', backgroundColor: 'var(--color-bg-raised)' }
                                     : { color: 'var(--color-text-muted)' }}>
@@ -302,7 +302,7 @@ const StudentsList: React.FC = () => {
                         </div>
 
                         <button onClick={handleCreate}
-                            className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold uppercase tracking-wider transition-all active:scale-95"
+                            className="flex items-center gap-2 px-4 py-2.5 min-h-[48px] md:min-h-0 text-xs font-bold uppercase tracking-wider transition-all active:scale-95"
                             style={{ backgroundColor: 'var(--color-brand)', color: '#fff', borderRadius: '6px' }}>
                             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>person_add</span>
                             <span className="hidden sm:inline">Nuevo Alumno</span>
@@ -319,7 +319,7 @@ const StudentsList: React.FC = () => {
                             <button
                                 key={status}
                                 onClick={() => setFilterStatus(status)}
-                                className="px-6 py-3.5 text-[11px] font-bold uppercase tracking-[0.05em] whitespace-nowrap transition-all relative"
+                                className="px-6 py-4 md:py-3.5 min-h-[48px] md:min-h-0 text-xs md:text-[11px] font-bold uppercase tracking-[0.05em] whitespace-nowrap transition-all relative"
                                 style={filterStatus === status
                                     ? { color: 'var(--color-text-primary)' }
                                     : { color: 'var(--color-text-muted)' }}
@@ -353,7 +353,7 @@ const StudentsList: React.FC = () => {
                                 placeholder="Buscar alumno, email, celular..."
                                 value={searchTerm}
                                 onChange={e => setSearchTerm(e.target.value)}
-                                className="w-full pr-4 py-3 text-sm outline-none transition-all placeholder:text-gray-500 rounded-lg search-input-override"
+                                className="w-full pr-4 py-3 min-h-[48px] text-base md:text-sm outline-none transition-all placeholder:text-gray-500 rounded-lg search-input-override"
                                 style={{
                                     backgroundColor: 'rgba(255,255,255,0.03)',
                                     color: 'var(--color-text-primary)',
@@ -381,7 +381,7 @@ const StudentsList: React.FC = () => {
                                         style={{ backgroundColor: 'var(--color-bg-surface)', border: '1px solid var(--color-border-subtle)', borderRadius: '12px' }}
                                         onClick={() => handleViewDetails(student)}>
 
-                                        <div className="absolute top-4 right-4 px-2.5 py-1 rounded-sm text-[9px] font-bold uppercase tracking-wider"
+                                        <div className="absolute top-4 right-4 px-2.5 py-1 rounded-sm text-[10px] md:text-[9px] font-bold uppercase tracking-wider"
                                             style={getStatusStyle(student.status)}>
                                             {getStatusLabel(student.status)}
                                         </div>
@@ -392,18 +392,18 @@ const StudentsList: React.FC = () => {
                                                 <div className="absolute inset-0 rounded-full" style={{ border: '1px solid rgba(255,255,255,0.05)' }}></div>
                                             </div>
                                             <div className="flex-1 min-w-0 pr-16 py-1">
-                                                <h3 className="text-sm sm:text-base font-bold leading-tight truncate" style={{ color: 'var(--color-text-primary)' }}>{student.name}</h3>
-                                                <p className="text-[11px] font-semibold uppercase tracking-wider mt-1.5" style={{ color: 'var(--color-brand)' }}>{student.rank}</p>
+                                                <h3 className="text-base sm:text-base font-bold leading-tight truncate" style={{ color: 'var(--color-text-primary)' }}>{student.name}</h3>
+                                                <p className="text-xs md:text-[11px] font-semibold uppercase tracking-wider mt-1.5" style={{ color: 'var(--color-brand)' }}>{student.rank}</p>
                                             </div>
                                         </div>
 
-                                        <div className="text-xs space-y-2 mt-2 pt-4" style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
+                                        <div className="text-sm md:text-xs space-y-2 mt-2 pt-4" style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
                                             <p className="flex items-center gap-3" style={{ color: 'var(--color-text-secondary)' }}>
-                                                <span className="material-symbols-outlined text-[14px]" style={{ color: 'var(--color-text-muted)' }}>smartphone</span>
+                                                <span className="material-symbols-outlined text-[16px] md:text-[14px]" style={{ color: 'var(--color-text-muted)' }}>smartphone</span>
                                                 <span>{student.cellPhone}</span>
                                             </p>
                                             <p className="flex items-center gap-3 truncate" style={{ color: 'var(--color-text-secondary)' }}>
-                                                <span className="material-symbols-outlined text-[14px]" style={{ color: 'var(--color-text-muted)' }}>supervisor_account</span>
+                                                <span className="material-symbols-outlined text-[16px] md:text-[14px]" style={{ color: 'var(--color-text-muted)' }}>supervisor_account</span>
                                                 <span className="truncate">{student.guardian.fullName}</span>
                                             </p>
                                         </div>
@@ -415,11 +415,11 @@ const StudentsList: React.FC = () => {
                         {viewMode === 'table' && (
                             <div className="overflow-hidden mt-4">
                                 <div className="overflow-x-auto">
-                                    <table className="w-full text-left" style={{ borderCollapse: 'collapse' }}>
+                                    <table className="w-full text-left min-w-[800px]" style={{ borderCollapse: 'collapse' }}>
                                         <thead style={{ borderBottom: '1px solid var(--color-border-strong)', backgroundColor: 'transparent' }}>
                                             <tr>
                                                 {['Alumno', 'Contacto', 'Responsable', 'Estado', 'Saldo', 'Acciones'].map((header, i) => (
-                                                    <th key={header} className={`px-5 py-4 text-[10px] font-black uppercase tracking-wider ${i >= 4 ? 'text-right' : ''}`} style={{ color: 'var(--color-text-muted)', borderBottom: '1px solid var(--color-border-subtle)' }}>
+                                                    <th key={header} className={`px-5 py-4 text-xs md:text-[10px] font-black uppercase tracking-wider ${i >= 4 ? 'text-right' : ''}`} style={{ color: 'var(--color-text-muted)', borderBottom: '1px solid var(--color-border-subtle)' }}>
                                                         {header}
                                                     </th>
                                                 ))}
@@ -441,37 +441,37 @@ const StudentsList: React.FC = () => {
                                                                 <div className="absolute inset-0 rounded-full" style={{ border: '1px solid rgba(255,255,255,0.1)' }}></div>
                                                             </div>
                                                             <div>
-                                                                <p className="text-sm font-bold truncate max-w-[180px]" style={{ color: 'var(--color-text-primary)' }}>{student.name}</p>
-                                                                <p className="text-[10px] uppercase font-semibold tracking-wider mt-1 truncate max-w-[180px]" style={{ color: 'var(--color-brand)' }}>{student.rank}</p>
+                                                                <p className="text-base md:text-sm font-bold truncate max-w-[180px]" style={{ color: 'var(--color-text-primary)' }}>{student.name}</p>
+                                                                <p className="text-xs md:text-[10px] uppercase font-semibold tracking-wider mt-1 truncate max-w-[180px]" style={{ color: 'var(--color-brand)' }}>{student.rank}</p>
                                                             </div>
                                                         </div>
                                                     </td>
                                                     <td className="px-5 py-5">
-                                                        <p className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>{student.cellPhone}</p>
-                                                        <p className="text-[11px] truncate max-w-[180px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{student.email}</p>
+                                                        <p className="text-base md:text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>{student.cellPhone}</p>
+                                                        <p className="text-xs md:text-[11px] truncate max-w-[180px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{student.email}</p>
                                                     </td>
                                                     <td className="px-5 py-5">
-                                                        <p className="text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>{student.guardian.fullName}</p>
-                                                        <div className="flex items-center gap-1.5 text-[11px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
+                                                        <p className="text-base md:text-sm font-medium" style={{ color: 'var(--color-text-secondary)' }}>{student.guardian.fullName}</p>
+                                                        <div className="flex items-center gap-1.5 text-xs md:text-[11px] mt-0.5" style={{ color: 'var(--color-text-muted)' }}>
                                                             <span className="material-symbols-outlined text-[10px]">phone</span>
                                                             {student.guardian.phones.main}
                                                         </div>
                                                     </td>
                                                     <td className="px-5 py-5">
-                                                        <span className="px-2.5 py-1 rounded-sm text-[9px] font-bold uppercase tracking-wider" style={getStatusStyle(student.status)}>
+                                                        <span className="px-2.5 py-1 rounded-sm text-[10px] md:text-[9px] font-bold uppercase tracking-wider" style={getStatusStyle(student.status)}>
                                                             {getStatusLabel(student.status)}
                                                         </span>
                                                     </td>
                                                     <td className="px-5 py-5 text-right">
-                                                        <span className="font-semibold text-sm tracking-wide" style={{ color: student.balance > 0 ? 'var(--color-brand)' : 'var(--color-text-primary)' }}>
+                                                        <span className="font-semibold text-base md:text-sm tracking-wide" style={{ color: student.balance > 0 ? 'var(--color-brand)' : 'var(--color-text-primary)' }}>
                                                             ${student.balance.toFixed(2)}
                                                         </span>
                                                     </td>
                                                     <td className="px-5 py-5 text-right">
-                                                        <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                            <button onClick={(e) => handleEdit(student, e)} className="p-1.5 rounded-md transition-colors blur-0" style={{ color: 'var(--color-text-muted)' }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLElement).style.color = 'var(--color-text-primary)'; }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)'; }}><span className="material-symbols-outlined text-[18px]">edit</span></button>
-                                                            <button onClick={(e) => handleCredentialsEdit(student, e)} className="p-1.5 rounded-md transition-colors blur-0" title="Actualizar Claves" style={{ color: 'var(--color-text-muted)' }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLElement).style.color = '#60a5fa'; }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)'; }}><span className="material-symbols-outlined text-[18px]">key</span></button>
-                                                            <button onClick={(e) => handleDelete(student.id, e)} className="p-1.5 rounded-md transition-colors blur-0" style={{ color: 'var(--color-text-muted)' }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-brand-glow)'; (e.currentTarget as HTMLElement).style.color = 'var(--color-brand)'; }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)'; }}><span className="material-symbols-outlined text-[18px]">delete</span></button>
+                                                        <div className="flex justify-end gap-2 md:gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <button onClick={(e) => handleEdit(student, e)} className="p-2 md:p-1.5 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center rounded-md transition-colors blur-0" style={{ color: 'var(--color-text-muted)' }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLElement).style.color = 'var(--color-text-primary)'; }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)'; }}><span className="material-symbols-outlined text-[18px]">edit</span></button>
+                                                            <button onClick={(e) => handleCredentialsEdit(student, e)} className="p-2 md:p-1.5 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center rounded-md transition-colors blur-0" title="Actualizar Claves" style={{ color: 'var(--color-text-muted)' }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(255,255,255,0.05)'; (e.currentTarget as HTMLElement).style.color = '#60a5fa'; }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)'; }}><span className="material-symbols-outlined text-[18px]">key</span></button>
+                                                            <button onClick={(e) => handleDelete(student.id, e)} className="p-2 md:p-1.5 min-w-[44px] min-h-[44px] md:min-w-0 md:min-h-0 flex items-center justify-center rounded-md transition-colors blur-0" style={{ color: 'var(--color-text-muted)' }} onMouseEnter={e => { (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-brand-glow)'; (e.currentTarget as HTMLElement).style.color = 'var(--color-brand)'; }} onMouseLeave={e => { (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)'; }}><span className="material-symbols-outlined text-[18px]">delete</span></button>
                                                         </div>
                                                     </td>
                                                 </MotionTr>
@@ -639,9 +639,9 @@ const StudentsList: React.FC = () => {
                                 </div>
                             </div>
 
-                            <div className="md:col-span-2 flex justify-end gap-4 pt-6 border-t" style={{ borderColor: 'var(--color-border-strong)' }}>
-                                <button type="button" onClick={() => setShowModal(false)} disabled={isSubmitting} className="px-8 py-3.5 rounded-xl border font-bold hover:bg-white/5 transition-all uppercase tracking-widest text-xs disabled:opacity-50" style={{ borderColor: 'var(--color-border-subtle)', color: 'var(--color-text-secondary)' }}>Cancelar</button>
-                                <button type="submit" disabled={isSubmitting} className="px-10 py-3.5 rounded-xl bg-primary text-white font-bold hover:bg-primary-hover shadow-lg transition-all active:scale-95 uppercase tracking-widest text-xs disabled:opacity-50 flex items-center gap-2" style={{ backgroundColor: 'var(--color-brand)' }}>
+                            <div className="md:col-span-2 flex flex-col md:flex-row justify-end gap-4 pt-6 md:pt-8 border-t" style={{ borderColor: 'var(--color-border-strong)' }}>
+                                <button type="button" onClick={() => setShowModal(false)} disabled={isSubmitting} className="min-h-[48px] px-8 rounded-xl border font-bold hover:bg-white/5 transition-all uppercase tracking-widest text-sm md:text-xs disabled:opacity-50 w-full md:w-auto" style={{ borderColor: 'var(--color-border-subtle)', color: 'var(--color-text-secondary)' }}>Cancelar</button>
+                                <button type="submit" disabled={isSubmitting} className="min-h-[48px] px-10 rounded-xl bg-primary text-white font-bold hover:bg-primary-hover shadow-lg transition-all active:scale-95 uppercase tracking-widest text-sm md:text-xs disabled:opacity-50 flex items-center justify-center gap-2 w-full md:w-auto" style={{ backgroundColor: 'var(--color-brand)' }}>
                                     {isSubmitting ? (
                                         <>
                                             <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

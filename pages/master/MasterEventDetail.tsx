@@ -146,7 +146,7 @@ const MasterEventDetail: React.FC = () => {
                     {/* Back Breadcrumb */}
                     <button
                         onClick={() => navigate('/master/schedule')}
-                        className="group flex items-center gap-1.5 text-sm font-semibold text-gray-400 hover:text-red-500 transition-colors mb-6 w-fit"
+                        className="group flex items-center gap-1.5 min-h-[48px] text-sm font-semibold text-gray-400 hover:text-red-500 transition-colors mb-6 w-fit"
                     >
                         <span className="material-symbols-outlined text-[18px] group-hover:-translate-x-1 transition-transform">arrow_back</span>
                         Volver al Calendario
@@ -211,11 +211,11 @@ const MasterEventDetail: React.FC = () => {
             </header>
 
             {/* Sub-Header Tabs */}
-            <div className="bg-[#101014] border-b border-white/[0.06] sticky top-0 z-20 w-full pt-2 px-6 md:px-10 lg:px-12 backdrop-blur-md bg-opacity-95">
-                <div className="max-w-[1240px] mx-auto flex gap-8">
+            <div className="bg-[#101014] border-b border-white/[0.06] sticky top-0 z-20 w-full pt-2 px-6 md:px-10 lg:px-12 backdrop-blur-md bg-opacity-95 overflow-x-auto custom-scrollbar">
+                <div className="max-w-[1240px] mx-auto flex gap-8 min-w-max">
                     <button
                         onClick={() => setActiveTab('attendees')}
-                        className={`pb-4 text-[14px] font-bold border-b-[2px] transition-colors whitespace-nowrap flex items-center gap-2 ${activeTab === 'attendees'
+                        className={`pb-4 pt-2 min-h-[48px] text-[14px] font-bold border-b-[2px] transition-colors whitespace-nowrap flex items-center gap-2 ${activeTab === 'attendees'
                             ? 'border-red-600 text-red-500'
                             : 'border-transparent text-gray-400 hover:text-[#dde1e7]'
                             }`}
@@ -225,7 +225,7 @@ const MasterEventDetail: React.FC = () => {
                     </button>
                     <button
                         onClick={() => setActiveTab('settings')}
-                        className={`pb-4 text-[14px] font-bold border-b-[2px] transition-colors whitespace-nowrap flex items-center gap-2 ${activeTab === 'settings'
+                        className={`pb-4 pt-2 min-h-[48px] text-[14px] font-bold border-b-[2px] transition-colors whitespace-nowrap flex items-center gap-2 ${activeTab === 'settings'
                             ? 'border-red-600 text-red-500'
                             : 'border-transparent text-gray-400 hover:text-[#dde1e7]'
                             }`}
@@ -264,14 +264,14 @@ const MasterEventDetail: React.FC = () => {
                                             }
                                             setShowChargeModal(true);
                                         }}
-                                        className="w-full sm:w-auto bg-[#dde1e7] hover:bg-white text-black px-5 py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors active:scale-95"
+                                        className="w-full sm:w-auto bg-[#dde1e7] hover:bg-white text-black px-5 py-3 md:py-2.5 min-h-[48px] md:min-h-0 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors active:scale-95"
                                     >
                                         <span className="material-symbols-outlined text-[18px]">payments</span>
                                         Generar Cargos
                                     </button>
                                     <button
                                         onClick={() => { setShowEnrollModal(true); setStudentToEnroll(''); }}
-                                        className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors active:scale-95 shadow-[0_4px_16px_rgba(225,29,72,0.3)]"
+                                        className="w-full sm:w-auto bg-red-600 hover:bg-red-700 text-white px-5 py-3 md:py-2.5 min-h-[48px] md:min-h-0 rounded-lg text-sm font-bold flex items-center justify-center gap-2 transition-colors active:scale-95 shadow-[0_4px_16px_rgba(225,29,72,0.3)]"
                                     >
                                         <span className="material-symbols-outlined text-[18px]">person_add</span>
                                         Inscribir Alumno
@@ -323,7 +323,7 @@ const MasterEventDetail: React.FC = () => {
                                                 <td className="px-8 py-4 text-right">
                                                     <button
                                                         onClick={() => handleRemoveStudent(student.id)}
-                                                        className="w-9 h-9 rounded-lg text-gray-600 hover:text-red-500 hover:bg-red-500/10 flex items-center justify-center ml-auto transition-all focus:outline-none focus:ring-1 focus:ring-red-500/50 opacity-0 group-hover:opacity-100 cursor-pointer"
+                                                        className="w-12 h-12 md:w-9 md:h-9 rounded-lg text-gray-600 hover:text-red-500 hover:bg-red-500/10 flex items-center justify-center mx-auto md:ml-auto transition-all focus:outline-none focus:ring-1 focus:ring-red-500/50 opacity-100 md:opacity-0 group-hover:opacity-100 cursor-pointer"
                                                         title="Revocar Inscripción"
                                                     >
                                                         <span className="material-symbols-outlined text-[20px]">person_remove</span>
@@ -341,7 +341,7 @@ const MasterEventDetail: React.FC = () => {
                                                     <p className="text-[14px] text-gray-500 mt-1 mb-4">No hay participantes registrados para este evento en este momento.</p>
                                                     <button
                                                         onClick={() => { setShowEnrollModal(true); setStudentToEnroll(''); }}
-                                                        className="text-sm font-bold text-red-500 hover:text-red-400 hover:bg-red-500/10 px-4 py-2 rounded-lg transition-colors inline-block"
+                                                        className="text-sm font-bold text-red-500 hover:text-red-400 hover:bg-red-500/10 px-4 py-3 md:py-2 min-h-[48px] md:min-h-0 rounded-lg transition-colors inline-block"
                                                     >
                                                         + Inscribir Nuevo Atleta
                                                     </button>
@@ -442,13 +442,13 @@ const MasterEventDetail: React.FC = () => {
                                     <button
                                         type="button"
                                         onClick={handleDeleteEvent}
-                                        className="w-full sm:w-auto text-red-500 font-bold text-[14px] hover:text-red-400 hover:bg-red-500/10 px-5 py-2.5 rounded-xl transition-colors text-center"
+                                        className="w-full sm:w-auto text-red-500 font-bold text-[14px] hover:text-red-400 hover:bg-red-500/10 px-5 py-3 md:py-2.5 min-h-[48px] md:min-h-0 rounded-xl transition-colors text-center"
                                     >
                                         Eliminar Evento
                                     </button>
                                     <button
                                         type="submit"
-                                        className="w-full sm:w-auto bg-red-600 text-white px-8 py-2.5 rounded-xl text-[14px] font-bold hover:bg-red-700 transition-colors active:scale-95 text-center shadow-[0_4px_16px_rgba(225,29,72,0.3)]"
+                                        className="w-full sm:w-auto bg-red-600 text-white px-8 py-3 md:py-2.5 min-h-[48px] md:min-h-0 rounded-xl text-[14px] font-bold hover:bg-red-700 transition-colors active:scale-95 text-center shadow-[0_4px_16px_rgba(225,29,72,0.3)]"
                                     >
                                         Guardar Configuraciones
                                     </button>
@@ -465,7 +465,7 @@ const MasterEventDetail: React.FC = () => {
                     <div className="bg-[#121217] rounded-3xl w-full max-w-md p-8 shadow-2xl relative border border-white/10">
                         <button
                             onClick={() => setShowEnrollModal(false)}
-                            className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-1.5 rounded-full cursor-pointer"
+                            className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-2 min-h-[48px] min-w-[48px] flex items-center justify-center rounded-full cursor-pointer"
                         >
                             <span className="material-symbols-outlined text-[20px]">close</span>
                         </button>
@@ -509,7 +509,7 @@ const MasterEventDetail: React.FC = () => {
                     <div className="bg-[#121217] rounded-3xl w-full max-w-md p-8 shadow-2xl relative border border-white/10 max-h-[90vh] overflow-y-auto custom-scrollbar">
                         <button
                             onClick={() => setShowChargeModal(false)}
-                            className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-1.5 rounded-full cursor-pointer z-10"
+                            className="absolute top-6 right-6 text-gray-500 hover:text-white transition-colors bg-white/5 hover:bg-white/10 p-2 min-h-[48px] min-w-[48px] flex items-center justify-center rounded-full cursor-pointer z-10"
                         >
                             <span className="material-symbols-outlined text-[20px]">close</span>
                         </button>

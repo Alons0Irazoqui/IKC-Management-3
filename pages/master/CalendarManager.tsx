@@ -162,14 +162,14 @@ const CalendarManager: React.FC = () => {
                 <p className="mt-1" style={{ color: '#9ca3af' }}>Vista global de todas las clases.</p>
             </div>
             
-            <div className="flex items-center p-1 rounded-xl" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))} className="p-2 rounded-lg transition-colors" style={{ color: '#9ca3af' }}>
+            <div className="flex items-center p-1 rounded-xl w-full md:w-auto" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))} className="p-2 min-h-[48px] min-w-[48px] flex items-center justify-center rounded-lg transition-colors" style={{ color: '#9ca3af' }}>
                     <span className="material-symbols-outlined">chevron_left</span>
                 </button>
-                <span className="w-44 text-center text-sm font-bold capitalize" style={{ color: '#dde1e7' }}>
+                <span className="flex-1 md:w-44 text-center text-sm font-bold capitalize" style={{ color: '#dde1e7' }}>
                     {currentMonth.toLocaleString('es-ES', { month: 'long', year: 'numeric' })}
                 </span>
-                <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))} className="p-2 rounded-lg transition-colors" style={{ color: '#9ca3af' }}>
+                <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))} className="p-2 min-h-[48px] min-w-[48px] flex items-center justify-center rounded-lg transition-colors" style={{ color: '#9ca3af' }}>
                     <span className="material-symbols-outlined">chevron_right</span>
                 </button>
             </div>
@@ -259,7 +259,7 @@ const CalendarManager: React.FC = () => {
                             <h3 className="text-xl font-bold" style={{ color: '#dde1e7' }}>Editar Sesión</h3>
                             <p className="text-sm mt-0.5" style={{ color: '#6b7280' }}>{selectedSession.date}</p>
                         </div>
-                        <button onClick={() => setSelectedSession(null)} className="p-2 rounded-xl transition-colors" style={{ color: '#6b7280', background: 'rgba(255,255,255,0.05)' }}><span className="material-symbols-outlined">close</span></button>
+                        <button onClick={() => setSelectedSession(null)} className="p-2 min-h-[48px] min-w-[48px] flex items-center justify-center rounded-xl transition-colors" style={{ color: '#6b7280', background: 'rgba(255,255,255,0.05)' }}><span className="material-symbols-outlined">close</span></button>
                     </div>
 
                     <div className="flex flex-col gap-4">
@@ -277,9 +277,9 @@ const CalendarManager: React.FC = () => {
                                 <input type="time" className="w-full rounded-xl p-3 text-sm font-medium outline-none" style={{ background: '#18181d', border: '1px solid rgba(255,255,255,0.08)', color: '#dde1e7' }} value={editForm.endTime} onChange={e => setEditForm({...editForm, endTime: e.target.value})} />
                             </div>
                         </div>
-                        <div className="flex gap-3 mt-2">
-                            <button onClick={handleCancelSession} className="flex-1 py-3 rounded-xl font-bold text-sm transition-all" style={{ background: 'rgba(225,29,72,0.1)', color: '#e11d48', border: '1px solid rgba(225,29,72,0.2)' }}>Cancelar Clase</button>
-                            <button onClick={handleSaveChanges} className="flex-1 py-3 rounded-xl font-bold text-sm text-white transition-all" style={{ background: '#e11d48', boxShadow: '0 4px 16px rgba(225,29,72,0.3)' }}>Guardar</button>
+                        <div className="flex flex-col sm:flex-row gap-3 mt-2">
+                            <button onClick={handleCancelSession} className="flex-1 py-3 min-h-[48px] md:min-h-0 rounded-xl font-bold text-sm transition-all" style={{ background: 'rgba(225,29,72,0.1)', color: '#e11d48', border: '1px solid rgba(225,29,72,0.2)' }}>Cancelar Clase</button>
+                            <button onClick={handleSaveChanges} className="flex-1 py-3 min-h-[48px] md:min-h-0 rounded-xl font-bold text-sm text-white transition-all" style={{ background: '#e11d48', boxShadow: '0 4px 16px rgba(225,29,72,0.3)' }}>Guardar</button>
                         </div>
                     </div>
                 </div>

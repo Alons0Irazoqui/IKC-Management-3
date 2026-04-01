@@ -222,7 +222,7 @@ const MasterAttendanceDetail: React.FC = () => {
       return (
         <div className="fixed inset-0 z-[9999] bg-[#0A0A0B] flex flex-col text-white animate-in fade-in duration-300">
           <div className="bg-[#141416] border-b border-white/10 px-8 py-4 flex items-center gap-6 shadow-xl">
-            <button onClick={() => setStudentDetail(null)} className="p-2 hover:bg-white/5 rounded-lg text-white/40 transition-all">
+            <button onClick={() => setStudentDetail(null)} className="p-2 min-h-[48px] min-w-[48px] flex items-center justify-center hover:bg-white/5 rounded-lg text-white/40 transition-all">
               <span className="material-symbols-outlined text-[20px]">arrow_back</span>
             </button>
             <Avatar src={student.avatarUrl} name={student.name} className="size-10 rounded-lg border border-white/10" />
@@ -288,7 +288,7 @@ const MasterAttendanceDetail: React.FC = () => {
         <div className="bg-[#141416] border-b border-white/10 px-8 py-4 flex items-center gap-6 shadow-xl">
           <button
             onClick={() => { setShowMonthly(false); setSelectedMonth(null); }}
-            className="p-2 hover:bg-white/5 rounded-lg text-white/40 transition-all"
+            className="p-2 min-h-[48px] min-w-[48px] flex items-center justify-center hover:bg-white/5 rounded-lg text-white/40 transition-all"
           >
             <span className="material-symbols-outlined text-[20px]">arrow_back</span>
           </button>
@@ -335,7 +335,7 @@ const MasterAttendanceDetail: React.FC = () => {
           ) : (
             <>
               <div className="flex items-center gap-4 mb-10">
-                <button onClick={() => setSelectedMonth(null)} className="p-3 hover:bg-white/5 rounded-full text-white/40 transition-all">
+                <button onClick={() => setSelectedMonth(null)} className="p-3 min-h-[48px] min-w-[48px] flex items-center justify-center hover:bg-white/5 rounded-full text-white/40 transition-all">
                   <span className="material-symbols-outlined text-[24px]">arrow_back</span>
                 </button>
                 <h2 className="text-3xl font-bold text-white tracking-tight">{MONTH_ES[selectedMonth]} {year}</h2>
@@ -406,7 +406,7 @@ const MasterAttendanceDetail: React.FC = () => {
       {/* ── HEADER ── */}
       <div className="bg-[#0A0A0B]/80 backdrop-blur-xl border-b border-white/5 px-6 py-6 sticky top-0 z-20 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="flex items-center gap-4">
-          <button onClick={() => navigate(-1)} className="p-2 hover:bg-white/5 rounded-full text-white/60 transition-colors">
+          <button onClick={() => navigate(-1)} className="p-2 min-h-[48px] min-w-[48px] flex items-center justify-center hover:bg-white/5 rounded-full text-white/60 transition-colors">
             <span className="material-symbols-outlined">arrow_back</span>
           </button>
           <div>
@@ -422,7 +422,7 @@ const MasterAttendanceDetail: React.FC = () => {
               <button
                 key={mode}
                 onClick={() => setViewMode(mode as any)}
-                className={`px-8 py-2.5 rounded-lg text-xs font-bold transition-all ${
+                className={`px-8 py-3 md:py-2.5 min-h-[48px] md:min-h-0 rounded-lg text-xs font-bold transition-all ${
                   viewMode === mode ? 'bg-white text-black shadow-lg scale-100' : 'text-white/40 hover:text-white'
                 }`}
               >
@@ -434,7 +434,7 @@ const MasterAttendanceDetail: React.FC = () => {
           {/* Monthly link button */}
           <button
             onClick={() => { setShowMonthly(true); setSelectedMonth(null); }}
-            className="flex items-center gap-2 px-6 py-2.5 text-xs font-bold text-white bg-white/5 hover:bg-white/10 rounded-xl transition-all border border-white/10 group"
+            className="flex items-center justify-center w-full md:w-auto gap-2 px-6 py-3 md:py-2.5 min-h-[48px] md:min-h-0 text-xs font-bold text-white bg-white/5 hover:bg-white/10 rounded-xl transition-all border border-white/10 group"
           >
             <span className="material-symbols-outlined text-[18px] text-emerald-400 group-hover:scale-110 transition-transform">analytics</span>
             Panel de Métricas Mensuales
@@ -451,7 +451,7 @@ const MasterAttendanceDetail: React.FC = () => {
             />
               <button
                 onClick={handleMarkAllPresent}
-                className="bg-emerald-500 hover:bg-emerald-600 text-black px-8 py-2.5 rounded-xl text-xs font-bold shadow-lg transition-all flex items-center gap-2 active:scale-95"
+                className="bg-emerald-500 hover:bg-emerald-600 text-black px-8 py-3 md:py-2.5 min-h-[48px] md:min-h-0 w-full md:w-auto rounded-xl text-xs font-bold shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95"
               >
                 <span className="material-symbols-outlined text-[18px]">done_all</span>
                 <span className="tracking-tight uppercase tracking-widest text-[10px]">Asistencia Completa</span>
@@ -459,32 +459,31 @@ const MasterAttendanceDetail: React.FC = () => {
             </>
           )}
 
-          {/* Week-mode navigator */}
-          {viewMode === 'week' && (
-            <div className="flex items-center bg-white/5 border border-white/10 rounded-xl p-1 shadow-lg">
-              <button 
-                onClick={() => navigateWeek(-1)} 
-                className="size-10 flex items-center justify-center hover:bg-white/10 rounded-lg text-white/40 hover:text-white transition-all active:scale-95"
-              >
-                <span className="material-symbols-outlined text-[20px]">chevron_left</span>
-              </button>
-              <div className="px-6 text-[10px] font-bold text-white/90 uppercase tracking-[0.2em] min-w-[200px] text-center">
-                {weekLabel}
+            {viewMode === 'week' && (
+              <div className="flex flex-wrap items-center bg-white/5 border border-white/10 rounded-xl p-1 shadow-lg w-full md:w-auto">
+                <button 
+                  onClick={() => navigateWeek(-1)} 
+                  className="size-12 md:size-10 flex items-center justify-center hover:bg-white/10 rounded-lg text-white/40 hover:text-white transition-all active:scale-95"
+                >
+                  <span className="material-symbols-outlined text-[20px]">chevron_left</span>
+                </button>
+                <div className="flex-1 md:flex-none px-2 md:px-6 text-[10px] sm:text-xs md:text-[10px] font-bold text-white/90 uppercase tracking-[0.1em] md:tracking-[0.2em] min-w-[150px] md:min-w-[200px] text-center">
+                  {weekLabel}
+                </div>
+                <button 
+                  onClick={() => navigateWeek(1)} 
+                  className="size-12 md:size-10 flex items-center justify-center hover:bg-white/10 rounded-lg text-white/40 hover:text-white transition-all active:scale-95"
+                >
+                  <span className="material-symbols-outlined text-[20px]">chevron_right</span>
+                </button>
+                <button 
+                  onClick={() => setWeekAnchor(new Date())} 
+                  className="px-4 md:px-6 py-2 min-h-[48px] md:min-h-[40px] md:h-10 text-[10px] md:text-[9px] font-bold bg-white text-black rounded-lg ml-1 hover:bg-white/90 active:scale-95 transition-all uppercase tracking-[0.2em] w-full md:w-auto mt-2 md:mt-0 basis-full md:basis-auto"
+                >
+                  Actual
+                </button>
               </div>
-              <button 
-                onClick={() => navigateWeek(1)} 
-                className="size-10 flex items-center justify-center hover:bg-white/10 rounded-lg text-white/40 hover:text-white transition-all active:scale-95"
-              >
-                <span className="material-symbols-outlined text-[20px]">chevron_right</span>
-              </button>
-              <button 
-                onClick={() => setWeekAnchor(new Date())} 
-                className="px-6 py-2 h-10 text-[9px] font-bold bg-white text-black rounded-lg ml-1 hover:bg-white/90 active:scale-95 transition-all uppercase tracking-[0.2em]"
-              >
-                Actual
-              </button>
-            </div>
-          )}
+            )}
         </div>
       </div>
 
@@ -569,11 +568,11 @@ const MasterAttendanceDetail: React.FC = () => {
                                         excused:'bg-sky-500 text-white',
                                       };
                                       return (
-                                        <button
+                                          <button
                                           key={s}
                                           title={s === 'present' ? 'Presente' : s === 'late' ? 'Tarde' : s === 'absent' ? 'Falta' : 'Justif.'}
                                           onClick={() => handleStatusChange(student.id, dateStr, s)}
-                                          className={`w-8 h-8 rounded-xl text-[11px] font-bold transition-all border ${
+                                          className={`w-11 h-11 md:w-8 md:h-8 rounded-xl text-[11px] font-bold transition-all border ${
                                             status === s ? btnActive[s] + ' border-transparent shadow-lg scale-110' : 'bg-white/5 text-white/30 border-white/5 hover:border-white/20 hover:text-white/60 hover:bg-white/10'
                                           }`}
                                         >
@@ -667,11 +666,11 @@ const MasterAttendanceDetail: React.FC = () => {
                             </div>
                           </td>
                           <td className="px-8 py-5">
-                            <div className="flex items-center justify-center p-1 bg-black/30 rounded-xl border border-white/5 max-w-[400px] mx-auto">
+                            <div className="flex flex-wrap items-center justify-center gap-2 md:gap-0 p-2 md:p-1 bg-black/30 rounded-xl border border-white/5 max-w-[400px] mx-auto">
                               {['present', 'late', 'absent', 'excused'].map(st => (
                                 <button key={st} onClick={() => handleStatusChange(student.id, selectedDate, st as any)}
-                                  className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all ${
-                                    currentStatus === st ? `${STATUS_COLORS[st]} text-white shadow-lg` : 'text-white/20 hover:text-white/40'
+                                  className={`flex-1 py-3 md:py-2 min-h-[44px] md:min-h-0 text-[11px] md:text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all flex items-center justify-center ${
+                                    currentStatus === st ? `${STATUS_COLORS[st]} text-white shadow-lg` : 'text-white/20 hover:text-white/40 bg-white/5 md:bg-transparent'
                                   }`}
                                 >
                                   {st === 'excused' ? 'Justif.' : st === 'late' ? 'Tarde' : st === 'absent' ? 'Falta' : 'Presente'}
@@ -682,16 +681,16 @@ const MasterAttendanceDetail: React.FC = () => {
                           <td className="px-8 py-5 text-right">
                             <div className="flex justify-end gap-3">
                               <button onClick={() => { setStudentForHistory(student); setShowHistoryModal(true); }}
-                                className="size-10 flex items-center justify-center rounded-lg bg-white/5 hover:bg-emerald-500 hover:text-black transition-all text-white/40"
+                                className="size-12 md:size-10 flex items-center justify-center rounded-lg bg-white/5 hover:bg-emerald-500 hover:text-black transition-all text-white/40"
                                 title="Historial"
                               >
-                                <span className="material-symbols-outlined text-[18px]">history</span>
+                                <span className="material-symbols-outlined text-[20px] md:text-[18px]">history</span>
                               </button>
                               <button onClick={() => unenrollStudent(student.id, classId!)}
-                                className="size-10 flex items-center justify-center rounded-lg bg-white/5 hover:bg-rose-500 hover:text-white transition-all text-white/20"
+                                className="size-12 md:size-10 flex items-center justify-center rounded-lg bg-white/5 hover:bg-rose-500 hover:text-white transition-all text-white/20"
                                 title="Desvincular"
                               >
-                                <span className="material-symbols-outlined text-[18px]">person_remove</span>
+                                <span className="material-symbols-outlined text-[20px] md:text-[18px]">person_remove</span>
                               </button>
                             </div>
                           </td>
@@ -723,8 +722,8 @@ const MasterAttendanceDetail: React.FC = () => {
               placeholder="Escribe el motivo..."
             />
             <div className="flex justify-end gap-3 mt-8">
-              <button onClick={() => setShowReasonModal(false)} className="px-6 py-2.5 rounded-lg text-white/30 font-bold text-[11px] uppercase tracking-widest hover:text-white transition-colors">Cancelar</button>
-              <button onClick={saveReason} className="px-8 py-2.5 rounded-lg bg-emerald-500 text-black font-bold text-[11px] uppercase tracking-widest hover:bg-emerald-400 transition-all">Guardar Motivo</button>
+              <button onClick={() => setShowReasonModal(false)} className="px-6 py-3 md:py-2.5 min-h-[48px] md:min-h-0 rounded-lg text-white/30 font-bold text-[11px] uppercase tracking-widest hover:text-white transition-colors">Cancelar</button>
+              <button onClick={saveReason} className="px-8 py-3 md:py-2.5 min-h-[48px] md:min-h-0 rounded-lg bg-emerald-500 text-black font-bold text-[11px] uppercase tracking-widest hover:bg-emerald-400 transition-all">Guardar Motivo</button>
             </div>
           </div>
         </div>
@@ -736,7 +735,7 @@ const MasterAttendanceDetail: React.FC = () => {
           <div className="bg-[#1C1C1E] rounded-xl p-8 w-full max-w-2xl shadow-2xl border border-white/10 flex flex-col max-h-[80vh]">
             <div className="flex justify-between items-center mb-8">
               <h3 className="text-xl font-bold text-white tracking-tight">Inscribir Alumno a la Sesión</h3>
-              <button onClick={() => setShowEnrollModal(false)} className="p-2 hover:bg-white/5 rounded-lg transition-all">
+              <button onClick={() => setShowEnrollModal(false)} className="p-2 min-h-[48px] min-w-[48px] flex items-center justify-center hover:bg-white/5 rounded-lg transition-all">
                 <span className="material-symbols-outlined text-white/40">close</span>
               </button>
             </div>
@@ -760,7 +759,7 @@ const MasterAttendanceDetail: React.FC = () => {
                       <p className="text-[9px] font-semibold text-white/20 uppercase tracking-widest">{student.rank}</p>
                     </div>
                   </div>
-                  <button className="px-4 py-1.5 rounded-lg bg-white/5 text-white/40 group-hover:bg-emerald-500 group-hover:text-black transition-all text-[10px] font-bold uppercase tracking-widest">
+                  <button className="px-4 py-3 md:py-1.5 min-h-[48px] md:min-h-0 rounded-lg bg-white/5 text-white/40 group-hover:bg-emerald-500 group-hover:text-black transition-all text-[10px] font-bold uppercase tracking-widest">
                     Inscribir
                   </button>
                 </div>
@@ -778,7 +777,7 @@ const MasterAttendanceDetail: React.FC = () => {
             <div className="p-8 border-b border-white/10 bg-white/[0.02]">
               <div className="flex items-center gap-4 mb-6">
                 <Avatar src={studentForHistory.avatarUrl} name={studentForHistory.name} className="size-10 rounded-lg border border-white/10" />
-                <button onClick={() => setShowHistoryModal(false)} className="ml-auto p-2 hover:bg-white/5 rounded-lg transition-all text-white/40">
+                <button onClick={() => setShowHistoryModal(false)} className="ml-auto p-2 min-h-[48px] min-w-[48px] flex items-center justify-center hover:bg-white/5 rounded-lg transition-all text-white/40">
                   <span className="material-symbols-outlined text-[20px]">close</span>
                 </button>
               </div>

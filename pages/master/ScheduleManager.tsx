@@ -265,19 +265,19 @@ const QuickEditModal: React.FC<{
                 {/* Header Actions */}
                 <div className="absolute top-4 right-4 flex gap-2 z-10">
                     {event.id && (
-                        <button 
-                            type="button" 
-                            onClick={() => onDelete(event.id!)}
-                            className="size-10 flex items-center justify-center rounded-full text-red-400 hover:text-red-300 transition-colors"
-                            style={{ background: 'rgba(225,29,72,0.1)', border: '1px solid rgba(225,29,72,0.2)' }}
-                            title="Eliminar sesión"
+                            <button 
+                                type="button" 
+                                onClick={() => onDelete(event.id!)}
+                                className="size-12 md:size-10 flex items-center justify-center rounded-full text-red-400 hover:text-red-300 transition-colors"
+                                style={{ background: 'rgba(225,29,72,0.1)', border: '1px solid rgba(225,29,72,0.2)' }}
+                                title="Eliminar sesión"
                         >
                             <span className="material-symbols-outlined text-[20px]">delete</span>
                         </button>
                     )}
                     <button 
                         onClick={onClose}
-                        className="size-10 flex items-center justify-center rounded-full text-[#6b7280] hover:text-[#dde1e7] transition-colors"
+                        className="size-12 md:size-10 flex items-center justify-center rounded-full text-[#6b7280] hover:text-[#dde1e7] transition-colors"
                         style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}
                     >
                         <span className="material-symbols-outlined text-[20px]">close</span>
@@ -359,7 +359,7 @@ const QuickEditModal: React.FC<{
                                     key={c.value}
                                     type="button"
                                     onClick={() => setFormData({...formData, color: c.value})}
-                                    className={`size-8 rounded-full flex items-center justify-center transition-all ${c.bg} ${formData.color === c.value ? 'ring-2 ring-offset-2 ring-offset-[#101014] ring-white scale-110' : 'opacity-30 hover:opacity-80'}`}
+                                    className={`size-11 md:size-8 shrink-0 rounded-full flex items-center justify-center transition-all ${c.bg} ${formData.color === c.value ? 'ring-2 ring-offset-2 ring-offset-[#101014] ring-white scale-110' : 'opacity-30 hover:opacity-80'}`}
                                     title={c.label}
                                 >
                                     {formData.color === c.value && <span className="material-symbols-outlined text-white text-[14px]">check</span>}
@@ -470,19 +470,19 @@ const ScheduleManager: React.FC = () => {
             
             {/* --- CUSTOM TOOLBAR --- */}
             <div className="px-10 py-6 flex flex-col md:flex-row justify-between items-center gap-6 sticky top-0 z-20 backdrop-blur-md bg-[#0A0A0B]/80" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
-                <div className="flex items-center gap-6">
-                    <button onClick={() => setDate(new Date())} className="text-[11px] font-black uppercase tracking-[0.2em] px-4 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white/50 hover:text-white">
+                <div className="flex flex-wrap items-center gap-6 w-full md:w-auto">
+                    <button onClick={() => setDate(new Date())} className="text-[11px] font-black uppercase tracking-[0.2em] px-4 py-3 md:py-2 min-h-[48px] md:min-h-0 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-all text-white/50 hover:text-white">
                         Hoy
                     </button>
                     
-                    <div className="flex items-center gap-3">
-                        <button onClick={() => handleNavigate('PREV')} className="size-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-all text-white/40 hover:text-white">
+                    <div className="flex items-center gap-3 ml-auto md:ml-0">
+                        <button onClick={() => handleNavigate('PREV')} className="size-12 md:size-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-all text-white/40 hover:text-white">
                             <span className="material-symbols-outlined text-[20px]">chevron_left</span>
                         </button>
                         <h1 className="text-xl md:text-2xl font-black tracking-tight text-white capitalize min-w-[140px] text-center">
                             {format(date, view === Views.MONTH ? 'MMMM yyyy' : 'd MMMM', { locale: es })}
                         </h1>
-                        <button onClick={() => handleNavigate('NEXT')} className="size-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-all text-white/40 hover:text-white">
+                        <button onClick={() => handleNavigate('NEXT')} className="size-12 md:size-9 flex items-center justify-center rounded-full hover:bg-white/10 transition-all text-white/40 hover:text-white">
                             <span className="material-symbols-outlined text-[20px]">chevron_right</span>
                         </button>
                     </div>
@@ -498,7 +498,7 @@ const ScheduleManager: React.FC = () => {
                             <button
                                 key={v.id}
                                 onClick={() => setView(v.id)}
-                                className={`px-5 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all`}
+                                className={`flex-1 flex items-center justify-center px-3 md:px-5 py-3 md:py-2 min-h-[48px] md:min-h-[32px] rounded-lg text-[10px] font-black uppercase tracking-widest transition-all`}
                                 style={view === v.id
                                     ? { background: 'rgba(255,255,255,0.08)', color: '#fff', boxShadow: '0 4px 12px rgba(0,0,0,0.5)' }
                                     : { color: 'rgba(255,255,255,0.4)' }
@@ -515,7 +515,7 @@ const ScheduleManager: React.FC = () => {
                             now.setMinutes(0,0,0);
                             handleSelectSlot({ start: now, end: addMinutes(now, 60) });
                         }}
-                        className="px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest bg-emerald-500 text-white hover:bg-emerald-400 shadow-[0_4px_20px_rgba(16,185,129,0.3)] transition-all active:scale-95 flex items-center gap-2"
+                        className="w-full md:w-auto px-6 py-3 min-h-[48px] rounded-xl font-black text-[10px] justify-center md:justify-start uppercase tracking-widest bg-emerald-500 text-white hover:bg-emerald-400 shadow-[0_4px_20px_rgba(16,185,129,0.3)] transition-all active:scale-95 flex items-center gap-2"
                     >
                         <span className="material-symbols-outlined text-[18px]">add</span>
                         <span>Nueva Clase</span>

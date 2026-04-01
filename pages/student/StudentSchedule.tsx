@@ -200,7 +200,7 @@ const CleanDayView: React.FC<{
                         {dayEvents.map(evt => (
                             <div key={evt.id} onClick={() => onEventClick(evt)} className="relative pl-8 group cursor-pointer">
                                 <div className={`absolute -left-[5px] top-4 size-2.5 rounded-full border-2 shadow-sm ring-1 transition-colors`}
-                                     style={{borderColor: 'var(--color-bg-app)', backgroundColor: evt.status === 'cancelled' ? 'var(--color-border-strong)' : '#FC6F6F', ringColor: 'var(--color-border-subtle)'}}></div>
+                                     style={{borderColor: 'var(--color-bg-app)', backgroundColor: evt.status === 'cancelled' ? 'var(--color-border-strong)' : '#FC6F6F', '--tw-ring-color': 'var(--color-border-subtle)'} as React.CSSProperties}></div>
                                 <div className={`flex items-center gap-6 p-6 rounded-2xl border transition-all group-hover:shadow-lg group-hover:-translate-y-1`}
                                      style={evt.status === 'cancelled'
                                         ? {borderColor: 'var(--color-border-subtle)', backgroundColor: 'var(--color-bg-surface)', opacity: 0.5}
@@ -365,7 +365,7 @@ const DayAgendaDrawer: React.FC<{
                                     {format(date, 'd MMMM yyyy', { locale: es })}
                                 </p>
                             </div>
-                            <button onClick={onClose} className="p-2 rounded-full transition-colors" style={{color: 'var(--color-text-muted)'}} onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}>
+                            <button onClick={onClose} className="p-2 rounded-full transition-colors min-h-[48px] min-w-[48px] flex items-center justify-center" style={{color: 'var(--color-text-muted)'}} onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}>
                                 <span className="material-symbols-outlined">close</span>
                             </button>
                         </div>
@@ -435,7 +435,7 @@ const EventDetailModal: React.FC<{
                             {event.type === 'class' ? 'Clase' : 'Evento'}
                         </div>
                     </div>
-                    <button onClick={onClose} className="absolute top-5 right-5 p-2 rounded-full transition-all" style={{backgroundColor: 'var(--color-bg-raised)', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-subtle)'}} onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-surface)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'}>
+                    <button onClick={onClose} className="absolute top-5 right-5 p-2 rounded-full transition-all min-h-[48px] min-w-[48px] flex flex-col items-center justify-center" style={{backgroundColor: 'var(--color-bg-raised)', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-subtle)'}} onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-surface)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'}>
                         <span className="material-symbols-outlined text-lg">close</span>
                     </button>
                 </div>
@@ -577,7 +577,7 @@ const StudentSchedule: React.FC = () => {
                             <button
                                 key={v.id}
                                 onClick={() => setView(v.id as ViewType)}
-                                className="px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap"
+                                className="px-4 py-2 min-h-[48px] rounded-lg text-xs font-bold transition-all whitespace-nowrap"
                                 style={view === v.id
                                     ? {backgroundColor: 'var(--color-bg-surface)', color: 'var(--color-text-primary)', boxShadow: '0 1px 4px rgba(0,0,0,0.3)'}
                                     : {color: 'var(--color-text-muted)'}}
@@ -589,13 +589,13 @@ const StudentSchedule: React.FC = () => {
 
                     {view !== 'agenda' && (
                         <div className="flex items-center gap-1">
-                            <button onClick={() => handleNavigate('PREV')} className="size-9 flex items-center justify-center rounded-full transition-all" style={{color: 'var(--color-text-muted)'}} onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}>
+                            <button onClick={() => handleNavigate('PREV')} className="size-9 flex items-center justify-center rounded-full transition-all min-h-[48px] min-w-[48px]" style={{color: 'var(--color-text-muted)'}} onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}>
                                 <span className="material-symbols-outlined text-xl">chevron_left</span>
                             </button>
-                            <button onClick={() => handleNavigate('TODAY')} className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all" style={{color: 'var(--color-text-secondary)'}} onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}>
+                            <button onClick={() => handleNavigate('TODAY')} className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all min-h-[48px]" style={{color: 'var(--color-text-secondary)'}} onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}>
                                 Hoy
                             </button>
-                            <button onClick={() => handleNavigate('NEXT')} className="size-9 flex items-center justify-center rounded-full transition-all" style={{color: 'var(--color-text-muted)'}} onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}>
+                            <button onClick={() => handleNavigate('NEXT')} className="size-9 flex items-center justify-center rounded-full transition-all min-h-[48px] min-w-[48px]" style={{color: 'var(--color-text-muted)'}} onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'} onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent'}>
                                 <span className="material-symbols-outlined text-xl">chevron_right</span>
                             </button>
                         </div>

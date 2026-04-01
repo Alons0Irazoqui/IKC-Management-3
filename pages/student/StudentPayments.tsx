@@ -16,36 +16,36 @@ const StatusBadge: React.FC<{ status: TuitionRecord['status'] }> = ({ status }) 
     switch (status) {
         case 'paid':
             return (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-[0.15em]" style={{backgroundColor:'rgba(52,211,153,0.06)',color:'#34D399',border:'1px solid rgba(52,211,153,0.1)'}}>
-                    <span className="material-symbols-outlined text-[12px] opacity-70">check_circle</span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-lg sm:text-[9px] font-bold uppercase tracking-[0.15em]" style={{backgroundColor:'rgba(52,211,153,0.06)',color:'#34D399',border:'1px solid rgba(52,211,153,0.1)'}}>
+                    <span className="material-symbols-outlined text-[12px] sm:text-[18px] opacity-70">check_circle</span>
                     Pagado
                 </span>
             );
         case 'in_review':
             return (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-[0.15em]" style={{backgroundColor:'rgba(255,82,82,0.06)',color:'#FF5252',border:'1px solid rgba(255,82,82,0.1)'}}>
-                    <span className="material-symbols-outlined text-[12px] opacity-70">hourglass_top</span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-lg sm:text-[9px] font-bold uppercase tracking-[0.15em]" style={{backgroundColor:'rgba(255,82,82,0.06)',color:'#FF5252',border:'1px solid rgba(255,82,82,0.1)'}}>
+                    <span className="material-symbols-outlined text-[12px] sm:text-[18px] opacity-70">hourglass_top</span>
                     En Revisión
                 </span>
             );
         case 'overdue':
             return (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-[0.15em]" style={{backgroundColor:'rgba(255,82,82,0.06)',color:'#F87171',border:'1px solid rgba(255,82,82,0.1)'}}>
-                    <span className="material-symbols-outlined text-[12px] opacity-70">warning</span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-lg sm:text-[9px] font-bold uppercase tracking-[0.15em]" style={{backgroundColor:'rgba(255,82,82,0.06)',color:'#F87171',border:'1px solid rgba(255,82,82,0.1)'}}>
+                    <span className="material-symbols-outlined text-[12px] sm:text-[18px] opacity-70">warning</span>
                     Vencido
                 </span>
             );
         case 'partial':
             return (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-[0.15em]" style={{backgroundColor:'rgba(251,191,36,0.06)',color:'#FBBF24',border:'1px solid rgba(251,191,36,0.1)'}}>
-                    <span className="material-symbols-outlined text-[12px] opacity-70">pie_chart</span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-lg sm:text-[9px] font-bold uppercase tracking-[0.15em]" style={{backgroundColor:'rgba(251,191,36,0.06)',color:'#FBBF24',border:'1px solid rgba(251,191,36,0.1)'}}>
+                    <span className="material-symbols-outlined text-[12px] sm:text-[18px] opacity-70">pie_chart</span>
                     Restante
                 </span>
             );
         default:
             return (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[9px] font-bold uppercase tracking-[0.15em]" style={{backgroundColor:'rgba(255,255,255,0.03)',color:'var(--color-text-muted)',border:'1px solid var(--color-border-subtle)',opacity:0.5}}>
-                    <span className="material-symbols-outlined text-[12px] opacity-70">pending</span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-lg sm:text-[9px] font-bold uppercase tracking-[0.15em]" style={{backgroundColor:'rgba(255,255,255,0.03)',color:'var(--color-text-muted)',border:'1px solid var(--color-border-subtle)',opacity:0.5}}>
+                    <span className="material-symbols-outlined text-[12px] sm:text-[18px] opacity-70">pending</span>
                     Por Pagar
                 </span>
             );
@@ -196,7 +196,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onConfirm,
                             {isSinglePaymentMode ? 'Confirma el pago de este concepto' : 'Selecciona los conceptos a pagar'}
                         </p>
                     </div>
-                    <button onClick={onClose} className="p-2 rounded-full transition-colors opacity-40 hover:opacity-100 hover:bg-white/5" style={{color:'var(--color-text-muted)'}}>
+                    <button onClick={onClose} className="p-2 rounded-full transition-colors opacity-40 hover:opacity-100 hover:bg-white/5 min-h-[48px] min-w-[48px] flex items-center justify-center" style={{color:'var(--color-text-muted)'}}>
                         <span className="material-symbols-outlined text-[20px]">close</span>
                     </button>
                 </div>
@@ -258,7 +258,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onConfirm,
                                             {!isSinglePaymentMode && (
                                                 <button
                                                     onClick={() => handleRemoveDebt(debt.id)}
-                                                    className="p-1 transition-colors"
+                                                    className="p-1 transition-colors min-w-[48px] min-h-[48px] flex justify-center items-center"
                                                     style={{color:'var(--color-text-muted)'}}
                                                     onMouseEnter={e => (e.currentTarget as HTMLElement).style.color='#F87171'}
                                                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.color='var(--color-text-muted)'}
@@ -281,7 +281,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onConfirm,
 
                     <div className="space-y-4 pt-4 border-t" style={{borderColor:'var(--color-border-subtle)'}}>
                         <div className="flex items-center justify-between">
-                            <label className="flex items-center gap-2.5 cursor-pointer group">
+                            <label className="flex items-center gap-2.5 cursor-pointer group min-h-[48px]">
                                 <div className="relative flex items-center">
                                     <input
                                         type="checkbox"
@@ -331,7 +331,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onConfirm,
                         <div className="grid grid-cols-2 gap-2 p-1 rounded-xl mb-3" style={{backgroundColor:'var(--color-bg-app)'}}>
                             <button
                                 onClick={() => setMethod('Transferencia')}
-                                className={`py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2`}
+                                className={`py-2.5 min-h-[48px] rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2`}
                                 style={method === 'Transferencia'
                                     ? {backgroundColor:'var(--color-bg-surface)',color:'#FF5252',boxShadow:'0 1px 4px rgba(0,0,0,0.3)',border:'1px solid rgba(255,82,82,0.25)'}
                                     : {color:'var(--color-text-muted)'}}
@@ -341,7 +341,7 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onConfirm,
                             </button>
                             <button
                                 onClick={() => setMethod('Efectivo')}
-                                className={`py-2.5 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2`}
+                                className={`py-2.5 min-h-[48px] rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2`}
                                 style={method === 'Efectivo'
                                     ? {backgroundColor:'var(--color-bg-surface)',color:'#34D399',boxShadow:'0 1px 4px rgba(0,0,0,0.3)',border:'1px solid rgba(52,211,153,0.25)'}
                                     : {color:'var(--color-text-muted)'}}
@@ -399,11 +399,11 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, onConfirm,
                 </div>
 
                 <div className="p-6 border-t flex gap-3 shrink-0" style={{borderColor:'var(--color-border-subtle)',backgroundColor:'var(--color-bg-app)'}}>
-                    <button onClick={onClose} className="flex-1 py-3.5 rounded-xl font-bold transition-all text-sm border" style={{backgroundColor:'var(--color-bg-surface)',color:'var(--color-text-secondary)',borderColor:'var(--color-border-subtle)'}} onMouseEnter={e=>(e.currentTarget as HTMLElement).style.backgroundColor='var(--color-bg-raised)'} onMouseLeave={e=>(e.currentTarget as HTMLElement).style.backgroundColor='var(--color-bg-surface)'}>Cancelar</button>
+                    <button onClick={onClose} className="flex-1 py-3.5 min-h-[48px] rounded-xl font-bold transition-all text-sm border" style={{backgroundColor:'var(--color-bg-surface)',color:'var(--color-text-secondary)',borderColor:'var(--color-border-subtle)'}} onMouseEnter={e=>(e.currentTarget as HTMLElement).style.backgroundColor='var(--color-bg-raised)'} onMouseLeave={e=>(e.currentTarget as HTMLElement).style.backgroundColor='var(--color-bg-surface)'}>Cancelar</button>
                     <button
                         onClick={handleSubmit}
                         disabled={selectedDebts.length === 0 || (method === 'Transferencia' && !file) || !isAmountValid}
-                        className="flex-[2] py-3.5 rounded-xl font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95 text-sm flex items-center justify-center gap-2"
+                        className="flex-[2] py-3.5 min-h-[48px] rounded-xl font-bold disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95 text-sm flex items-center justify-center gap-2"
                         style={{backgroundColor:'rgba(255,82,82,0.15)',color:'#FF5252',border:'1px solid rgba(255,82,82,0.3)'}}
                         onMouseEnter={e => { if (!e.currentTarget.disabled) (e.currentTarget as HTMLElement).style.backgroundColor='rgba(255,82,82,0.25)'; }}
                         onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor='rgba(255,82,82,0.15)'}
@@ -551,7 +551,7 @@ const StudentPayments: React.FC = () => {
                                                     <div className="flex-1 w-full">
                                                         <div className="flex justify-between items-start mb-2">
                                                             <StatusBadge status={record.status} />
-                                                            <span className="text-xs font-medium px-2 py-1 rounded-lg" style={{color:'var(--color-text-muted)',backgroundColor:'var(--color-bg-app)',border:'1px solid var(--color-border-subtle)'}}>Vence: {formatDateDisplay(record.dueDate)}</span>
+                                                            <span className="text-lg sm:text-xs font-bold sm:font-medium px-2 py-1 rounded-lg" style={{color:'var(--color-text-muted)',backgroundColor:'var(--color-bg-app)',border:'1px solid var(--color-border-subtle)'}}>Vence: {formatDateDisplay(record.dueDate)}</span>
                                                         </div>
                                                         <h4 className="text-base font-semibold mb-1" style={{color:'var(--color-text-primary)'}}>{record.concept}</h4>
                                                         {isOverdue && (
@@ -580,14 +580,14 @@ const StudentPayments: React.FC = () => {
                                                             {record.status === 'partial' && (
                                                                 <button
                                                                     onClick={(e) => { e.stopPropagation(); handleDownloadReceipt(record); }}
-                                                                    className="size-10 md:size-11 rounded-lg md:rounded-xl flex items-center justify-center transition-all bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05] text-zinc-500 hover:text-white"
+                                                                    className="size-10 md:size-11 rounded-lg md:rounded-xl flex items-center justify-center transition-all bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05] text-zinc-500 hover:text-white min-h-[48px] min-w-[48px]"
                                                                 >
                                                                     <span className="material-symbols-outlined text-[18px] md:text-[20px]">receipt_long</span>
                                                                 </button>
                                                             )}
                                                             <button
                                                                 onClick={(e) => { e.stopPropagation(); handleOpenPaymentModal(record); }}
-                                                                className="px-4 md:px-6 py-2.5 md:py-3 rounded-lg md:rounded-xl font-bold flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap text-[9px] md:text-[11px] uppercase tracking-widest shadow-lg shadow-black/20"
+                                                                className="px-4 md:px-6 py-2.5 md:py-3 min-h-[48px] rounded-lg md:rounded-xl font-bold flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap text-[12px] md:text-[11px] uppercase tracking-widest shadow-lg shadow-black/20"
                                                                 style={{backgroundColor:'rgba(255,82,82,0.08)',color:'#FF5252',border:'1px solid rgba(255,82,82,0.15)'}}
                                                                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor='rgba(255,82,82,0.12)'}
                                                                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor='rgba(255,82,82,0.08)'}
@@ -614,7 +614,7 @@ const StudentPayments: React.FC = () => {
                                         <div className="flex-1 w-full">
                                             <div className="flex justify-between items-start mb-2">
                                                 <StatusBadge status="in_review" />
-                                                <span className="text-xs" style={{color:'var(--color-text-muted)'}}>Enviado: {formatDateDisplay(record.paymentDate || '')}</span>
+                                                <span className="text-lg sm:text-xs font-bold sm:font-medium" style={{color:'var(--color-text-muted)'}}>Enviado: {formatDateDisplay(record.paymentDate || '')}</span>
                                             </div>
                                             <h4 className="text-base font-bold" style={{color:'var(--color-text-secondary)'}}>{record.concept}</h4>
                                         </div>
@@ -637,7 +637,7 @@ const StudentPayments: React.FC = () => {
                                  </h3>
                                  <button
                                      onClick={() => setShowHistoryModal(true)}
-                                     className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest transition-opacity hover:opacity-70 bg-[#FF5252]/5 px-3 py-1.5 rounded-lg border border-[#FF5252]/10"
+                                     className="text-[12px] md:text-[10px] min-h-[48px] font-bold uppercase tracking-widest transition-opacity hover:opacity-70 bg-[#FF5252]/5 px-4 py-2 rounded-lg border border-[#FF5252]/10"
                                      style={{color:'#FF5252'}}
                                  >
                                      Ver completo
@@ -656,22 +656,22 @@ const StudentPayments: React.FC = () => {
                                         <div>
                                              <div className="flex items-center gap-3 mb-1">
                                                  <span className="text-sm font-semibold" style={{color:'var(--color-text-primary)'}}>{record.concept}</span>
-                                                 <span className="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest"
+                                                 <span className="text-lg sm:text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest"
                                                        style={record.status === 'partial'
                                                            ? {backgroundColor:'rgba(251,191,36,0.06)',color:'#FBBF24',border:'1px solid rgba(251,191,36,0.1)'}
                                                            : {backgroundColor:'rgba(52,211,153,0.06)',color:'#34D399',border:'1px solid rgba(52,211,153,0.1)'}}>
                                                      {record.status === 'partial' ? 'Parcial' : 'Pagado'}
                                                  </span>
                                              </div>
-                                             <p className="text-[11px] font-medium opacity-40" style={{color:'var(--color-text-muted)'}}>
+                                             <p className="text-sm sm:text-[11px] font-medium opacity-60 sm:opacity-40 mt-1 sm:mt-0" style={{color:'var(--color-text-muted)'}}>
                                                  {formatDateDisplay(record.paymentDate || '')} • {record.method}
                                              </p>
                                          </div>
                                         <div className="flex items-center gap-4">
-                                            <span className="font-bold text-sm" style={{color:'var(--color-text-primary)'}}>${(record.originalAmount || record.amount).toFixed(2)}</span>
+                                            <span className="font-bold text-lg sm:text-sm" style={{color:'var(--color-text-primary)'}}>${(record.originalAmount || record.amount).toFixed(2)}</span>
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); handleDownloadReceipt(record); }}
-                                                className="size-8 rounded-lg flex items-center justify-center transition-colors"
+                                                className="size-8 rounded-lg flex items-center justify-center transition-colors min-h-[48px] min-w-[48px]"
                                                 style={{color:'var(--color-text-muted)',backgroundColor:'var(--color-bg-app)'}}
                                                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.color='#FF5252'}
                                                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.color='var(--color-text-muted)'}
@@ -690,7 +690,7 @@ const StudentPayments: React.FC = () => {
 
                     <button
                         onClick={() => handleOpenPaymentModal()}
-                        className="w-full py-4 md:py-5 rounded-xl md:rounded-2xl font-bold transition-all active:scale-95 flex items-center justify-center gap-3 group bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05] hover:border-white/[0.1] text-zinc-300 text-xs md:text-sm shadow-xl"
+                        className="w-full py-4 md:py-5 min-h-[48px] rounded-xl md:rounded-2xl font-bold transition-all active:scale-95 flex items-center justify-center gap-3 group bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05] hover:border-white/[0.1] text-zinc-300 text-xs md:text-sm shadow-xl"
                     >
                         <span className="material-symbols-outlined text-lg md:text-xl group-hover:text-[#FF5252] transition-colors">add_card</span>
                         Pagar Varios Conceptos
@@ -721,7 +721,7 @@ const StudentPayments: React.FC = () => {
                                             <p className="font-mono text-sm md:text-base tracking-[0.05em] md:tracking-[0.1em] select-all font-medium truncate" style={{color:'var(--color-text-primary)'}}>{bankInfo.clabe}</p>
                                             <button
                                                 onClick={() => { navigator.clipboard.writeText(bankInfo.clabe); addToast('CLABE copiada', 'success') }}
-                                                className="p-1.5 bg-white/5 rounded-lg transition-colors hover:text-[#FF5252]"
+                                                className="p-1.5 bg-white/5 rounded-lg transition-colors hover:text-[#FF5252] min-h-[48px] min-w-[48px] flex items-center justify-center"
                                                 style={{color:'var(--color-text-muted)'}}
                                                 title="Copiar"
                                             >

@@ -90,7 +90,7 @@ const StudentSearch: React.FC<StudentSearchProps> = ({ students, value, onChange
         <input
           ref={inputRef}
           type="text"
-          className={`w-full rounded-xl border p-4 text-sm font-medium transition-all shadow-sm student-search-input-override ${
+          className={`w-full rounded-xl border p-4 text-base md:text-sm min-h-[48px] font-medium transition-all shadow-sm student-search-input-override ${
             error 
               ? 'border-red-500 bg-red-500/5 text-red-200 focus:ring-red-500/20' 
               : '!bg-[#050505] !border-zinc-800 text-white focus:!border-red-600 focus:!ring-4 focus:ring-red-600/10'
@@ -158,10 +158,10 @@ const StudentSearch: React.FC<StudentSearchProps> = ({ students, value, onChange
                 <div className="flex items-center gap-3">
                     <Avatar src={student.avatarUrl} name={student.name} className="size-8 rounded-full border border-zinc-900 shadow-sm" />
                     <div className="flex flex-col">
-                        <span className={`text-sm font-bold truncate leading-tight ${index === highlightedIndex ? 'text-white' : 'text-zinc-200'}`}>
+                        <span className={`text-base md:text-sm font-bold truncate leading-tight ${index === highlightedIndex ? 'text-white' : 'text-zinc-200'}`}>
                             {student.name}
                         </span>
-                        <span className={`text-[10px] font-black uppercase tracking-widest ${index === highlightedIndex ? 'text-zinc-500' : 'text-zinc-600'}`}>
+                        <span className={`text-xs md:text-[10px] font-black uppercase tracking-widest ${index === highlightedIndex ? 'text-zinc-500' : 'text-zinc-600'}`}>
                             {student.rank}
                         </span>
                     </div>
@@ -171,12 +171,12 @@ const StudentSearch: React.FC<StudentSearchProps> = ({ students, value, onChange
                 <div className="text-right">
                     {student.balance > 0 ? (
                         <div className="flex flex-col items-end">
-                            <span className="text-red-400 font-black text-[9px] bg-red-500/10 px-2 py-0.5 rounded-md border border-red-500/10 uppercase tracking-widest italic">
+                            <span className="text-red-400 font-black text-[11px] md:text-[9px] bg-red-500/10 px-2 py-0.5 rounded-md border border-red-500/10 uppercase tracking-widest italic">
                                 Deuda: ${student.balance.toFixed(2)}
                             </span>
                         </div>
                     ) : (
-                        <span className="text-emerald-500/50 font-black text-[9px] flex items-center gap-1 uppercase tracking-widest italic">
+                        <span className="text-emerald-500/50 font-black text-[11px] md:text-[9px] flex items-center gap-1 uppercase tracking-widest italic">
                             <span className="material-symbols-outlined text-xs filled">check_circle</span> Al día
                         </span>
                     )}

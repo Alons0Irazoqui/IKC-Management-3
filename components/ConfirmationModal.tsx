@@ -48,22 +48,22 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           </div>
 
           <div>
-            <h3 className="text-xl font-bold text-white">{title}</h3>
-            <p className="text-gray-400 mt-2 text-sm leading-relaxed max-w-xs mx-auto">{message}</p>
+            <h3 className="text-2xl md:text-xl font-bold text-white">{title}</h3>
+            <p className="text-gray-400 mt-2 text-base md:text-sm leading-relaxed max-w-xs mx-auto">{message}</p>
           </div>
 
           <div className="flex gap-3 w-full mt-4">
             <button
               onClick={onCancel}
               disabled={isLoading}
-              className="flex-1 py-3.5 rounded-xl bg-white/5 font-bold text-gray-400 hover:bg-white/10 hover:text-white transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 min-h-[48px] min-w-[48px] py-3.5 rounded-xl bg-white/5 font-bold text-gray-400 hover:bg-white/10 hover:text-white transition-colors text-base md:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {cancelText}
             </button>
             <button
               onClick={onConfirm}
               disabled={isLoading}
-              className={`flex-1 flex justify-center items-center gap-2 py-3.5 rounded-xl font-bold text-white shadow-lg transition-all active:scale-95 text-sm disabled:opacity-50 disabled:cursor-not-allowed ${
+              className={`flex-1 flex justify-center items-center min-h-[48px] min-w-[48px] gap-2 py-3.5 rounded-xl font-bold text-white shadow-lg transition-all active:scale-95 text-base md:text-sm disabled:opacity-50 disabled:cursor-not-allowed ${
                 type === 'danger' ? 'bg-gradient-to-br from-red-600 to-red-700 shadow-red-600/20 hover:from-red-500 hover:to-red-600' :
                 type === 'success' ? 'bg-gradient-to-br from-green-600 to-green-700 shadow-green-600/20 hover:from-green-500 hover:to-green-600' :
                 'bg-gradient-to-br from-blue-600 to-blue-700 shadow-blue-600/20 hover:from-blue-500 hover:to-blue-600'

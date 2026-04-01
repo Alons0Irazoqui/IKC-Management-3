@@ -25,14 +25,14 @@ const MasterLibrary: React.FC = () => {
 
   return (
     <div className="p-6 md:p-10 max-w-[1600px] mx-auto w-full">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
                 <h1 className="text-3xl font-bold tracking-tight text-text-main">Biblioteca de Contenido</h1>
                 <p className="text-text-secondary mt-1">Sube videos y recursos para tus alumnos.</p>
             </div>
             <button 
                 onClick={() => setShowModal(true)}
-                className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-xl font-medium shadow-sm flex items-center gap-2 transition-all"
+                className="bg-primary hover:bg-primary-hover text-white px-5 py-3 md:py-2.5 min-h-[48px] md:min-h-0 rounded-xl font-medium shadow-sm flex items-center justify-center gap-2 transition-all w-full md:w-auto"
             >
                 <span className="material-symbols-outlined text-[20px]">upload</span>
                 Subir Recurso
@@ -44,9 +44,9 @@ const MasterLibrary: React.FC = () => {
                 <div key={resource.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden flex flex-col group relative">
                     <button 
                         onClick={() => deleteLibraryResource(resource.id)}
-                        className="absolute top-2 right-2 z-10 bg-white/90 p-1.5 rounded-lg text-gray-500 hover:text-red-500 shadow-sm opacity-0 group-hover:opacity-100 transition-all"
+                        className="absolute top-2 right-2 z-10 bg-white/90 p-2 min-h-[48px] min-w-[48px] flex items-center justify-center rounded-lg text-gray-500 hover:text-red-500 shadow-sm opacity-100 md:opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
                     >
-                        <span className="material-symbols-outlined text-lg">delete</span>
+                        <span className="material-symbols-outlined text-[20px]">delete</span>
                     </button>
                     <div className="relative aspect-video bg-gray-100">
                         <img src={resource.thumbnailUrl} alt={resource.title} className="w-full h-full object-cover" />
@@ -78,30 +78,30 @@ const MasterLibrary: React.FC = () => {
                 <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl animate-in fade-in zoom-in-95 duration-200">
                     <h2 className="text-2xl font-bold mb-6 text-text-main">Subir Recurso</h2>
                     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                        <input required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full rounded-xl border-gray-300 p-3" placeholder="Título del Video" />
+                        <input required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} className="w-full rounded-xl border-gray-300 p-3 min-h-[48px] outline-none" placeholder="Título del Video" />
                         
                         <div>
                             <label className="text-xs font-bold text-text-secondary uppercase mb-1 block">Enlace de Video</label>
-                            <input required value={formData.videoUrl} onChange={e => setFormData({...formData, videoUrl: e.target.value})} className="w-full rounded-xl border-gray-300 p-3" placeholder="https://youtube.com/watch?v=..." />
+                            <input required value={formData.videoUrl} onChange={e => setFormData({...formData, videoUrl: e.target.value})} className="w-full rounded-xl border-gray-300 p-3 min-h-[48px] outline-none" placeholder="https://youtube.com/watch?v=..." />
                             <p className="text-xs text-gray-400 mt-1">Soporta YouTube y Vimeo.</p>
                         </div>
 
-                        <textarea required value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full rounded-xl border-gray-300 p-3" placeholder="Descripción" rows={3} />
+                        <textarea required value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full rounded-xl border-gray-300 p-3 outline-none" placeholder="Descripción" rows={3} />
                         
-                        <div className="grid grid-cols-2 gap-4">
-                            <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value as any})} className="w-full rounded-xl border-gray-300 p-3">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <select value={formData.category} onChange={e => setFormData({...formData, category: e.target.value as any})} className="w-full rounded-xl border-gray-300 p-3 min-h-[48px] outline-none">
                                 <option>Technique</option>
                                 <option>Sparring</option>
                                 <option>Mindset</option>
                                 <option>History</option>
                             </select>
-                            <input value={formData.level} onChange={e => setFormData({...formData, level: e.target.value})} className="w-full rounded-xl border-gray-300 p-3" placeholder="Nivel (ej. White Belt)" />
+                            <input value={formData.level} onChange={e => setFormData({...formData, level: e.target.value})} className="w-full rounded-xl border-gray-300 p-3 min-h-[48px] outline-none" placeholder="Nivel (ej. White Belt)" />
                         </div>
-                        <input value={formData.duration} onChange={e => setFormData({...formData, duration: e.target.value})} className="w-full rounded-xl border-gray-300 p-3" placeholder="Duración (ej. 12:30)" />
+                        <input value={formData.duration} onChange={e => setFormData({...formData, duration: e.target.value})} className="w-full rounded-xl border-gray-300 p-3 min-h-[48px] outline-none" placeholder="Duración (ej. 12:30)" />
                         
-                        <div className="flex gap-3 mt-4">
-                            <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-2.5 rounded-xl border border-gray-300 font-medium hover:bg-gray-50">Cancelar</button>
-                            <button type="submit" className="flex-1 py-2.5 rounded-xl bg-primary text-white font-bold">Subir</button>
+                        <div className="flex flex-col sm:flex-row gap-3 mt-4">
+                            <button type="button" onClick={() => setShowModal(false)} className="flex-1 py-3 md:py-2.5 min-h-[48px] md:min-h-0 rounded-xl border border-gray-300 font-medium hover:bg-gray-50 flex justify-center items-center">Cancelar</button>
+                            <button type="submit" className="flex-1 py-3 md:py-2.5 min-h-[48px] md:min-h-0 rounded-xl bg-primary text-white font-bold flex justify-center items-center">Subir</button>
                         </div>
                     </form>
                 </div>

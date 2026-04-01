@@ -33,9 +33,9 @@ const EventDetailModal: React.FC<{
                     <div className="flex items-center gap-4">
                         <button
                             onClick={onClose}
-                            className="size-10 rounded-full bg-zinc-900 hover:bg-zinc-800 text-zinc-500 hover:text-white flex items-center justify-center transition-all border border-zinc-800/50"
+                            className="size-12 md:size-10 rounded-full bg-zinc-900 hover:bg-zinc-800 text-zinc-500 hover:text-white flex items-center justify-center transition-all border border-zinc-800/50"
                         >
-                            <span className="material-symbols-outlined text-xl">arrow_back</span>
+                            <span className="material-symbols-outlined text-[20px] md:text-xl">arrow_back</span>
                         </button>
                         <div className="flex flex-col gap-1.5">
                             <div className="flex items-center gap-2">
@@ -91,9 +91,9 @@ const EventDetailModal: React.FC<{
                     {!isRegistered ? (
                         <button
                             onClick={onRegister}
-                            className="w-full py-4 bg-zinc-100 hover:bg-white text-zinc-950 font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 text-xs uppercase tracking-widest"
+                            className="w-full py-4 min-h-[48px] bg-zinc-100 hover:bg-white text-zinc-950 font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all active:scale-95 text-[14px] md:text-xs uppercase tracking-widest"
                         >
-                            <span className="material-symbols-outlined text-lg">how_to_reg</span>
+                            <span className="material-symbols-outlined text-xl md:text-lg">how_to_reg</span>
                             <span>Confirmar Asistencia</span>
                         </button>
                     ) : (
@@ -157,7 +157,7 @@ const StudentClasses: React.FC = () => {
             <div className="p-1.5 rounded-xl flex gap-1 relative w-full md:w-auto overflow-hidden" style={{backgroundColor: 'var(--color-bg-surface)', border: '1px solid var(--color-border-strong)'}}>
                 <button
                     onClick={() => setActiveTab('classes')}
-                    className="relative z-10 flex-1 md:w-48 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-colors duration-200"
+                    className="relative z-10 flex-1 md:w-48 py-3 md:py-2.5 min-h-[48px] md:min-h-0 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-colors duration-200"
                     style={{color: activeTab === 'classes' ? 'var(--color-text-primary)' : 'var(--color-text-muted)'}}
                 >
                     Clases Regulares
@@ -167,12 +167,12 @@ const StudentClasses: React.FC = () => {
                 </button>
                 <button
                     onClick={() => setActiveTab('events')}
-                    className="relative z-10 flex-1 md:w-56 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-colors duration-200"
+                    className="relative z-10 flex-1 md:w-56 py-3 md:py-2.5 min-h-[48px] md:min-h-0 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-colors duration-200 flex items-center justify-center"
                     style={{color: activeTab === 'events' ? 'var(--color-text-primary)' : 'var(--color-text-muted)'}}
                 >
                     Eventos y Seminarios
                     {activeTab === 'events' && (
-                        <motion.div layoutId="tab-bg-classes" className="absolute inset-0 rounded-lg shadow-sm -z-10" style={{backgroundColor: 'var(--color-bg-raised)', border: '1px solid var(--color-border-subtle)'}} transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />
+                        <motion.div layoutId="tab-bg-events" className="absolute inset-0 rounded-lg shadow-sm -z-10" style={{backgroundColor: 'var(--color-bg-raised)', border: '1px solid var(--color-border-subtle)'}} transition={{ type: "spring", bounce: 0.2, duration: 0.6 }} />
                     )}
                 </button>
             </div>

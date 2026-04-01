@@ -72,7 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
           </div>
           <button
             onClick={onClose}
-            className="md:hidden p-2 rounded transition-colors"
+            className="md:hidden p-2 min-h-[48px] min-w-[48px] flex items-center justify-center rounded transition-colors"
             style={{ color: 'var(--color-text-muted)' }}
           >
             <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>close</span>
@@ -88,7 +88,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
                 key={link.path}
                 to={link.path}
                 onClick={onClose}
-                className="flex items-center gap-4 md:gap-3 mx-4 md:mx-3 px-4 md:px-3 py-4 md:py-2.5 transition-all duration-150 relative"
+                className="flex items-center gap-4 md:gap-3 mx-4 md:mx-3 px-4 md:px-3 py-4 md:py-2.5 min-h-[48px] transition-all duration-150 relative"
                 style={{
                   color: isActive ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
                   backgroundColor: isActive ? 'var(--color-bg-raised)' : 'transparent',
@@ -148,7 +148,7 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
             <button
               onClick={handleLogout}
               title="Cerrar sesión"
-              className="shrink-0 p-1.5 rounded-md transition-all"
+              className="shrink-0 p-1.5 min-h-[48px] min-w-[48px] flex items-center justify-center rounded-md transition-all"
               style={{ color: 'var(--color-text-muted)' }}
               onMouseEnter={e => {
                 (e.currentTarget as HTMLElement).style.color = 'var(--color-brand)';

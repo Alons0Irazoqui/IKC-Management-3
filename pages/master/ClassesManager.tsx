@@ -283,10 +283,10 @@ const ClassesManager: React.FC = () => {
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="flex p-1.5 rounded-xl" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                    <div className="flex p-1.5 rounded-xl w-full md:w-auto overflow-x-auto scrollbar-hide" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
                         <button
                             onClick={() => setActiveTab('classes')}
-                            className="px-5 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2"
+                            className="px-5 py-3 md:py-2 min-h-[48px] md:min-h-0 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 flex-1 md:flex-none whitespace-nowrap"
                             style={activeTab === 'classes' ? { background: '#e11d48', color: '#fff', boxShadow: '0 4px 12px rgba(225,29,72,0.35)' } : { color: '#9ca3af' }}
                         >
                             <span className="material-symbols-outlined text-[18px]">calendar_month</span>
@@ -294,17 +294,17 @@ const ClassesManager: React.FC = () => {
                         </button>
                         <button
                             onClick={() => setActiveTab('events')}
-                            className="px-5 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2"
+                            className="px-5 py-3 md:py-2 min-h-[48px] md:min-h-0 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 flex-1 md:flex-none whitespace-nowrap"
                             style={activeTab === 'events' ? { background: '#e11d48', color: '#fff', boxShadow: '0 4px 12px rgba(225,29,72,0.35)' } : { color: '#9ca3af' }}
                         >
                             <span className="material-symbols-outlined text-[18px]">trophy</span>
-                            Eventos y Seminarios
+                            Eventos
                         </button>
                     </div>
                     {activeTab === 'classes' ? (
                         <button
                             onClick={() => { resetClassForm(); setShowCreateModal(true); }}
-                            className="text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap"
+                            className="text-white px-5 py-3 md:py-2.5 min-h-[48px] md:min-h-0 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 whitespace-nowrap w-full md:w-auto"
                             style={{ background: '#e11d48', boxShadow: '0 4px 16px rgba(225,29,72,0.3)' }}
                         >
                             <span className="material-symbols-outlined text-[18px]">add</span>
@@ -313,7 +313,7 @@ const ClassesManager: React.FC = () => {
                     ) : (
                         <button
                             onClick={() => setShowEventModal(true)}
-                            className="text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap"
+                            className="text-white px-5 py-3 md:py-2.5 min-h-[48px] md:min-h-0 rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 whitespace-nowrap w-full md:w-auto"
                             style={{ background: '#e11d48', boxShadow: '0 4px 16px rgba(225,29,72,0.3)' }}
                         >
                             <span className="material-symbols-outlined text-[18px]">add_circle</span>
@@ -333,12 +333,12 @@ const ClassesManager: React.FC = () => {
                         {classes.map(cls => (
                             <div key={cls.id} className="p-6 rounded-2xl hover:-translate-y-1 transition-all group relative flex flex-col" style={{ background: '#101014', border: '1px solid rgba(255,255,255,0.07)', boxShadow: '0 4px 24px rgba(0,0,0,0.3)' }}>
                                 {/* Actions */}
-                                <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                    <button onClick={() => handleOpenEditClass(cls)} className="size-9 rounded-xl flex items-center justify-center transition-colors" style={{ background: 'rgba(255,255,255,0.06)', color: '#9ca3af' }}>
-                                        <span className="material-symbols-outlined text-[18px]">edit</span>
+                                <div className="absolute top-4 right-4 flex gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                    <button onClick={() => handleOpenEditClass(cls)} className="size-11 md:size-9 rounded-xl flex items-center justify-center transition-colors" style={{ background: 'rgba(255,255,255,0.06)', color: '#9ca3af' }}>
+                                        <span className="material-symbols-outlined text-[20px] md:text-[18px]">edit</span>
                                     </button>
-                                    <button onClick={() => handleDeleteClass(cls.id)} className="size-9 rounded-xl flex items-center justify-center transition-colors" style={{ background: 'rgba(225,29,72,0.1)', color: '#e11d48' }}>
-                                        <span className="material-symbols-outlined text-[18px]">delete</span>
+                                    <button onClick={() => handleDeleteClass(cls.id)} className="size-11 md:size-9 rounded-xl flex items-center justify-center transition-colors" style={{ background: 'rgba(225,29,72,0.1)', color: '#e11d48' }}>
+                                        <span className="material-symbols-outlined text-[20px] md:text-[18px]">delete</span>
                                     </button>
                                 </div>
 
@@ -364,21 +364,21 @@ const ClassesManager: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <div className="mt-auto flex flex-col gap-2.5">
+                                <div className="mt-auto flex flex-col gap-2 md:gap-2.5">
                                     <button
                                         onClick={() => navigate(`/master/attendance/${cls.id}`)}
-                                        className="w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                                        className="w-full py-3 min-h-[48px] rounded-xl font-bold text-base md:text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
                                         style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: '#9ca3af' }}
                                     >
-                                        <span className="material-symbols-outlined text-[18px]" style={{ color: '#e11d48' }}>groups</span>
+                                        <span className="material-symbols-outlined text-[20px] md:text-[18px]" style={{ color: '#e11d48' }}>groups</span>
                                         Alumnos y Asistencia
                                     </button>
                                     <button
                                         onClick={() => setShowFullCalendar(true)}
-                                        className="w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                                        className="w-full py-3 min-h-[48px] rounded-xl font-bold text-base md:text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
                                         style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', color: '#60a5fa' }}
                                     >
-                                        <span className="material-symbols-outlined text-[18px]">calendar_month</span>
+                                        <span className="material-symbols-outlined text-[20px] md:text-[18px]">calendar_month</span>
                                         Gestionar Calendario
                                     </button>
                                 </div>
@@ -448,7 +448,7 @@ const ClassesManager: React.FC = () => {
 
                                         <button
                                             onClick={() => navigate(`/master/event/${event.id}`)}
-                                            className="mt-auto w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                                            className="mt-auto w-full py-3 min-h-[48px] rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
                                             style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: '#9ca3af' }}
                                         >
                                             <span className="material-symbols-outlined">settings</span>
