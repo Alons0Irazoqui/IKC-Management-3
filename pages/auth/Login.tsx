@@ -58,60 +58,28 @@ const Login: React.FC = () => {
 
     return (
         <div className="login-dark-theme">
-            {/* Fondos de grado corporativo */}
+            {/* Fondo mosaico + glow de branding */}
             <div className="enterprise-bg"></div>
             <div className="ambient-glow"></div>
 
             <main className="layout-container">
-                
-                {/* LADO IZQUIERDO: PRESENTACIÓN */}
-                <section className="presentation-side">
-                    <div className="brand-header">
-                        <div className="logo-mark">
-                            <i className="fa-solid fa-shield-halved"></i>
-                        </div>
-                        <span>IKC Enterprise</span>
-                    </div>
-                    
-                    <div className="value-prop">
-                        <h1>Infraestructura marcial <span>de clase mundial.</span></h1>
-                        
-                        <ul className="feature-list">
-                            <li className="feature-item">
-                                <div className="feature-icon"><i className="fa-solid fa-check"></i></div>
-                                <div className="feature-text">
-                                    <h3>Gestión Centralizada</h3>
-                                    <p>Administra atletas, dojos y licencias WKF desde un único panel ultra seguro.</p>
-                                </div>
-                            </li>
-                            <li className="feature-item">
-                                <div className="feature-icon"><i className="fa-solid fa-lock"></i></div>
-                                <div className="feature-text">
-                                    <h3>Seguridad Nivel Bancario</h3>
-                                    <p>Encriptación end-to-end (E2EE) y cumplimiento estricto de normativas GDPR.</p>
-                                </div>
-                            </li>
-                            <li className="feature-item">
-                                <div className="feature-icon"><i className="fa-solid fa-bolt"></i></div>
-                                <div className="feature-text">
-                                    <h3>Alta Disponibilidad</h3>
-                                    <p>Infraestructura desplegada en edge con un 99.99% de uptime garantizado.</p>
-                                </div>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div className="trust-badges">
-                        <span>Certificaciones globales:</span>
-                        <span><i className="fa-solid fa-globe"></i> WKF Standard</span>
-                        <span><i className="fa-solid fa-shield"></i> ISO 27001</span>
-                    </div>
-                </section>
-
-                {/* LADO DERECHO: AUTENTICACIÓN EDGE-TO-EDGE */}
+                {/* PANEL CENTRAL: AUTENTICACIÓN */}
                 <section className="auth-side">
                     <div className="auth-wrapper">
-                        
+
+                        {/* Logo IKC */}
+                        <div className="auth-logo">
+                            <img
+                                src="/logo.svg"
+                                alt="IKC Enterprise"
+                                className="auth-logo-img"
+                            />
+                        </div>
+
+                        {/* Separador */}
+                        <div className="auth-divider"></div>
+
+                        {/* Título */}
                         <div className="auth-header">
                             <h2>Iniciar Sesión</h2>
                             <p>Accede a tu entorno de trabajo seguro</p>
@@ -119,16 +87,14 @@ const Login: React.FC = () => {
 
                         {/* Formulario */}
                         <form id="enterpriseForm" onSubmit={handleSubmit}>
-                            
-                            {/* Floating Label Input para Email */}
+
                             <div className="form-group">
-                                {/* El placeholder " " (espacio) es un hack de CSS necesario para la pseudo-clase :placeholder-shown */}
-                                <input 
-                                    type="email" 
-                                    id="email" 
-                                    className="form-control bg-[#16161a] border-[#ffffff1f] text-white pt-7 pb-2 px-4 shadow-inner" 
-                                    placeholder=" " 
-                                    required 
+                                <input
+                                    type="email"
+                                    id="email"
+                                    className="form-control"
+                                    placeholder=" "
+                                    required
                                     autoComplete="email"
                                     value={formData.email}
                                     onChange={e => setFormData({ ...formData, email: e.target.value })}
@@ -136,14 +102,13 @@ const Login: React.FC = () => {
                                 <label htmlFor="email" className="floating-label">Correo Institucional</label>
                             </div>
 
-                            {/* Floating Label Input para Password */}
                             <div className="form-group">
-                                <input 
-                                    type="password" 
-                                    id="password" 
-                                    className="form-control bg-[#16161a] border-[#ffffff1f] text-white pt-7 pb-2 px-4 shadow-inner" 
-                                    placeholder=" " 
-                                    required 
+                                <input
+                                    type="password"
+                                    id="password"
+                                    className="form-control"
+                                    placeholder=" "
+                                    required
                                     autoComplete="current-password"
                                     value={formData.password}
                                     onChange={e => setFormData({ ...formData, password: e.target.value })}

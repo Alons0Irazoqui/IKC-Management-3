@@ -14,6 +14,7 @@ interface LoginResult {
 interface AuthContextType {
     currentUser: UserProfile | null;
     loading: boolean;
+    isLoggingOut: boolean;
     login: (email: string, pass: string) => Promise<LoginResult>;
     registerStudent: (data: any) => Promise<boolean>;
     registerMaster: (data: any) => Promise<boolean>;
@@ -27,6 +28,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isLoggingOutState, setIsLoggingOutState] = useState(false);
     // Guard: prevents SIGNED_IN events from firing while logout is in progress
     const isLoggingOut = React.useRef(false);
     const { addToast } = useToast();
@@ -139,8 +141,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const logout = async () => {
-        // 1. Set guard to block SIGNED_IN events during logout
+        // 1. Set guard and expose state to trigger re-render immediately
         isLoggingOut.current = true;
+        setIsLoggingOutState(true);
 
         // 2. Optimistic Cleanup (Immediate) — loading=true keeps ProtectedRoute in spinner mode
         //    so the Login page never flashes before the full-page redirect fires.
@@ -249,6 +252,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         <AuthContext.Provider value={{
             currentUser,
             loading,
+            isLoggingOut: isLoggingOutState,
             login,
             logout,
             registerStudent: registerStudentAction,
