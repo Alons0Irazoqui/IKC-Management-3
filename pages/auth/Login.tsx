@@ -136,8 +136,7 @@ const Login: React.FC = () => {
                         </div>
 
                         <div className="secure-badge">
-                            <i className="fa-solid fa-lock"></i>
-                            Conexión cifrada E2EE de 256 bits
+                            <i className="fa-solid fa-lock"></i>Plataforma diseñada y desarrollada por Irazoqui Karate Club
                         </div>
 
                     </div>
