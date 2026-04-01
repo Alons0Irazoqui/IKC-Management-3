@@ -80,14 +80,21 @@ const StudentSearch: React.FC<StudentSearchProps> = ({ students, value, onChange
   return (
     <div className="relative" ref={containerRef}>
       <div className="relative">
+        <style>
+          {`
+            input.student-search-input-override {
+              padding-left: 56px !important;
+            }
+          `}
+        </style>
         <input
           ref={inputRef}
           type="text"
-          className={`w-full rounded-xl border p-3 pl-11 text-sm transition-all shadow-sm ${
+          className={`w-full rounded-xl border p-4 text-sm font-medium transition-all shadow-sm student-search-input-override ${
             error 
-              ? 'border-red-300 focus:border-red-500 focus:ring-red-200' 
-              : 'border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10'
-          }`}
+              ? 'border-red-500 bg-red-500/5 text-red-200 focus:ring-red-500/20' 
+              : '!bg-[#050505] !border-zinc-800 text-white focus:!border-red-600 focus:!ring-4 focus:ring-red-600/10'
+          } placeholder:text-zinc-800`}
           placeholder={placeholder}
           value={query}
           onChange={(e) => {
@@ -102,16 +109,16 @@ const StudentSearch: React.FC<StudentSearchProps> = ({ students, value, onChange
           onKeyDown={handleKeyDown}
           autoComplete="off"
         />
-        <div className="absolute left-3 top-3 pointer-events-none">
+        <div className="absolute left-5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center">
             {selectedStudent ? (
-                <Avatar src={selectedStudent.avatarUrl} name={selectedStudent.name} className="size-6 rounded-full border border-gray-200 text-xs" />
+                <Avatar src={selectedStudent.avatarUrl} name={selectedStudent.name} className="size-7 rounded-full border border-zinc-800 text-[10px] font-black italic shadow-inner" />
             ) : (
-                <span className="material-symbols-outlined text-gray-400">search</span>
+                <span className="material-symbols-outlined text-zinc-700 !text-xl">search</span>
             )}
         </div>
         
         {/* Dropdown Chevron / Clear */}
-        <div className="absolute right-3 top-3 flex items-center">
+        <div className="absolute right-3.5 top-3 flex items-center">
             {query && (
                 <button 
                     type="button"
@@ -121,9 +128,9 @@ const StudentSearch: React.FC<StudentSearchProps> = ({ students, value, onChange
                         setIsOpen(true);
                         inputRef.current?.focus();
                     }}
-                    className="text-gray-400 hover:text-gray-600 mr-1"
+                    className="text-zinc-600 hover:text-zinc-300 transition-colors"
                 >
-                    <span className="material-symbols-outlined text-sm">close</span>
+                    <span className="material-symbols-outlined text-lg">close</span>
                 </button>
             )}
         </div>
@@ -133,28 +140,28 @@ const StudentSearch: React.FC<StudentSearchProps> = ({ students, value, onChange
 
       {/* Dropdown List */}
       {isOpen && (
-        <ul className="absolute z-50 w-full mt-1 max-h-60 overflow-auto rounded-xl bg-white py-1 text-base shadow-xl ring-1 ring-black/5 focus:outline-none sm:text-sm animate-in fade-in zoom-in-95 duration-100">
+        <ul className="absolute z-50 w-full mt-2 max-h-60 overflow-auto rounded-xl bg-[#0a0a0a] py-1 shadow-2xl border border-zinc-800 no-scrollbar animate-in fade-in zoom-in-95 duration-200">
           {filteredStudents.length === 0 ? (
-            <li className="relative cursor-default select-none py-4 px-4 text-gray-500 text-center">
-              No se encontraron alumnos.
+            <li className="relative cursor-default select-none py-6 px-4 text-zinc-600 text-center font-black uppercase tracking-widest text-[10px] italic">
+              Sin resultados
             </li>
           ) : (
             filteredStudents.map((student, index) => (
               <li
                 key={student.id}
-                className={`relative cursor-pointer select-none py-3 px-4 flex items-center justify-between transition-colors ${
-                  index === highlightedIndex ? 'bg-blue-50 text-primary' : 'text-text-main hover:bg-gray-50'
+                className={`relative cursor-pointer select-none py-3 px-4 flex items-center justify-between transition-all border-b border-zinc-900/50 last:border-0 ${
+                  index === highlightedIndex ? 'bg-zinc-900 text-white' : 'text-zinc-400 hover:bg-zinc-900/50'
                 }`}
                 onClick={() => handleSelect(student)}
                 onMouseEnter={() => setHighlightedIndex(index)}
               >
                 <div className="flex items-center gap-3">
-                    <Avatar src={student.avatarUrl} name={student.name} className="size-8 rounded-full" />
+                    <Avatar src={student.avatarUrl} name={student.name} className="size-8 rounded-full border border-zinc-900 shadow-sm" />
                     <div className="flex flex-col">
-                        <span className={`font-bold truncate ${index === highlightedIndex ? 'text-primary' : 'text-gray-900'}`}>
+                        <span className={`text-sm font-bold truncate leading-tight ${index === highlightedIndex ? 'text-white' : 'text-zinc-200'}`}>
                             {student.name}
                         </span>
-                        <span className={`text-xs ${index === highlightedIndex ? 'text-blue-400' : 'text-gray-500'}`}>
+                        <span className={`text-[10px] font-black uppercase tracking-widest ${index === highlightedIndex ? 'text-zinc-500' : 'text-zinc-600'}`}>
                             {student.rank}
                         </span>
                     </div>
@@ -164,13 +171,13 @@ const StudentSearch: React.FC<StudentSearchProps> = ({ students, value, onChange
                 <div className="text-right">
                     {student.balance > 0 ? (
                         <div className="flex flex-col items-end">
-                            <span className="text-red-500 font-bold text-xs bg-red-50 px-2 py-0.5 rounded-full border border-red-100">
+                            <span className="text-red-400 font-black text-[9px] bg-red-500/10 px-2 py-0.5 rounded-md border border-red-500/10 uppercase tracking-widest italic">
                                 Deuda: ${student.balance.toFixed(2)}
                             </span>
                         </div>
                     ) : (
-                        <span className="text-green-600 font-bold text-xs flex items-center gap-1">
-                            <span className="material-symbols-outlined text-sm">check_circle</span> Al día
+                        <span className="text-emerald-500/50 font-black text-[9px] flex items-center gap-1 uppercase tracking-widest italic">
+                            <span className="material-symbols-outlined text-xs filled">check_circle</span> Al día
                         </span>
                     )}
                 </div>

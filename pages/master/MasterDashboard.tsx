@@ -7,14 +7,91 @@ import {
 } from 'recharts';
 import { useNavigate } from 'react-router-dom';
 import Avatar from '../../components/ui/Avatar';
+import { formatDateDisplay } from '../../utils/dateUtils';
 
 const MasterDashboard: React.FC = () => {
     // 1. Arquitectura de Datos (Local)
-    const { students, monthlyRevenueData, rollingRevenueData, stats } = useStore();
+    const { students, monthlyRevenueData, rollingRevenueData, stats, records } = useStore();
     const navigate = useNavigate();
     
     // Selector de Tiempo
     const [timeRange, setTimeRange] = useState<'month' | 'year'>('month');
+
+    // --- INGRESOS (FULLSCREEN MODAL) ---
+    const [showAllIncomes, setShowAllIncomes] = useState(false);
+    const [incomeSearch, setIncomeSearch] = useState('');
+    const [incomeMonthFilter, setIncomeMonthFilter] = useState('');
+    const [expandedRecordId, setExpandedRecordId] = useState<string | null>(null);
+
+    const allIncomes = useMemo(() => {
+        const arr: any[] = [];
+        records.forEach(r => {
+            if (r.paymentHistory && r.paymentHistory.length > 0) {
+                r.paymentHistory.forEach((h, i) => {
+                    arr.push({
+                        id: `${r.id}-hist-${i}`,
+                        date: h.date,
+                        studentName: r.studentName || 'Estudiante',
+                        concept: r.concept,
+                        amount: h.amount,
+                        method: h.method || 'Sistema',
+                        description: r.description || ''
+                    });
+                });
+            } else if (r.status === 'paid') {
+                const amount = (r.originalAmount !== undefined ? r.originalAmount : (r.amount || 0)) + (r.customPenaltyAmount || 0);
+                arr.push({
+                    id: r.id,
+                    date: r.paymentDate || r.dueDate,
+                    studentName: r.studentName || 'Estudiante',
+                    concept: r.concept,
+                    amount: amount,
+                    method: r.method || 'Sistema',
+                    description: r.description || ''
+                });
+            } else if (r.status === 'partial') {
+                const paid = (r.originalAmount !== undefined ? r.originalAmount : (r.amount || 0)) - (r.amount || 0);
+                if (paid > 0) {
+                    arr.push({
+                        id: r.id,
+                        date: r.paymentDate || r.dueDate,
+                        studentName: r.studentName || 'Estudiante',
+                        concept: r.concept + ' (Pago Parcial)',
+                        amount: paid,
+                        method: r.method || 'Sistema',
+                        description: r.description || ''
+                    });
+                }
+            }
+        });
+        return arr.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }, [records]);
+
+    const filteredIncomes = useMemo(() => {
+        return allIncomes.filter(inc => {
+            const searchLower = incomeSearch.toLowerCase();
+            const matchesSearch = inc.concept.toLowerCase().includes(searchLower) ||
+                inc.studentName.toLowerCase().includes(searchLower) ||
+                inc.description.toLowerCase().includes(searchLower);
+            
+            const matchesMonth = incomeMonthFilter 
+                ? inc.date.startsWith(incomeMonthFilter)
+                : true;
+
+            return matchesSearch && matchesMonth;
+        });
+    }, [allIncomes, incomeSearch, incomeMonthFilter]);
+
+    const uniqueMonths = useMemo(() => {
+        const set = new Set<string>();
+        allIncomes.forEach(i => set.add(i.date.substring(0, 7))); // "YYYY-MM"
+        return Array.from(set).sort().reverse();
+    }, [allIncomes]);
+
+    const [sumFilteredIncomes, cntFilteredIncomes] = useMemo(() => {
+        const sum = filteredIncomes.reduce((acc, curr) => acc + curr.amount, 0);
+        return [sum, filteredIncomes.length];
+    }, [filteredIncomes]);
 
     // --- LÓGICA DE NEGOCIO ---
 
@@ -85,20 +162,19 @@ const MasterDashboard: React.FC = () => {
         // Mapa de colores estáticos hexadecimales (Enterprise Palette)
         const getColor = (rankName: string) => {
             const lower = rankName.toLowerCase();
-            if (lower.includes('white') || lower.includes('blanco')) return '#E5E7EB'; // Gray 200
-            if (lower.includes('yellow') || lower.includes('amarillo')) return '#FCD34D'; // Amber 300
-            if (lower.includes('orange') || lower.includes('naranja')) return '#FB923C'; // Orange 400
-            if (lower.includes('green') || lower.includes('verde')) return '#4ADE80'; // Green 400
-            if (lower.includes('blue') || lower.includes('azul')) return '#60A5FA'; // Blue 400
-            if (lower.includes('purple') || lower.includes('morado')) return '#A78BFA'; // Violet 400
-            if (lower.includes('brown') || lower.includes('marrón') || lower.includes('marron')) return '#78350F'; // Amber 900
-            if (lower.includes('black') || lower.includes('negro')) return '#DC2626'; // Red 600 (Black Belt Highlight)
+            if (lower.includes('blanca')) return '#E5E7EB'; // Gray 200
+            if (lower.includes('amarilla')) return '#FCD34D'; // Amber 300
+            if (lower.includes('verde')) return '#4ADE80'; // Green 400
+            if (lower.includes('azul')) return '#60A5FA'; // Blue 400
+            if (lower.includes('cafe')) return '#78350F'; // Amber 900
+            if (lower.includes('shodan ho')) return '#78350F'; // Brown
+            if (lower.includes('negra')) return '#000000'; // Black
             return '#9CA3AF'; // Default Gray
         };
 
         // Orden lógico aproximado para la visualización
         const orderMap: Record<string, number> = { 
-            white: 1, yellow: 2, orange: 3, green: 4, blue: 5, purple: 6, brown: 7, black: 8 
+            blanca: 1, amarilla: 2, verde: 3, azul: 4, cafe: 5, 'shodan ho': 6, negra: 7 
         };
 
         return Object.entries(distribution).map(([name, value]) => {
@@ -129,246 +205,294 @@ const MasterDashboard: React.FC = () => {
     }, [students]);
 
     return (
-        <div className="p-6 md:p-10 max-w-[1600px] mx-auto w-full flex flex-col gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
+        <div className="p-4 sm:p-6 md:p-8 lg:p-10 max-w-[1600px] mx-auto w-full flex flex-col gap-5 sm:gap-6 md:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700 ease-out">
             
             {/* --- HEADER --- */}
-            <div className="flex flex-col md:flex-row justify-between items-end gap-4 mb-2">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-3 sm:gap-4 mb-1">
                 <div>
-                    <h1 className="text-3xl font-black tracking-tight text-slate-900">Dashboard</h1>
-                    <p className="text-slate-500 mt-1 font-medium text-sm">Resumen general de rendimiento.</p>
+                    <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] mb-1" style={{color: 'var(--color-brand)'}}>IKC Management</p>
+                    <h1 className="text-3xl sm:text-4xl font-black tracking-tighter" style={{color: 'var(--color-text-primary)'}}>Dashboard</h1>
+                    <p className="mt-0.5 text-xs sm:text-sm hidden sm:block" style={{color: 'var(--color-text-muted)'}}>Panel de control &mdash; {new Date().toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    <p className="mt-0.5 text-xs sm:hidden" style={{color: 'var(--color-text-muted)'}}>{new Date().toLocaleDateString('es-MX', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                 </div>
                 
-                {/* Selector de Tiempo (Borderless Control with Smooth Transition) */}
-                <div className="bg-white p-1 rounded-xl shadow-sm border border-gray-100 flex transition-all duration-300 hover:shadow-md">
+                {/* Time range selector — Google-style pill segmented control */}
+                <div className="flex items-center gap-0 rounded-none" style={{borderBottom: '2px solid var(--color-border-subtle)'}}>
                     <button 
                         onClick={() => setTimeRange('month')}
-                        className={`px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 ease-out ${
-                            timeRange === 'month' 
-                            ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20 scale-105' 
-                            : 'text-gray-400 hover:text-slate-900 hover:bg-gray-50'
-                        }`}
+                        className="px-5 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-200 relative"
+                        style={timeRange === 'month' 
+                            ? {color: 'var(--color-text-primary)', borderBottom: '2px solid var(--color-brand)', marginBottom: '-2px'}
+                            : {color: 'var(--color-text-muted)', borderBottom: '2px solid transparent', marginBottom: '-2px'}}
                     >
                         Mensual
                     </button>
                     <button 
                         onClick={() => setTimeRange('year')}
-                        className={`px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all duration-300 ease-out ${
-                            timeRange === 'year' 
-                            ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/20 scale-105' 
-                            : 'text-gray-400 hover:text-slate-900 hover:bg-gray-50'
-                        }`}
+                        className="px-5 py-2 text-xs font-bold uppercase tracking-wider transition-all duration-200"
+                        style={timeRange === 'year' 
+                            ? {color: 'var(--color-text-primary)', borderBottom: '2px solid var(--color-brand)', marginBottom: '-2px'}
+                            : {color: 'var(--color-text-muted)', borderBottom: '2px solid transparent', marginBottom: '-2px'}}
                     >
                         Anual
                     </button>
                 </div>
             </div>
 
-            {/* --- FILA 1: KPIs (Interactive Cards) --- */}
-            <div className="grid grid-cols-12 gap-6">
-                
-                {/* KPI 1: Ingresos */}
-                <div className="col-span-12 md:col-span-6 lg:col-span-3 bg-white p-6 rounded-2xl shadow-soft border border-gray-100 flex flex-col justify-between h-36 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:border-gray-200">
-                    <div className="flex justify-between items-start">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Ingresos ({timeRange === 'month' ? 'Mes' : 'Año'})</span>
-                        <div className="size-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center transition-transform duration-300 hover:scale-110">
-                            <span className="material-symbols-outlined text-lg">payments</span>
-                        </div>
-                    </div>
+            {/* ================================================================
+                FILA 1: KPIs — 1 col mobile, 2 tablet, 4 desktop
+                ================================================================ */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+                style={{
+                    border: '1px solid var(--color-border-subtle)',
+                    borderRadius: '10px',
+                    overflow: 'hidden',
+                    backgroundColor: 'var(--color-border-subtle)'  /* gap color between cells */
+                }}>
+
+                {/* KPI 1 — Ingresos */}
+                <div className="flex flex-col justify-between p-7 group"
+                    style={{backgroundColor: 'var(--color-bg-surface)'}}>
                     <div>
-                        <span className="text-4xl font-black text-slate-900 tracking-tighter tabular-nums">
+                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-3"
+                            style={{color: 'var(--color-text-muted)'}}>Ingresos / {timeRange === 'month' ? 'Mes' : 'Año'}</p>
+                        <p className="text-3xl font-black tracking-tighter tabular-nums"
+                            style={{color: 'var(--color-text-primary)'}}>
                             ${displayRevenue.toLocaleString('es-MX', { maximumFractionDigits: 0 })}
-                        </span>
+                        </p>
+                    </div>
+                    <div className="flex items-center justify-between mt-5 pt-4" style={{borderTop: '1px solid var(--color-border-subtle)'}}>
+                        <span className="text-[10px] font-medium" style={{color: 'var(--color-text-muted)'}}>Total acumulado</span>
+                        <span className="material-symbols-outlined" style={{fontSize: '16px', color: 'var(--color-brand)'}}>trending_up</span>
                     </div>
                 </div>
 
-                {/* KPI 2: Alumnos Totales (Inscritos) */}
-                <div 
-                    className="col-span-12 md:col-span-6 lg:col-span-3 bg-white p-6 rounded-2xl shadow-soft border border-gray-100 flex flex-col justify-between h-36 cursor-pointer group transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:border-gray-200"
-                    onClick={() => navigate('/master/students')}
-                >
-                    <div className="flex justify-between items-start">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest group-hover:text-red-600 transition-colors">Alumnos Inscritos</span>
-                        <div className="size-8 rounded-lg bg-gray-50 text-gray-400 flex items-center justify-center group-hover:bg-red-50 group-hover:text-red-600 transition-all duration-300 group-hover:scale-110">
-                            <span className="material-symbols-outlined text-lg">groups</span>
-                        </div>
-                    </div>
+                {/* KPI 2 — Alumnos */}
+                <div className="flex flex-col justify-between p-7 cursor-pointer group transition-colors"
+                    style={{backgroundColor: 'var(--color-bg-surface)'}}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-surface)'}
+                    onClick={() => navigate('/master/students')}>
                     <div>
-                        <span className="text-4xl font-black text-slate-900 tracking-tighter">
-                            {students.length}
-                        </span>
+                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-3"
+                            style={{color: 'var(--color-text-muted)'}}>Alumnos Inscritos</p>
+                        <p className="text-3xl font-black tracking-tighter"
+                            style={{color: 'var(--color-text-primary)'}}>{students.length}</p>
+                    </div>
+                    <div className="flex items-center justify-between mt-5 pt-4" style={{borderTop: '1px solid var(--color-border-subtle)'}}>
+                        <span className="text-[10px] font-medium" style={{color: 'var(--color-text-muted)'}}>Ver estudiantes</span>
+                        <span className="material-symbols-outlined" style={{fontSize: '16px', color: 'var(--color-text-muted)'}}>arrow_forward</span>
                     </div>
                 </div>
 
-                {/* KPI 3: Alumnos Nuevos */}
-                <div className="col-span-12 md:col-span-6 lg:col-span-3 bg-white p-6 rounded-2xl shadow-soft border border-gray-100 flex flex-col justify-between h-36 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:border-gray-200">
-                    <div className="flex justify-between items-start">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Nuevos Ingresos</span>
-                        <div className="size-8 rounded-lg bg-gray-50 text-gray-400 flex items-center justify-center transition-transform duration-300 hover:scale-110">
-                            <span className="material-symbols-outlined text-lg">person_add</span>
-                        </div>
-                    </div>
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-4xl font-black text-slate-900 tracking-tighter">
-                            +{newStudentsCount}
-                        </span>
-                        <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md">
-                            {timeRange === 'month' ? 'Este Mes' : 'Este Año'}
-                        </span>
-                    </div>
-                </div>
-
-                {/* KPI 4: Cuentas por Cobrar */}
-                <div 
-                    className="col-span-12 md:col-span-6 lg:col-span-3 bg-white p-6 rounded-2xl shadow-soft border border-gray-100 flex flex-col justify-between h-36 cursor-pointer group transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-xl hover:border-gray-200"
-                    onClick={() => navigate('/master/finance')}
-                >
-                    <div className="flex justify-between items-start">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest group-hover:text-red-600 transition-colors">Por Cobrar</span>
-                        <div className="size-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center transition-all duration-300 group-hover:scale-110">
-                            <span className="material-symbols-outlined text-lg">account_balance_wallet</span>
-                        </div>
-                    </div>
+                {/* KPI 3 — Nuevos */}
+                <div className="flex flex-col justify-between p-7 group"
+                    style={{backgroundColor: 'var(--color-bg-surface)'}}>
                     <div>
-                        <span className="text-4xl font-black text-slate-900 tracking-tighter tabular-nums">
+                        <div className="flex items-center justify-between mb-3">
+                            <p className="text-[9px] font-bold uppercase tracking-[0.2em]"
+                                style={{color: 'var(--color-text-muted)'}}>Nuevos Ingresos</p>
+                            <span className="text-[9px] font-bold px-1.5 py-0.5"
+                                style={{color: 'var(--color-text-muted)', border: '1px solid var(--color-border-strong)', borderRadius: '3px'}}>
+                                {timeRange === 'month' ? 'Mes' : 'Año'}
+                            </span>
+                        </div>
+                        <p className="text-3xl font-black tracking-tighter"
+                            style={{color: 'var(--color-text-primary)'}}>+{newStudentsCount}</p>
+                    </div>
+                    <div className="flex items-center justify-between mt-5 pt-4" style={{borderTop: '1px solid var(--color-border-subtle)'}}>
+                        <span className="text-[10px] font-medium" style={{color: 'var(--color-text-muted)'}}>Nuevos registros</span>
+                        <span className="material-symbols-outlined" style={{fontSize: '16px', color: 'var(--color-text-muted)'}}>person_add</span>
+                    </div>
+                </div>
+
+                {/* KPI 4 — Por Cobrar */}
+                <div className="flex flex-col justify-between p-7 cursor-pointer group transition-colors"
+                    style={{backgroundColor: 'var(--color-bg-surface)'}}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-surface)'}
+                    onClick={() => navigate('/master/finance')}>
+                    <div>
+                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-3"
+                            style={{color: 'var(--color-text-muted)'}}>Por Cobrar</p>
+                        <p className="text-3xl font-black tracking-tighter tabular-nums"
+                            style={{color: 'var(--color-text-primary)'}}>
                             ${totalReceivable.toLocaleString('es-MX', { maximumFractionDigits: 0 })}
-                        </span>
+                        </p>
                         {stats.overdueAmount > 0 && (
-                            <p className="text-[10px] font-bold text-red-600 mt-1 flex items-center gap-1">
-                                <span className="size-1.5 rounded-full bg-red-500 animate-pulse"></span>
-                                ${stats.overdueAmount.toLocaleString()} Vencido
+                            <p className="text-[10px] font-bold mt-2 flex items-center gap-1.5" style={{color: 'var(--color-brand)'}}>
+                                <span className="size-1.5 rounded-full animate-pulse inline-block" style={{backgroundColor: 'var(--color-brand)'}}></span>
+                                ${stats.overdueAmount.toLocaleString()} vencido
                             </p>
                         )}
+                    </div>
+                    <div className="flex items-center justify-between mt-5 pt-4" style={{borderTop: '1px solid var(--color-border-subtle)'}}>
+                        <span className="text-[10px] font-medium" style={{color: 'var(--color-text-muted)'}}>Ver finanzas</span>
+                        <span className="material-symbols-outlined" style={{fontSize: '16px', color: 'var(--color-brand)'}}>account_balance_wallet</span>
                     </div>
                 </div>
             </div>
 
-            {/* --- FILA 2: GRÁFICAS (White Cards) --- */}
-            <div className="grid grid-cols-12 gap-6">
-                
+            {/* ================================================================
+                FILA 2: GRÁFICAS — Stack on mobile, side by side desktop
+                ================================================================ */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5">
+
                 {/* Gráfica Principal: Ingresos */}
-                <div className="col-span-12 lg:col-span-8 bg-white p-8 rounded-2xl shadow-soft border border-gray-100 min-h-[400px] flex flex-col transition-all duration-300 hover:shadow-lg">
-                    <div className="flex justify-between items-center mb-6">
-                        <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Tendencia de Ingresos</h3>
+                <div className="col-span-1 lg:col-span-8 flex flex-col min-h-[280px] sm:min-h-[360px] lg:min-h-[420px]"
+                    style={{
+                        backgroundColor: 'var(--color-bg-surface)',
+                        border: '1px solid var(--color-border-subtle)',
+                        borderRadius: '10px',
+                        overflow: 'hidden'
+                    }}>
+                    <div className="flex justify-between items-center px-7 py-5"
+                        style={{borderBottom: '1px solid var(--color-border-subtle)'}}>
+                        <div>
+                            <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-0.5"
+                                style={{color: 'var(--color-text-muted)'}}>Análisis Financiero</p>
+                            <h3 className="text-sm font-semibold"
+                                style={{color: 'var(--color-text-primary)'}}>Tendencia de Ingresos</h3>
+                        </div>
+                        <button onClick={() => setShowAllIncomes(true)}
+                            className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider transition-colors"
+                            style={{color: 'var(--color-brand)'}}>
+                            Ver historial
+                            <span className="material-symbols-outlined" style={{fontSize: '14px'}}>arrow_forward</span>
+                        </button>
                     </div>
-                    <div className="flex-1 w-full min-h-0">
+                    <div className="flex-1 p-4">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={revenueChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                                 <defs>
                                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#DC2626" stopOpacity={0.1}/>
-                                        <stop offset="95%" stopColor="#DC2626" stopOpacity={0}/>
+                                        <stop offset="5%" stopColor="#e11d48" stopOpacity={0.15}/>
+                                        <stop offset="95%" stopColor="#e11d48" stopOpacity={0}/>
                                     </linearGradient>
                                 </defs>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F3F4F6" />
-                                <XAxis 
-                                    dataKey="name" 
-                                    axisLine={false} 
-                                    tickLine={false} 
-                                    tick={{fill: '#9CA3AF', fontSize: 10, fontWeight: 600}} 
-                                    dy={10}
+                                <CartesianGrid strokeDasharray="2 6" vertical={false} stroke="rgba(255,255,255,0.04)" />
+                                <XAxis dataKey="name" axisLine={false} tickLine={false}
+                                    tick={{fill: '#52525b', fontSize: 10, fontWeight: 600}} dy={10} />
+                                <YAxis axisLine={false} tickLine={false}
+                                    tick={{fill: '#52525b', fontSize: 10, fontWeight: 600}}
+                                    tickFormatter={(v) => `$${v >= 1000 ? (v/1000).toFixed(0)+'k' : v}`} />
+                                <Tooltip
+                                    contentStyle={{ borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)', backgroundColor: '#111114', color: '#f4f4f5', fontSize: '12px', padding: '10px 14px' }}
+                                    formatter={(value: number) => [new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN'}).format(Number(value)||0),'Ingresos']}
+                                    cursor={{ stroke: 'rgba(255,255,255,0.05)', strokeWidth: 40 }}
                                 />
-                                <YAxis 
-                                    axisLine={false} 
-                                    tickLine={false} 
-                                    tick={{fill: '#9CA3AF', fontSize: 10, fontWeight: 600}} 
-                                    tickFormatter={(value) => `$${value >= 1000 ? (value/1000).toFixed(0) + 'k' : value}`}
-                                />
-                                <Tooltip 
-                                    contentStyle={{ borderRadius: '12px', border: '1px solid #F3F4F6', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', fontSize: '12px' }}
-                                    formatter={(value: number) => [
-                                        new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(Number(value) || 0), 
-                                        'Ingresos'
-                                    ]}
-                                    cursor={{ stroke: '#DC2626', strokeWidth: 1, strokeDasharray: '3 3' }}
-                                />
-                                <Area 
-                                    type="monotone" 
-                                    dataKey="total" 
-                                    stroke="#DC2626" 
-                                    strokeWidth={3} 
-                                    fillOpacity={1} 
-                                    fill="url(#colorRevenue)" 
-                                    animationDuration={1500}
-                                />
+                                <Area type="monotone" dataKey="total" stroke="#e11d48" strokeWidth={2}
+                                    fillOpacity={1} fill="url(#colorRevenue)" animationDuration={1500} />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
-                {/* Gráfica Secundaria: Población por Grado */}
-                <div className="col-span-12 lg:col-span-4 bg-white p-8 rounded-2xl shadow-soft border border-gray-100 min-h-[400px] flex flex-col transition-all duration-300 hover:shadow-lg">
-                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide mb-4">Distribución por Grado</h3>
-                    <div className="flex-1 relative">
+                {/* Gráfica Secundaria: Distribución por Grado */}
+                <div className="col-span-1 lg:col-span-4 flex flex-col min-h-[280px] sm:min-h-[340px] lg:min-h-[420px]"
+                    style={{
+                        backgroundColor: 'var(--color-bg-surface)',
+                        border: '1px solid var(--color-border-subtle)',
+                        borderRadius: '10px',
+                        overflow: 'hidden'
+                    }}>
+                    <div className="px-7 py-5" style={{borderBottom: '1px solid var(--color-border-subtle)'}}>
+                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-0.5"
+                            style={{color: 'var(--color-text-muted)'}}>Alumnos</p>
+                        <h3 className="text-sm font-semibold"
+                            style={{color: 'var(--color-text-primary)'}}>Distribución por Grado</h3>
+                    </div>
+                    <div className="flex-1 relative p-4 min-h-[200px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
-                                <Pie
-                                    data={studentsByRank}
-                                    innerRadius={70}
-                                    outerRadius={90}
-                                    paddingAngle={4}
-                                    dataKey="value"
-                                    stroke="none"
-                                    cornerRadius={6}
-                                    animationDuration={1500}
-                                >
+                                <Pie data={studentsByRank} innerRadius={60} outerRadius={78}
+                                    paddingAngle={3} dataKey="value" stroke="none" cornerRadius={3}
+                                    animationDuration={1500}>
                                     {studentsByRank.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={entry.fill} />
                                     ))}
                                 </Pie>
-                                <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #F3F4F6', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }} />
+                                <Tooltip contentStyle={{ borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)', backgroundColor: '#111114', color: '#f4f4f5' }} itemStyle={{ color: '#f4f4f5' }} />
                             </PieChart>
                         </ResponsiveContainer>
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none flex-col">
-                            <span className="text-4xl font-black text-slate-900 animate-in zoom-in duration-700">{totalChartStudents}</span>
-                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Total</span>
+                            <span className="text-3xl font-black tabular-nums"
+                                style={{color: 'var(--color-text-primary)'}}>{totalChartStudents}</span>
+                            <span className="text-[9px] font-bold uppercase tracking-[0.2em]"
+                                style={{color: 'var(--color-text-muted)'}}>Total</span>
                         </div>
                     </div>
-                    {/* Leyenda Limpia */}
-                    <div className="mt-4 flex flex-wrap gap-2 justify-center">
-                        {studentsByRank.map((rank) => (
-                            <div key={rank.name} className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-gray-50 transition-colors hover:bg-gray-100">
-                                <span className="size-2 rounded-full" style={{ backgroundColor: rank.fill }}></span>
-                                <span className="text-[10px] font-bold text-gray-500">{rank.name}</span>
+                    {/* Leyenda — rows with dividers */}
+                    <div style={{borderTop: '1px solid var(--color-border-subtle)'}}>
+                        {studentsByRank.map((rank, i) => (
+                            <div key={rank.name}
+                                className="flex items-center justify-between px-6 py-3"
+                                style={{borderBottom: i < studentsByRank.length-1 ? '1px solid var(--color-border-subtle)' : 'none'}}>
+                                <div className="flex items-center gap-2.5">
+                                    <span className="size-1.5 rounded-full inline-block" style={{backgroundColor: rank.fill}}></span>
+                                    <span className="text-xs font-medium" style={{color: 'var(--color-text-secondary)'}}>{rank.name}</span>
+                                </div>
+                                <span className="text-xs font-bold tabular-nums" style={{color: 'var(--color-text-primary)'}}>{rank.value}</span>
                             </div>
                         ))}
                     </div>
                 </div>
             </div>
 
-            {/* --- FILA 3: DETALLES (Alertas de Deuda - Clean List) --- */}
-            <div className="col-span-12 bg-white p-8 rounded-2xl shadow-soft border border-gray-100 transition-all duration-300 hover:shadow-lg">
-                <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wide flex items-center gap-2">
-                        <span className="material-symbols-outlined text-red-600 text-lg">warning</span>
-                        Pagos Pendientes
-                    </h3>
-                    <button onClick={() => navigate('/master/finance')} className="text-xs font-bold text-red-600 hover:text-red-700 uppercase tracking-wide transition-colors">Ver Todo</button>
+            {/* ================================================================
+                FILA 3: PAGOS PENDIENTES — Flush column grid, no inner cards
+                ================================================================ */}
+            <div style={{
+                backgroundColor: 'var(--color-bg-surface)',
+                border: '1px solid var(--color-border-subtle)',
+                borderRadius: '10px',
+                overflow: 'hidden'
+            }}>
+                <div className="flex justify-between items-center px-7 py-5"
+                    style={{borderBottom: '1px solid var(--color-border-subtle)'}}>
+                    <div>
+                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-0.5"
+                            style={{color: 'var(--color-brand)'}}>Alertas</p>
+                        <h3 className="text-sm font-semibold"
+                            style={{color: 'var(--color-text-primary)'}}>Pagos Pendientes</h3>
+                    </div>
+                    <button onClick={() => navigate('/master/finance')}
+                        className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider transition-colors"
+                        style={{color: 'var(--color-brand)'}}>
+                        Ver finanzas
+                        <span className="material-symbols-outlined" style={{fontSize: '14px'}}>arrow_forward</span>
+                    </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+                    style={{backgroundColor: 'var(--color-border-subtle)'}}>
                     {topDebtors.length === 0 ? (
-                        <div className="col-span-full py-8 text-center text-gray-400 bg-gray-50 rounded-xl border-dashed border-2 border-gray-100">
-                            <span className="material-symbols-outlined text-2xl mb-2 text-gray-300">check_circle</span>
-                            <p className="text-xs font-bold uppercase tracking-wide">Sin deudores críticos</p>
+                        <div className="col-span-full py-16 text-center flex flex-col items-center gap-3"
+                            style={{backgroundColor: 'var(--color-bg-surface)'}}>
+                            <span className="material-symbols-outlined" style={{fontSize: '28px', color: 'var(--color-border-strong)'}}>check_circle</span>
+                            <p className="text-[10px] font-bold uppercase tracking-widest" style={{color: 'var(--color-text-muted)'}}>Sin deudores críticos</p>
                         </div>
                     ) : (
-                        topDebtors.map(debtor => (
-                            <div 
-                                key={debtor.id} 
-                                className="p-4 rounded-2xl bg-gray-50 hover:bg-white hover:shadow-lg transition-all duration-300 ease-out cursor-pointer group flex flex-col gap-3 relative overflow-hidden border border-transparent hover:border-gray-100 hover:-translate-y-1" 
-                                onClick={() => navigate('/master/finance')}
-                            >
-                                <div className="absolute top-0 left-0 w-1 h-full bg-red-500 transition-all group-hover:w-1.5"></div>
-                                <div className="flex items-center gap-3 pl-2">
-                                    <Avatar src={debtor.avatarUrl} name={debtor.name} className="size-8 rounded-lg text-xs shadow-sm" />
+                        topDebtors.map((debtor, i) => (
+                            <div key={debtor.id}
+                                className="flex flex-col gap-5 p-6 cursor-pointer transition-colors"
+                                style={{backgroundColor: 'var(--color-bg-surface)'}}
+                                onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'}
+                                onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-surface)'}
+                                onClick={() => navigate('/master/finance')}>
+                                <div className="flex items-center gap-3">
+                                    <Avatar src={debtor.avatarUrl} name={debtor.name} className="size-9 rounded-full text-xs" />
                                     <div className="overflow-hidden">
-                                        <p className="text-sm font-bold text-slate-900 truncate">{debtor.name}</p>
-                                        <p className="text-[10px] text-gray-400 truncate font-mono">{debtor.rank}</p>
+                                        <p className="text-sm font-bold truncate" style={{color: 'var(--color-text-primary)'}}>{debtor.name}</p>
+                                        <p className="text-[10px] uppercase tracking-wider font-medium truncate" style={{color: 'var(--color-text-muted)'}}>{debtor.rank}</p>
                                     </div>
                                 </div>
-                                <div className="flex justify-between items-end pt-2 mt-auto pl-2">
-                                    <span className="text-[10px] font-bold text-red-600 uppercase tracking-wider bg-red-100 px-1.5 py-0.5 rounded">Vencido</span>
-                                    <span className="text-sm font-black text-red-600 group-hover:text-red-700 transition-colors">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-[9px] font-bold uppercase tracking-[0.15em] px-2 py-0.5"
+                                        style={{color: 'var(--color-brand)', border: '1px solid var(--color-brand-glow)', borderRadius: '3px'}}>
+                                        Vencido
+                                    </span>
+                                    <span className="text-base font-black tabular-nums" style={{color: 'var(--color-brand)'}}>
                                         ${debtor.balance.toLocaleString()}
                                     </span>
                                 </div>
@@ -377,6 +501,170 @@ const MasterDashboard: React.FC = () => {
                     )}
                 </div>
             </div>
+
+            {/* --- MODAL DASHBOARD PANTALLA COMPLETA DE INGRESOS --- */}
+            {showAllIncomes && (
+                <div className="fixed inset-0 z-[60] flex flex-col animate-in fade-in zoom-in-95 duration-200" style={{backgroundColor: 'var(--color-bg-app)'}}>
+                    <div className="px-6 py-5 flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0" style={{backgroundColor: 'var(--color-bg-surface)', borderBottom: '1px solid var(--color-border-subtle)'}}>
+                        <div className="flex items-center gap-4">
+                            <button onClick={() => setShowAllIncomes(false)} className="p-2 rounded-full transition-colors" style={{color: 'var(--color-text-muted)', backgroundColor: 'var(--color-bg-raised)'}}>
+                                <span className="material-symbols-outlined">arrow_back</span>
+                            </button>
+                            <div>
+                                <h1 className="text-xl font-black leading-none" style={{color: 'var(--color-text-primary)'}}>Todos los Ingresos</h1>
+                                <p className="text-sm" style={{color: 'var(--color-text-muted)'}}>Historial completo de pagos procesados</p>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col md:flex-row gap-3">
+                            <div className="relative">
+                                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">search</span>
+                                <input
+                                    type="text"
+                                    placeholder="Buscar por concepto o alumno..."
+                                    value={incomeSearch}
+                                    onChange={(e) => setIncomeSearch(e.target.value)}
+                                    className="w-full md:w-64 pl-9 pr-4 py-2 rounded-xl text-sm outline-none transition-all font-medium placeholder:font-normal"
+                                />
+                                {incomeSearch && (
+                                    <button onClick={() => setIncomeSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                                        <span className="material-symbols-outlined text-sm">close</span>
+                                    </button>
+                                )}
+                            </div>
+                            <select
+                                value={incomeMonthFilter}
+                                onChange={(e) => setIncomeMonthFilter(e.target.value)}
+                                className="w-full md:w-48 px-4 py-2 rounded-xl text-sm font-bold outline-none transition-all cursor-pointer appearance-none"
+                                style={{color: 'var(--color-text-primary)'}}
+                            >
+                                <option value="">Todos los Meses</option>
+                                {uniqueMonths.map(m => {
+                                    const [y, mm] = m.split('-');
+                                    const dateObj = new Date(parseInt(y), parseInt(mm) - 1, 1);
+                                    return (
+                                        <option key={m} value={m}>
+                                            {formatDateDisplay(dateObj.toISOString(), { month: 'long', year: 'numeric' })}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="flex-1 overflow-auto p-6 md:p-10 max-w-[1400px] w-full mx-auto flex flex-col gap-6">
+                        
+                        {/* Resumen Rápid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 shrink-0">
+                            <div className="p-5 rounded-2xl flex items-center gap-4" style={{backgroundColor: 'var(--color-bg-surface)', border: '1px solid var(--color-border-subtle)'}}>
+                                <div className="size-12 rounded-xl flex items-center justify-center shrink-0" style={{backgroundColor: 'rgba(16,185,129,0.15)', color: '#10b981'}}>
+                                    <span className="material-symbols-outlined text-2xl">account_balance_wallet</span>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-wider mb-0.5" style={{color: 'var(--color-text-muted)'}}>Total en filtro</p>
+                                    <p className="text-2xl font-black" style={{color: 'var(--color-text-primary)'}}>\${sumFilteredIncomes.toLocaleString('es-MX', { maximumFractionDigits: 0 })}</p>
+                                </div>
+                            </div>
+                            <div className="p-5 rounded-2xl flex items-center gap-4" style={{backgroundColor: 'var(--color-bg-surface)', border: '1px solid var(--color-border-subtle)'}}>
+                                <div className="size-12 rounded-xl flex items-center justify-center shrink-0" style={{backgroundColor: 'rgba(96,165,250,0.15)', color: '#60a5fa'}}>
+                                    <span className="material-symbols-outlined text-2xl">receipt_long</span>
+                                </div>
+                                <div>
+                                    <p className="text-xs font-bold uppercase tracking-wider mb-0.5" style={{color: 'var(--color-text-muted)'}}>Movimientos</p>
+                                    <p className="text-2xl font-black" style={{color: 'var(--color-text-primary)'}}>{cntFilteredIncomes}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Listado */}
+                        <div className="rounded-3xl overflow-hidden flex-1 flex flex-col min-h-[400px]" style={{backgroundColor: 'var(--color-bg-surface)', border: '1px solid var(--color-border-subtle)'}}>
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-left">
+                                    <thead className="text-xs font-bold uppercase tracking-wider sticky top-0 z-10" style={{backgroundColor: 'var(--color-bg-raised)', color: 'var(--color-text-muted)'}}>
+                                        <tr>
+                                            <th className="px-6 py-4 w-32">Fecha</th>
+                                            <th className="px-6 py-4">Concepto & Alumno</th>
+                                            <th className="px-6 py-4 w-32">Monto</th>
+                                            <th className="px-6 py-4 w-32">Método</th>
+                                            <th className="px-6 py-4 w-16"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody style={{borderColor: 'var(--color-border-subtle)'}} className="divide-y">
+                                        {filteredIncomes.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={5} className="py-20 text-center">
+                                                    <div className="mx-auto size-16 bg-gray-50 rounded-full flex items-center justify-center mb-4 border border-dashed border-gray-200">
+                                                        <span className="material-symbols-outlined text-gray-300 text-2xl">search_off</span>
+                                                    </div>
+                                                    <p className="font-bold text-gray-500">No se encontraron movimientos.</p>
+                                                    <p className="text-sm text-gray-400 mt-1">Prueba con otro filtro o término de búsqueda.</p>
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            filteredIncomes.map((inc) => {
+                                                const isExpanded = expandedRecordId === inc.id;
+                                                return (
+                                                    <React.Fragment key={inc.id}>
+                                                        <tr 
+                                                            onClick={() => setExpandedRecordId(isExpanded ? null : inc.id)}
+                                                            className="transition-colors cursor-pointer group"
+                                                            style={{borderColor: 'var(--color-border-subtle)'}}
+                                                            onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-raised)'}
+                                                            onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = ''}
+                                                        >
+                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                <p className="font-bold text-sm" style={{color: 'var(--color-text-primary)'}}>
+                                                                    {formatDateDisplay(inc.date, { day: '2-digit', month: 'short', year: '2-digit' })}
+                                                                </p>
+                                                                <p className="text-xs font-mono mt-0.5" style={{color: 'var(--color-text-muted)'}}>
+                                                                    {new Date(inc.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                </p>
+                                                            </td>
+                                                            <td className="px-6 py-4">
+                                                                <p className="font-bold leading-tight" style={{color: 'var(--color-text-primary)'}}>{inc.concept}</p>
+                                                                <p className="text-sm flex items-center gap-1.5 mt-1" style={{color: 'var(--color-text-muted)'}}>
+                                                                    <span className="material-symbols-outlined text-[14px]">person</span> {inc.studentName}
+                                                                </p>
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                <span className="text-sm font-black px-2.5 py-1 rounded-lg" style={{color: '#10b981', backgroundColor: 'rgba(16,185,129,0.15)'}}>
+                                                                    +${inc.amount.toLocaleString()}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded" style={{color: 'var(--color-text-muted)', backgroundColor: 'var(--color-bg-raised)', border: '1px solid var(--color-border-strong)'}}>
+                                                                    {inc.method}
+                                                                </span>
+                                                            </td>
+                                                            <td className="px-6 py-4 text-center">
+                                                                <button className="p-1 rounded-full transition-all" style={{color: 'var(--color-text-muted)'}}>
+                                                                    <span className={`material-symbols-outlined text-xl transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>expand_more</span>
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                        {isExpanded && (
+                                                            <tr className="animate-in fade-in duration-200 slide-in-from-top-2" style={{backgroundColor: 'var(--color-bg-raised)'}}>
+                                                                <td colSpan={5} className="px-6 py-5">
+                                                                    <div className="max-w-3xl">
+                                                                        <h4 className="text-xs font-bold uppercase tracking-wider mb-2" style={{color: 'var(--color-text-muted)'}}>Descripción / Información Adicional</h4>
+                                                                        <p className="text-sm leading-relaxed font-medium p-4 rounded-xl italic" style={{color: 'var(--color-text-secondary)', backgroundColor: 'var(--color-bg-hover)', border: '1px solid var(--color-border-subtle)'}}>
+                                                                            {inc.description ? inc.description : "Sin descripción adicional proporcionada al momento del pago."}
+                                                                        </p>
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        )}
+                                                    </React.Fragment>
+                                                )
+                                            })
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
         </div>
     );

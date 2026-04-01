@@ -13,8 +13,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
   if (loading) {
     // Basic loading spinner while checking auth
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-white">
-        <div className="size-8 border-4 border-red-100 border-t-red-600 rounded-full animate-spin"></div>
+      <div className="flex h-screen w-full items-center justify-center bg-[#08080a]">
+        <div className="loader"></div>
       </div>
     );
   }

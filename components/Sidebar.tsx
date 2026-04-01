@@ -37,94 +37,131 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
 
   const links = role === 'master' ? masterLinks : studentLinks;
   const displayName = currentUser?.name || (role === 'master' ? 'Sensei' : 'Alumno');
-  
+
   const handleLogout = () => {
-      logout();
-      navigate('/');
+    logout();
+    navigate('/');
   };
 
   return (
     <>
-      <div 
-        className={`fixed inset-0 bg-gray-900/10 backdrop-blur-[2px] z-40 transition-opacity duration-300 md:hidden ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+      {/* Mobile overlay */}
+      <div
+        className={`fixed inset-0 backdrop-blur-[2px] z-40 transition-opacity duration-300 md:hidden ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+        style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
         onClick={onClose}
       />
 
-      <aside 
+      <aside
         className={`
-          fixed md:static inset-y-0 left-0 z-50
-          flex flex-col w-72 h-full
-          bg-[#F9FAFB] /* Structured Minimalism: Gray Surface */
-          transform transition-transform duration-300 ease-out 
+          fixed md:relative inset-y-0 left-0 z-50 md:z-0
+          flex flex-col w-full md:w-64 h-full
+          transform transition-transform duration-300 ease-out
           ${isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0'}
-          /* No border-r. The contrast between #F9FAFB and #FFFFFF (content) creates the structure. */
         `}
+        style={{
+          backgroundColor: 'var(--color-bg-surface)',
+          borderRight: '1px solid var(--color-border-subtle)',
+        }}
       >
-        {/* LOGO SECTION */}
-        <div className="px-8 pt-10 pb-8 flex items-center justify-between">
-            <div className="flex flex-col justify-center leading-none">
-                <span className="text-3xl font-black text-red-600 tracking-tight">IKC</span>
-                <span className="text-[10px] font-medium text-gray-400 uppercase tracking-[0.25em] mt-1">Management</span>
-            </div>
-            
-            <button 
-                onClick={onClose} 
-                className="md:hidden text-slate-400 hover:text-slate-600 p-1"
-            >
-                <span className="material-symbols-outlined">close</span>
-            </button>
+        {/* ── LOGO ── */}
+        <div className="flex items-center justify-between px-6 h-16 md:h-14" style={{ borderBottom: '1px solid var(--color-border-subtle)' }}>
+          <div className="flex items-center gap-3">
+            <span className="text-2xl md:text-xl font-black tracking-tighter" style={{ color: 'var(--color-brand)' }}>IKC</span>
+            <span className="text-[10px] md:text-[9px] font-semibold uppercase tracking-[0.35em]" style={{ color: 'var(--color-text-muted)' }}>Management</span>
+          </div>
+          <button
+            onClick={onClose}
+            className="md:hidden p-2 rounded transition-colors"
+            style={{ color: 'var(--color-text-muted)' }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '22px' }}>close</span>
+          </button>
         </div>
 
-        {/* NAVIGATION */}
-        <nav className="flex-1 overflow-y-auto px-4 py-2 space-y-1 no-scrollbar">
-            {links.map((link) => {
+        {/* ── NAVIGATION ── */}
+        <nav className="flex-1 overflow-y-auto py-4 md:py-3 no-scrollbar" style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          {links.map((link) => {
             const isActive = location.pathname.startsWith(link.path);
             return (
-                <Link
-                    key={link.path}
-                    to={link.path}
-                    onClick={onClose}
-                    className={`flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-sm font-bold tracking-wide transition-all duration-200 group ${
-                        isActive
-                            ? 'bg-white text-slate-900 shadow-sm shadow-gray-200/50' /* Active state pops out as white card */
-                            : 'text-slate-500 hover:bg-gray-100 hover:text-slate-900'
-                        }`}
+              <Link
+                key={link.path}
+                to={link.path}
+                onClick={onClose}
+                className="flex items-center gap-4 md:gap-3 mx-4 md:mx-3 px-4 md:px-3 py-4 md:py-2.5 transition-all duration-150 relative"
+                style={{
+                  color: isActive ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
+                  backgroundColor: isActive ? 'var(--color-bg-raised)' : 'transparent',
+                  borderRadius: '8px',
+                  borderLeft: isActive ? '2px solid var(--color-brand)' : '2px solid transparent',
+                  paddingLeft: isActive ? '14px' : '12px',
+                }}
+                onMouseEnter={e => {
+                  if (!isActive) {
+                    (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(255,255,255,0.03)';
+                    (e.currentTarget as HTMLElement).style.color = 'var(--color-text-secondary)';
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (!isActive) {
+                    (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+                    (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)';
+                  }
+                }}
+              >
+                <span
+                  className="material-symbols-outlined"
+                  style={{
+                    fontSize: '22px',
+                    color: isActive ? 'var(--color-brand)' : 'inherit',
+                    flexShrink: 0,
+                  }}
                 >
-                    <span className={`material-symbols-outlined text-[22px] transition-colors ${isActive ? 'text-red-600 filled' : 'text-slate-400 group-hover:text-slate-600'}`}>
-                        {link.icon}
-                    </span>
-                    <span>
-                        {link.name}
-                    </span>
-                </Link>
+                  {link.icon}
+                </span>
+                <span style={{ fontSize: '16px', fontWeight: isActive ? 600 : 400, letterSpacing: '0.01em' }}
+                    className="md:text-[13px]">
+                  {link.name}
+                </span>
+              </Link>
             );
-            })}
+          })}
         </nav>
 
-        {/* FOOTER / USER PROFILE */}
-        <div className="p-5 mt-auto">
-            <div className="flex items-center gap-3 px-3 py-3 mb-2 rounded-2xl bg-white border border-gray-100 shadow-sm cursor-pointer group hover:border-gray-200 transition-all">
-                <Avatar 
-                    src={currentUser?.avatarUrl} 
-                    name={displayName} 
-                    className="size-9 rounded-full text-xs font-bold ring-2 ring-gray-50" 
-                />
-                <div className="flex flex-col overflow-hidden">
-                    <span className="text-sm font-bold text-slate-900 truncate group-hover:text-red-600 transition-colors">
-                        {displayName}
-                    </span>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate">
-                        {role === 'master' ? 'Administrador' : 'Alumno'}
-                    </span>
-                </div>
+        {/* ── USER PROFILE + LOGOUT ── */}
+        <div style={{ borderTop: '1px solid var(--color-border-subtle)' }}>
+          <div className="flex items-center gap-3 px-5 py-4 md:py-3.5">
+            <Avatar
+              src={currentUser?.avatarUrl}
+              name={displayName}
+              className="size-9 md:size-7 rounded-full text-[10px] font-bold shrink-0"
+            />
+            <div className="flex flex-col overflow-hidden flex-1 min-w-0">
+              <span className="text-sm md:text-xs font-semibold truncate" style={{ color: 'var(--color-text-primary)' }}>
+                {displayName}
+              </span>
+              <span className="text-[11px] md:text-[10px] uppercase tracking-wider truncate" style={{ color: 'var(--color-text-muted)' }}>
+                {role === 'master' ? 'Administrador' : 'Alumno'}
+              </span>
             </div>
-
-            <button 
-                onClick={handleLogout}
-                className="flex items-center gap-3 px-3 py-2 text-xs font-bold text-slate-400 hover:text-red-600 transition-colors w-full rounded-lg hover:bg-red-50 group uppercase tracking-wider justify-center"
+            {/* Logout icon button */}
+            <button
+              onClick={handleLogout}
+              title="Cerrar sesión"
+              className="shrink-0 p-1.5 rounded-md transition-all"
+              style={{ color: 'var(--color-text-muted)' }}
+              onMouseEnter={e => {
+                (e.currentTarget as HTMLElement).style.color = 'var(--color-brand)';
+                (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-brand-glow)';
+              }}
+              onMouseLeave={e => {
+                (e.currentTarget as HTMLElement).style.color = 'var(--color-text-muted)';
+                (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+              }}
             >
-                <span>Cerrar Sesión</span>
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>logout</span>
             </button>
+          </div>
         </div>
       </aside>
     </>

@@ -14,6 +14,7 @@ interface LoginResult {
 interface AuthContextType {
     currentUser: UserProfile | null;
     loading: boolean;
+    isLoggingOut: boolean;
     login: (email: string, pass: string) => Promise<LoginResult>;
     registerStudent: (data: any) => Promise<boolean>;
     registerMaster: (data: any) => Promise<boolean>;
@@ -27,6 +28,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
+    const [isLoggingOutState, setIsLoggingOutState] = useState(false);
+    // Guard: prevents SIGNED_IN events from firing while logout is in progress
+    const isLoggingOut = React.useRef(false);
     const { addToast } = useToast();
 
     // Initialize Session
@@ -35,6 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         const initAuth = async () => {
             console.log("AuthContext: Starting session init...");
+            const startTime = Date.now();
             try {
                 // 1. Check current session
                 const user = await PulseService.getCurrentUser();
@@ -45,7 +50,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             } catch (error) {
                 console.error("AuthContext: Error initializing session:", error);
             } finally {
-                if (mounted) setLoading(false);
+                // Ensure the loader is visible for at least 1.5s as requested
+                const elapsed = Date.now() - startTime;
+                const delay = Math.max(0, 2000 - elapsed);
+                setTimeout(() => {
+                    if (mounted) setLoading(false);
+                }, delay);
             }
 
             // 2. Intercept email confirmation redirects BEFORE processing normal auth state
@@ -67,17 +77,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 console.log(`AuthContext: Auth event ${event}`);
 
                 if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-                    // Only re-fetch if we have a session but no user, or if it changed
-                    if (session?.user) {
+                    // Guard: ignore SIGNED_IN fired during/after logout (stale localStorage events)
+                    if (isLoggingOut.current) {
+                        console.log('AuthContext: Ignoring SIGNED_IN — logout in progress');
+                        return;
+                    }
+                    // Verify the session has a valid user ID before fetching
+                    if (session?.user?.id) {
                         try {
+                            // Small delay to let Supabase fully commit the session
+                            // This eliminates the race condition where getCurrentUser
+                            // returns a stale/null profile right after login.
+                            await new Promise(resolve => setTimeout(resolve, 100));
+                            // Double-check the active session matches the event's user
+                            // to avoid loading a stale/previous user's profile
+                            const { data: { session: freshSession } } = await supabase.auth.getSession();
+                            if (!freshSession || freshSession.user.id !== session.user.id) {
+                                console.log('AuthContext: Session mismatch, skipping profile load');
+                                return;
+                            }
                             const user = await PulseService.getCurrentUser();
-                            if (mounted) setCurrentUser(user);
+                            if (mounted) {
+                                setCurrentUser(user);
+                                setLoading(false);
+                            }
                         } catch (e) {
                             console.warn("AuthContext: Silent error fetching user on change", e);
+                            if (mounted) setLoading(false);
                         }
                     }
                 } else if (event === 'SIGNED_OUT') {
-                    // Immediate cleanup
+                    // Immediate cleanup — loading=false was already set optimistically in logout()
                     if (mounted) {
                         setCurrentUser(null);
                         setLoading(false);
@@ -97,6 +127,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, []);
 
     const login = async (email: string, pass: string): Promise<LoginResult> => {
+        isLoggingOut.current = false;
         try {
             const user = await PulseService.login(email, pass);
             setCurrentUser(user); // Optimistic update
@@ -110,18 +141,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const logout = async () => {
-        // 1. Optimistic Cleanup (Immediate)
+        // 1. Set guard and expose state to trigger re-render immediately
+        isLoggingOut.current = true;
+        setIsLoggingOutState(true);
+
+        // 2. Optimistic Cleanup (Immediate) — loading=true keeps ProtectedRoute in spinner mode
+        //    so the Login page never flashes before the full-page redirect fires.
+        setLoading(true);
         setCurrentUser(null);
-        setLoading(false);
         addToast('Sesión cerrada correctamente', 'info');
 
-        // 2. Server Cleanup (Background)
+        // 3. Server Cleanup — await so the session is fully cleared before next login
         try {
             await PulseService.logout();
-            // We do NOT wait or check for errors here. The user is already "out" locally.
+            window.location.href = '/login';
         } catch (error) {
             // Ignore network errors on logout, user is already gone locally.
             console.warn("Supabase signOut error (ignorable):", error);
+            window.location.href = '/login';
+        } finally {
+            // Release the guard after a small buffer so any pending
+            // SIGNED_OUT / stale SIGNED_IN events from Supabase have time to fire and be ignored
+            setTimeout(() => { isLoggingOut.current = false; }, 500);
         }
     };
 
@@ -129,7 +170,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (!currentUser) return false;
         try {
             // Update Profile
-            const { error: profileError } = await supabase.from('profiles').update(updates).eq('id', currentUser.id);
+            const dbUpdates: any = { ...updates };
+            if (dbUpdates.avatarUrl !== undefined) {
+                dbUpdates.avatar_url = dbUpdates.avatarUrl;
+                delete dbUpdates.avatarUrl;
+            }
+            if (dbUpdates.academyId !== undefined) {
+                dbUpdates.academy_id = dbUpdates.academyId;
+                delete dbUpdates.academyId;
+            }
+            if (dbUpdates.studentId !== undefined) {
+                dbUpdates.student_id = dbUpdates.studentId;
+                delete dbUpdates.studentId;
+            }
+
+            const { error: profileError } = await supabase.from('profiles').update(dbUpdates).eq('id', currentUser.id);
             if (profileError) throw profileError;
 
             // If it's a student and they changed their name, keep the `students` table in sync
@@ -197,6 +252,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         <AuthContext.Provider value={{
             currentUser,
             loading,
+            isLoggingOut: isLoggingOutState,
             login,
             logout,
             registerStudent: registerStudentAction,

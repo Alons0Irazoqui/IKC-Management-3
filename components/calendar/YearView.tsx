@@ -59,7 +59,7 @@ const MonthCell: React.FC<MonthCellProps> = React.memo(({ month, events, onMonth
                 onClick={() => onMonthClick(month)}
                 className="text-left flex items-center gap-2 group/header hover:opacity-70 transition-opacity w-fit"
             >
-                <h3 className={`text-xl font-bold capitalize tracking-tight ${isCurrentMonth ? 'text-red-600' : 'text-gray-900'}`}>
+                <h3 className={`text-xl font-bold capitalize tracking-tight ${isCurrentMonth ? 'text-red-600' : 'text-[#dde1e7]'}`}>
                     {format(month, 'MMMM', { locale: es })}
                 </h3>
                 <span className="material-symbols-outlined text-gray-400 text-sm opacity-0 -translate-x-2 transition-all group-hover/header:opacity-100 group-hover/header:translate-x-0">
@@ -84,6 +84,16 @@ const MonthCell: React.FC<MonthCellProps> = React.memo(({ month, events, onMonth
                     const hasEvent = dayEvents.length > 0;
                     const isToday = isSameDay(day, new Date());
                     
+                    // Determine dominant event color
+                    const getDotColor = () => {
+                        if (!hasEvent) return null;
+                        if (dayEvents.some(e => e.type === 'tournament')) return '#3b82f6'; // Indigo/Blue
+                        if (dayEvents.some(e => e.type === 'exam')) return '#f59e0b'; // Amber
+                        if (dayEvents.some(e => e.type === 'seminar')) return '#8b5cf6'; // Violet/Purple
+                        return '#ef4444'; // Red for classes
+                    };
+                    const dotColor = getDotColor();
+                    
                     return (
                         <div 
                             key={day.toISOString()} 
@@ -94,16 +104,16 @@ const MonthCell: React.FC<MonthCellProps> = React.memo(({ month, events, onMonth
                                 className={`
                                     flex items-center justify-center size-7 text-xs font-medium rounded-full transition-all z-10
                                     ${isToday 
-                                        ? 'bg-red-600 text-white shadow-md shadow-red-200 font-bold' 
-                                        : 'text-gray-700 group-hover/day:bg-gray-100'}
+                                        ? 'bg-red-600 text-white shadow-[0_4px_12px_rgba(225,29,72,0.4)] font-bold' 
+                                        : 'text-[#9ca3af] group-hover/day:bg-white/5'}
                                 `}
                             >
                                 {format(day, 'd')}
                             </span>
                             
-                            {/* Heatmap Indicator (Red Dot) */}
-                            {hasEvent && !isToday && (
-                                <div className="absolute bottom-0.5 size-1 rounded-full bg-red-500"></div>
+                            {/* Heatmap Indicator */}
+                            {dotColor && !isToday && (
+                                <div className="absolute bottom-0.5 size-1 rounded-full" style={{ background: dotColor }}></div>
                             )}
                         </div>
                     );

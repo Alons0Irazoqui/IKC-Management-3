@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { Student, ClassCategory, Event, LibraryResource, AcademySettings, Message, AttendanceRecord, SessionModification, ClassException, PromotionHistoryItem, CalendarEvent, Rank } from '../types';
 import { PulseService } from '../services/pulseService';
 import { mockMessages, defaultAcademySettings } from '../mockData';
@@ -295,6 +295,9 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
                 }, 500);
             }
         } else {
+            setStudents([]);
+            setClasses([]);
+            setEvents([]);
             setIsLoading(false);
         }
     }, [currentUser]);
@@ -823,8 +826,15 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (currentUser?.role !== 'master') return;
         const newEvents = events.filter(e => e.id !== id);
         setEvents(newEvents);
-        // Needs delete method in service, skipping for now
-        addToast('Evento eliminado', 'success');
+        try {
+            await PulseService.deleteEvent(id);
+            addToast('Evento eliminado permanentemente', 'success');
+        } catch (e) {
+            console.error("Error deleting event from DB:", e);
+            addToast('Error al eliminar el evento de la base de datos', 'error');
+            // Optionally, we could rollback local state if DB delete fails
+            // setEvents(events); 
+        }
     };
 
     const registerForEvent = async (studentId: string, eventId: string) => {
@@ -956,9 +966,36 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         setMessages(prev => prev.map(m => m.id === id ? { ...m, read: true } : m));
     };
 
+    // --- Strict Rank Mapping based on Academy Settings ---
+    const mappedStudents = useMemo(() => {
+        if (!academySettings?.ranks || academySettings.ranks.length === 0) return students;
+        return students.map(s => {
+            // 1. Prioritize strict ID match
+            let activeRank = academySettings.ranks.find(r => r.id === s.rankId);
+            
+            // 2. Fallback to name match (legacy logic bridging)
+            if (!activeRank) {
+                activeRank = academySettings.ranks.find(r => r.name.toLowerCase() === s.rank.toLowerCase());
+            }
+
+            // 3. Absolute fallback: the beginner belt
+            if (!activeRank) {
+                activeRank = academySettings.ranks[0];
+            }
+
+            // Return student with strictly coerced rank presentation
+            return {
+                ...s,
+                rank: activeRank.name,
+                rankColor: activeRank.color,
+                rankId: activeRank.id,
+            };
+        });
+    }, [students, academySettings?.ranks]);
+
     return (
         <AcademyContext.Provider value={{
-            students,
+            students: mappedStudents,
             classes,
             events,
             scheduleEvents,

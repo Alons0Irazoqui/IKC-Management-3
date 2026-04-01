@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { AcademyProvider } from './context/AcademyContext';
 import { FinanceProvider } from './context/FinanceContext';
 import { ToastProvider } from './context/ToastContext';
@@ -43,16 +43,21 @@ import Library from './pages/student/Library';
 import Settings from './pages/shared/Settings';
 import Forbidden from './pages/Forbidden';
 
-const App: React.FC = () => {
-  return (
-    <ErrorBoundary>
-        <ToastProvider>
-        <AuthProvider>
-            <AcademyProvider>
-            <FinanceProvider>
-                <ConfirmationProvider>
-                <Router>
-                    <Routes>
+// Inner component that has access to AuthContext
+const AppRoutes: React.FC = () => {
+    const { isLoggingOut } = useAuth();
+
+    // While logout is in progress, block ALL route rendering to avoid Login flash.
+    if (isLoggingOut) {
+        return (
+            <div className="min-h-screen w-full flex items-center justify-center bg-[#08080a]">
+                <div className="loader"></div>
+            </div>
+        );
+    }
+
+    return (
+        <Routes>
                     {/* --- RUTAS PÚBLICAS --- */}
                     <Route path="/" element={<Login />} />
                     <Route path="/login" element={<Login />} />
@@ -105,7 +110,20 @@ const App: React.FC = () => {
                             </DashboardLayout>
                         </ProtectedRoute>
                     } />
-                    </Routes>
+        </Routes>
+    );
+};
+
+const App: React.FC = () => {
+  return (
+    <ErrorBoundary>
+        <ToastProvider>
+        <AuthProvider>
+            <AcademyProvider>
+            <FinanceProvider>
+                <ConfirmationProvider>
+                <Router>
+                    <AppRoutes />
                 </Router>
                 </ConfirmationProvider>
             </FinanceProvider>

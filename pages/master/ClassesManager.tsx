@@ -278,22 +278,24 @@ const ClassesManager: React.FC = () => {
             {/* Header with Tabs */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-6">
                 <div>
-                    <h1 className="text-4xl font-black tracking-tight text-text-main">Gestión de Horarios</h1>
-                    <p className="text-text-secondary mt-1 text-lg">Define clases regulares y eventos especiales.</p>
+                    <h1 className="text-4xl font-black tracking-tight" style={{ color: '#dde1e7' }}>Gestión de Horarios</h1>
+                    <p className="mt-1 text-lg" style={{ color: '#6b7280' }}>Define clases regulares y eventos especiales.</p>
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <div className="flex bg-white p-1.5 rounded-2xl shadow-sm border border-gray-200">
+                    <div className="flex p-1.5 rounded-xl" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
                         <button
                             onClick={() => setActiveTab('classes')}
-                            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'classes' ? 'bg-primary text-white shadow-md' : 'text-text-secondary hover:text-text-main hover:bg-gray-50'}`}
+                            className="px-5 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2"
+                            style={activeTab === 'classes' ? { background: '#e11d48', color: '#fff', boxShadow: '0 4px 12px rgba(225,29,72,0.35)' } : { color: '#9ca3af' }}
                         >
                             <span className="material-symbols-outlined text-[18px]">calendar_month</span>
                             Clases
                         </button>
                         <button
                             onClick={() => setActiveTab('events')}
-                            className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'events' ? 'bg-primary text-white shadow-md' : 'text-text-secondary hover:text-text-main hover:bg-gray-50'}`}
+                            className="px-5 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2"
+                            style={activeTab === 'events' ? { background: '#e11d48', color: '#fff', boxShadow: '0 4px 12px rgba(225,29,72,0.35)' } : { color: '#9ca3af' }}
                         >
                             <span className="material-symbols-outlined text-[18px]">trophy</span>
                             Eventos y Seminarios
@@ -302,7 +304,8 @@ const ClassesManager: React.FC = () => {
                     {activeTab === 'classes' ? (
                         <button
                             onClick={() => { resetClassForm(); setShowCreateModal(true); }}
-                            className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-2xl font-bold shadow-lg shadow-primary/25 flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap"
+                            className="text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap"
+                            style={{ background: '#e11d48', boxShadow: '0 4px 16px rgba(225,29,72,0.3)' }}
                         >
                             <span className="material-symbols-outlined text-[18px]">add</span>
                             Nueva Clase
@@ -310,7 +313,8 @@ const ClassesManager: React.FC = () => {
                     ) : (
                         <button
                             onClick={() => setShowEventModal(true)}
-                            className="bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-2xl font-bold shadow-lg shadow-primary/25 flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap"
+                            className="text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap"
+                            style={{ background: '#e11d48', boxShadow: '0 4px 16px rgba(225,29,72,0.3)' }}
                         >
                             <span className="material-symbols-outlined text-[18px]">add_circle</span>
                             Nuevo Evento
@@ -325,56 +329,56 @@ const ClassesManager: React.FC = () => {
             {activeTab === 'classes' && (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                         {classes.map(cls => (
-                            <div key={cls.id} className="bg-white p-6 rounded-[2rem] shadow-card border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all group relative flex flex-col">
+                            <div key={cls.id} className="p-6 rounded-2xl hover:-translate-y-1 transition-all group relative flex flex-col" style={{ background: '#101014', border: '1px solid rgba(255,255,255,0.07)', boxShadow: '0 4px 24px rgba(0,0,0,0.3)' }}>
                                 {/* Actions */}
                                 <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                                    <button onClick={() => handleOpenEditClass(cls)} className="size-9 bg-gray-50 hover:bg-blue-50 text-gray-500 hover:text-blue-600 rounded-full flex items-center justify-center transition-colors shadow-sm">
+                                    <button onClick={() => handleOpenEditClass(cls)} className="size-9 rounded-xl flex items-center justify-center transition-colors" style={{ background: 'rgba(255,255,255,0.06)', color: '#9ca3af' }}>
                                         <span className="material-symbols-outlined text-[18px]">edit</span>
                                     </button>
-                                    <button onClick={() => handleDeleteClass(cls.id)} className="size-9 bg-gray-50 hover:bg-red-50 text-gray-500 hover:text-red-600 rounded-full flex items-center justify-center transition-colors shadow-sm">
+                                    <button onClick={() => handleDeleteClass(cls.id)} className="size-9 rounded-xl flex items-center justify-center transition-colors" style={{ background: 'rgba(225,29,72,0.1)', color: '#e11d48' }}>
                                         <span className="material-symbols-outlined text-[18px]">delete</span>
                                     </button>
                                 </div>
 
                                 <div className="mb-5 mt-2">
-                                    <div className="size-16 rounded-2xl bg-gradient-to-br from-indigo-50 to-white border border-indigo-100 text-primary flex items-center justify-center shadow-sm mb-4">
-                                        <span className="material-symbols-outlined text-4xl">sports_martial_arts</span>
+                                    <div className="size-14 rounded-xl flex items-center justify-center mb-4" style={{ background: 'rgba(225,29,72,0.1)', border: '1px solid rgba(225,29,72,0.2)' }}>
+                                        <span className="material-symbols-outlined text-3xl" style={{ color: '#e11d48' }}>sports_martial_arts</span>
                                     </div>
-                                    <h3 className="text-2xl font-bold text-text-main mb-1 truncate leading-tight">{cls.name}</h3>
-                                    <p className="text-sm text-text-secondary font-medium">{cls.instructor}</p>
+                                    <h3 className="text-xl font-bold mb-1 truncate leading-tight" style={{ color: '#dde1e7' }}>{cls.name}</h3>
+                                    <p className="text-sm font-medium" style={{ color: '#6b7280' }}>{cls.instructor}</p>
                                 </div>
 
-                                <div className="space-y-3 mb-8">
-                                    <div className="flex items-center gap-3 text-sm text-text-secondary">
-                                        <div className="size-8 rounded-full bg-gray-50 flex items-center justify-center"><span className="material-symbols-outlined text-[18px]">schedule</span></div>
+                                <div className="space-y-3 mb-6">
+                                    <div className="flex items-center gap-3 text-sm">
+                                        <div className="size-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.05)' }}><span className="material-symbols-outlined text-[16px]" style={{ color: '#6b7280' }}>schedule</span></div>
                                         <div className="flex flex-col">
-                                            <span className="font-semibold text-text-main">{cls.days.map(d => d.substring(0, 3)).join(', ')}</span>
-                                            <span className="text-xs">{cls.startTime} - {cls.endTime}</span>
+                                            <span className="font-semibold text-sm" style={{ color: '#dde1e7' }}>{cls.days.map(d => d.substring(0, 3)).join(', ')}</span>
+                                            <span className="text-xs" style={{ color: '#6b7280' }}>{cls.startTime} - {cls.endTime}</span>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-3 text-sm text-text-secondary">
-                                        <div className="size-8 rounded-full bg-gray-50 flex items-center justify-center"><span className="material-symbols-outlined text-[18px]">groups</span></div>
-                                        <span className="font-medium">{cls.studentIds?.length || 0} Alumnos Inscritos</span>
+                                    <div className="flex items-center gap-3 text-sm">
+                                        <div className="size-8 rounded-lg flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.05)' }}><span className="material-symbols-outlined text-[16px]" style={{ color: '#6b7280' }}>groups</span></div>
+                                        <span className="font-medium" style={{ color: '#9ca3af' }}>{cls.studentIds?.length || 0} Alumnos Inscritos</span>
                                     </div>
                                 </div>
 
-                                <div className="mt-auto flex flex-col gap-3">
-                                    {/* BUTTON 1: ALUMNOS / ASISTENCIA */}
+                                <div className="mt-auto flex flex-col gap-2.5">
                                     <button
                                         onClick={() => navigate(`/master/attendance/${cls.id}`)}
-                                        className="w-full py-3.5 rounded-xl border-2 border-gray-100 bg-white text-text-main font-bold hover:bg-gray-50 hover:border-gray-200 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                                        className="w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                                        style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: '#9ca3af' }}
                                     >
-                                        <span className="material-symbols-outlined text-primary">groups</span>
+                                        <span className="material-symbols-outlined text-[18px]" style={{ color: '#e11d48' }}>groups</span>
                                         Alumnos y Asistencia
                                     </button>
-                                    {/* BUTTON 2: GESTIONAR CALENDARIO */}
                                     <button
                                         onClick={() => setShowFullCalendar(true)}
-                                        className="w-full py-3.5 rounded-xl border-2 border-indigo-100 bg-indigo-50 text-indigo-700 font-bold hover:bg-indigo-100 hover:border-indigo-200 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                                        className="w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                                        style={{ background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.2)', color: '#60a5fa' }}
                                     >
-                                        <span className="material-symbols-outlined text-indigo-500">calendar_month</span>
+                                        <span className="material-symbols-outlined text-[18px]">calendar_month</span>
                                         Gestionar Calendario
                                     </button>
                                 </div>
@@ -388,12 +392,12 @@ const ClassesManager: React.FC = () => {
             {activeTab === 'events' && (
                 <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                         {events.length === 0 ? (
-                            <div className="col-span-full py-20 flex flex-col items-center justify-center text-text-secondary bg-white rounded-3xl border border-dashed border-gray-300">
-                                <span className="material-symbols-outlined text-6xl opacity-20 mb-4">emoji_events</span>
-                                <h3 className="text-xl font-bold text-text-main">No hay eventos programados</h3>
-                                <p className="max-w-md text-center mt-2">Crea torneos, exÃƒÂ¡menes de grado o seminarios para que tus alumnos se inscriban.</p>
+                            <div className="col-span-full py-20 flex flex-col items-center justify-center rounded-2xl" style={{ border: '1px dashed rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.02)' }}>
+                                <span className="material-symbols-outlined text-6xl mb-4" style={{ color: 'rgba(255,255,255,0.1)' }}>emoji_events</span>
+                                <h3 className="text-xl font-bold" style={{ color: '#dde1e7' }}>No hay eventos programados</h3>
+                                <p className="max-w-md text-center mt-2" style={{ color: '#6b7280' }}>Crea torneos, exámenes de grado o seminarios para que tus alumnos se inscriban.</p>
                             </div>
                         ) : (
                             events.map(event => {
@@ -401,53 +405,51 @@ const ClassesManager: React.FC = () => {
                                 const percentFull = Math.min(((event.registeredCount || 0) / event.capacity) * 100, 100);
 
                                 return (
-                                    <div key={event.id} className="bg-white p-6 rounded-[2rem] shadow-card border border-gray-100 flex flex-col relative group hover:shadow-xl transition-all">
+                                    <div key={event.id} className="p-6 rounded-2xl flex flex-col relative group hover:-translate-y-1 transition-all" style={{ background: '#101014', border: '1px solid rgba(255,255,255,0.07)', boxShadow: '0 4px 24px rgba(0,0,0,0.3)' }}>
                                         <div className="flex justify-between items-start mb-6">
                                             <div className="flex gap-4">
-                                                <div className="flex flex-col items-center justify-center w-16 h-16 bg-gray-50 rounded-2xl border border-gray-200 shrink-0">
-                                                    <span className="text-xs font-bold text-red-500 uppercase">{new Date(event.date).toLocaleString('es-ES', { month: 'short' })}</span>
-                                                    <span className="text-2xl font-black text-text-main leading-none">{new Date(event.date).getDate()}</span>
+                                                <div className="flex flex-col items-center justify-center w-14 h-14 rounded-xl shrink-0" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                                                    <span className="text-[10px] font-bold uppercase" style={{ color: '#e11d48' }}>{new Date(event.date).toLocaleString('es-ES', { month: 'short' })}</span>
+                                                    <span className="text-2xl font-black leading-none" style={{ color: '#dde1e7' }}>{new Date(event.date).getDate()}</span>
                                                 </div>
                                                 <div>
-                                                    <div className={`inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded mb-1 ${typeInfo.color}`}>
+                                                    <div className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded mb-1" style={{ background: 'rgba(255,255,255,0.07)', color: '#9ca3af', border: '1px solid rgba(255,255,255,0.08)' }}>
                                                         <span className="material-symbols-outlined text-[12px]">{typeInfo.icon}</span>
                                                         {typeInfo.label}
                                                     </div>
-                                                    <h3 className="text-xl font-bold text-text-main leading-tight line-clamp-1">{event.title}</h3>
-                                                    <p className="text-sm text-text-secondary mt-0.5 flex items-center gap-1">
+                                                    <h3 className="text-lg font-bold leading-tight line-clamp-1" style={{ color: '#dde1e7' }}>{event.title}</h3>
+                                                    <p className="text-sm mt-0.5 flex items-center gap-1" style={{ color: '#6b7280' }}>
                                                         <span className="material-symbols-outlined text-[14px]">schedule</span> {event.time}
                                                     </p>
                                                 </div>
                                             </div>
 
-                                            {/* Privacy Badge */}
                                             {event.isVisibleToStudents === false && (
-                                                <div className="absolute top-6 right-6" title="Evento Privado (Solo InvitaciÃƒÂ³n)">
-                                                    <span className="bg-gray-100 text-gray-500 p-1.5 rounded-full flex items-center justify-center border border-gray-200">
+                                                <div className="absolute top-6 right-6" title="Evento Privado (Solo Invitación)">
+                                                    <span className="p-1.5 rounded-full flex items-center justify-center" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)', color: '#6b7280' }}>
                                                         <span className="material-symbols-outlined text-sm">visibility_off</span>
                                                     </span>
                                                 </div>
                                             )}
                                         </div>
 
-                                        {/* Capacity Progress */}
-                                        <div className="mb-6">
-                                            <div className="flex justify-between text-xs font-bold text-text-secondary mb-1">
+                                        <div className="mb-5">
+                                            <div className="flex justify-between text-xs font-bold mb-2" style={{ color: '#6b7280' }}>
                                                 <span>Cupo</span>
-                                                <span className={`${percentFull >= 100 ? 'text-red-500' : 'text-text-main'}`}>{event.registeredCount || 0} / {event.capacity}</span>
+                                                <span style={{ color: percentFull >= 100 ? '#e11d48' : '#dde1e7' }}>{event.registeredCount || 0} / {event.capacity}</span>
                                             </div>
-                                            <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                                            <div className="h-1.5 w-full rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
                                                 <div
-                                                    className={`h-full rounded-full transition-all duration-500 ${percentFull >= 100 ? 'bg-red-500' : 'bg-primary'}`}
-                                                    style={{ width: `${percentFull}%` }}
+                                                    className="h-full rounded-full transition-all duration-500"
+                                                    style={{ width: `${percentFull}%`, background: percentFull >= 100 ? '#e11d48' : '#e11d48' }}
                                                 ></div>
                                             </div>
                                         </div>
 
-                                        {/* Updated: Button Navigates to Full Page */}
                                         <button
                                             onClick={() => navigate(`/master/event/${event.id}`)}
-                                            className="mt-auto w-full py-3 rounded-xl border border-gray-200 bg-white text-text-main font-bold hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                                            className="mt-auto w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                                            style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: '#9ca3af' }}
                                         >
                                             <span className="material-symbols-outlined">settings</span>
                                             Gestionar Evento
@@ -543,36 +545,48 @@ const ClassesManager: React.FC = () => {
                         const weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
                         return (
                             <div className="flex flex-col h-full animate-in fade-in duration-500 overflow-hidden">
-                                <div className="grid grid-cols-7 py-3 shrink-0 bg-white border-b border-gray-100 z-10 shadow-sm">
+                                <div className="grid grid-cols-7 py-3 shrink-0 z-10" style={{ background: '#101014', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                                     {weekDays.map(day => (
-                                        <div key={day} className="text-center text-[10px] font-bold text-gray-400 uppercase tracking-widest">{day}</div>
+                                        <div key={day} className="text-center text-[10px] font-bold uppercase tracking-widest" style={{ color: '#4b5563' }}>{day}</div>
                                     ))}
                                 </div>
                                 <div className="flex-1 overflow-y-auto custom-scrollbar">
-                                    <div className="grid grid-cols-7 auto-rows-fr bg-gray-50 gap-px border-b border-gray-100 min-h-[600px]">
+                                    <div className="grid grid-cols-7 auto-rows-fr gap-[1px] min-h-[600px] bg-white/[0.02]">
                                         {days.map((day) => {
                                             const dayEvts = calEvents.filter(e => isSameDay(e.start, day)).sort((a, b) => a.start.getTime() - b.start.getTime());
                                             const isToday = isSameDay(day, new Date());
                                             const isCurrentMonth = isSameMonth(day, calDate2);
                                             return (
                                                 <div key={day.toISOString()} onClick={() => handleDayClick2(day, dayEvts)}
-                                                    className={`min-h-[120px] p-2 cursor-pointer transition-colors hover:bg-blue-50/30 flex flex-col items-center gap-1 ${isCurrentMonth ? 'bg-white' : 'bg-gray-50/50'}`}
+                                                    className="min-h-[120px] p-2 cursor-pointer transition-colors flex flex-col items-center gap-1"
+                                                    style={{ background: isCurrentMonth ? '#0e0e11' : 'rgba(0,0,0,0.3)' }}
                                                 >
-                                                    <div className={`size-7 flex items-center justify-center rounded-full text-xs font-bold transition-all ${
-                                                        isToday ? 'bg-red-600 text-white shadow-md' : isCurrentMonth ? 'text-gray-700' : 'text-gray-300'
-                                                    }`}>{format(day, 'd')}</div>
+                                                    <div className="size-7 flex items-center justify-center rounded-full text-xs font-bold transition-all"
+                                                        style={isToday ? { background: '#e11d48', color: '#fff', boxShadow: '0 2px 8px rgba(225,29,72,0.5)' } : { color: isCurrentMonth ? '#dde1e7' : '#374151' }}
+                                                    >{format(day, 'd')}</div>
                                                     <div className="w-full flex flex-col gap-1 mt-1">
-                                                        {dayEvts.slice(0, 3).map(evt => (
-                                                            <div key={evt.id} onClick={e => { e.stopPropagation(); handleEventClick2(evt); }}
-                                                                className={`w-full px-2.5 py-1.5 rounded-md text-[11px] font-bold truncate transition-transform hover:scale-[1.02] shadow-sm border-l-2 ${
-                                                                    evt.status === 'cancelled'
-                                                                        ? 'bg-gray-100 text-gray-400 line-through border-gray-300'
-                                                                        : 'bg-white text-gray-700 border-red-500 hover:bg-red-50'
-                                                                }`}
-                                                            >{evt.title}</div>
-                                                        ))}
+                                                        {dayEvts.slice(0, 3).map(evt => {
+                                                            const isCancelled = evt.status === 'cancelled';
+                                                            const colors = isCancelled ? { bg: 'rgba(255,255,255,0.04)', text: '#4b5563', border: '#374151' } :
+                                                                           evt.type === 'exam' ? { bg: 'rgba(217,119,6,0.1)', text: '#fbbf24', border: '#d97706' } :
+                                                                           evt.type === 'tournament' ? { bg: 'rgba(37,99,235,0.1)', text: '#60a5fa', border: '#2563eb' } :
+                                                                           evt.type === 'seminar' ? { bg: 'rgba(124,58,237,0.1)', text: '#a78bfa', border: '#7c3aed' } :
+                                                                           { bg: 'rgba(225,29,72,0.1)', text: '#f87171', border: '#e11d48' };
+                                                            
+                                                            return (
+                                                                <div key={evt.id} onClick={e => { e.stopPropagation(); handleEventClick2(evt); }}
+                                                                    className="w-full px-2 py-1 rounded-md text-[10px] font-bold truncate transition-transform hover:scale-[1.02] border-l-2"
+                                                                    style={{ 
+                                                                        background: colors.bg, 
+                                                                        color: colors.text, 
+                                                                        borderColor: colors.border,
+                                                                        textDecoration: isCancelled ? 'line-through' : 'none'
+                                                                    }}
+                                                                >{evt.title}</div>
+                                                            );
+                                                        })}
                                                         {dayEvts.length > 3 && (
-                                                            <div className="text-[10px] font-bold text-gray-400 text-center bg-gray-50 rounded py-0.5">+ {dayEvts.length - 3} más</div>
+                                                            <div className="text-[10px] font-bold text-center py-0.5" style={{ color: '#4b5563', background: 'rgba(255,255,255,0.04)', borderRadius: '4px' }}>+ {dayEvts.length - 3} más</div>
                                                         )}
                                                     </div>
                                                 </div>
@@ -591,35 +605,47 @@ const ClassesManager: React.FC = () => {
                             return Array.from({ length: 7 }, (_, i) => addDays(start, i));
                         }, []);
                         return (
-                            <div className="flex-1 overflow-y-auto bg-white custom-scrollbar animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                <div className="grid grid-cols-1 md:grid-cols-7 min-h-full divide-y md:divide-y-0 md:divide-x divide-gray-100">
+                            <div className="flex-1 overflow-y-auto custom-scrollbar animate-in fade-in slide-in-from-bottom-2 duration-500" style={{ background: 'transparent' }}>
+                                <div className="grid grid-cols-1 md:grid-cols-7 min-h-full divide-y md:divide-y-0 md:divide-x divide-white/[0.04]">
                                     {weekDays2.map(day => {
                                         const dayEvts = calEvents.filter(e => isSameDay(e.start, day)).sort((a, b) => a.start.getTime() - b.start.getTime());
                                         const isToday = isSameDay(day, new Date());
                                         return (
-                                            <div key={day.toISOString()} className="flex flex-col relative bg-white">
-                                                <div className={`sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-gray-50 py-3 text-center transition-colors ${isToday ? 'bg-red-50/30' : ''}`}>
-                                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{format(day, 'EEE', { locale: es })}</p>
-                                                    <div className={`mx-auto size-8 flex items-center justify-center rounded-full mt-1 ${isToday ? 'bg-red-600 text-white shadow-md' : 'text-gray-900 font-black'}`}>
-                                                        <span className="text-lg leading-none">{format(day, 'd')}</span>
+                                            <div key={day.toISOString()} className="flex flex-col relative" style={{ background: 'transparent' }}>
+                                                <div className="sticky top-0 z-10 py-3 text-center transition-colors" style={{ background: isToday ? 'rgba(225,29,72,0.08)' : 'rgba(16,16,20,0.95)', borderBottom: '1px solid rgba(255,255,255,0.03)', backdropFilter: 'blur(12px)' }}>
+                                                    <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: '#4b5563' }}>{format(day, 'EEE', { locale: es })}</p>
+                                                    <div className="mx-auto size-8 flex items-center justify-center rounded-full mt-1" style={isToday ? { background: '#e11d48', boxShadow: '0 2px 8px rgba(225,29,72,0.5)' } : { background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                        <span className="text-lg leading-none font-black" style={{ color: isToday ? '#fff' : '#dde1e7' }}>{format(day, 'd')}</span>
                                                     </div>
                                                 </div>
-                                                <div className="flex flex-col gap-3 p-3 flex-1 min-h-[100px]">
+                                                <div className="flex flex-col gap-2.5 p-3 flex-1 min-h-[100px]">
                                                     {dayEvts.length > 0 ? dayEvts.map(evt => (
                                                         <div key={evt.id} onClick={() => handleEventClick2(evt)}
-                                                            className={`p-4 rounded-xl border-l-[3px] cursor-pointer transition-all hover:shadow-md hover:-translate-y-0.5 group active:scale-95 ${
-                                                                evt.status === 'cancelled' ? 'bg-gray-50 border-gray-300 opacity-60' : 'bg-white border-red-500 shadow-sm ring-1 ring-gray-100'
-                                                            }`}
+                                                            className={`p-3 rounded-xl border-l-[3px] cursor-pointer transition-all hover:-translate-y-0.5 active:scale-95 shadow-lg`}
+                                                            style={evt.status === 'cancelled'
+                                                                ? { background: 'rgba(255,255,255,0.03)', borderColor: '#374151', opacity: 0.6 }
+                                                                : { 
+                                                                    background: evt.type === 'class' ? 'rgba(225,29,72,0.08)' : 
+                                                                                evt.type === 'exam' ? 'rgba(217,119,6,0.08)' : 
+                                                                                evt.type === 'tournament' ? 'rgba(37,99,235,0.08)' : 
+                                                                                'rgba(124,58,237,0.08)', 
+                                                                    borderColor: evt.type === 'class' ? '#e11d48' : 
+                                                                                 evt.type === 'exam' ? '#d97706' : 
+                                                                                 evt.type === 'tournament' ? '#2563eb' : 
+                                                                                 '#7c3aed',
+                                                                    boxShadow: '0 4px 12px rgba(0,0,0,0.3)' 
+                                                                }
+                                                            }
                                                         >
-                                                            <p className={`text-sm font-bold leading-tight ${evt.status === 'cancelled' ? 'text-gray-400 line-through' : 'text-gray-800'}`}>{evt.title}</p>
-                                                            <div className="flex items-center gap-1 mt-2">
-                                                                <span className="material-symbols-outlined text-[12px] text-gray-400">schedule</span>
-                                                                <p className="text-xs text-gray-500 font-bold uppercase tracking-wide">{format(evt.start, 'HH:mm')}</p>
+                                                            <p className="text-sm font-bold leading-tight" style={{ color: evt.status === 'cancelled' ? '#4b5563' : '#dde1e7', textDecoration: evt.status === 'cancelled' ? 'line-through' : 'none' }}>{evt.title}</p>
+                                                            <div className="flex items-center gap-1 mt-1.5">
+                                                                <span className="material-symbols-outlined text-[12px]" style={{ color: '#6b7280' }}>schedule</span>
+                                                                <p className="text-xs font-bold uppercase tracking-wide" style={{ color: '#6b7280' }}>{format(evt.start, 'HH:mm')}</p>
                                                             </div>
                                                         </div>
                                                     )) : (
                                                         <div className="hidden md:flex flex-1 flex-col items-center justify-center opacity-10">
-                                                            <div className="h-full w-px bg-gray-100 border-l border-dashed border-gray-300"></div>
+                                                            <div className="h-full w-px" style={{ borderLeft: '1px dashed rgba(255,255,255,0.1)' }}></div>
                                                         </div>
                                                     )}
                                                 </div>
@@ -635,51 +661,76 @@ const ClassesManager: React.FC = () => {
                     const DayView = () => {
                         const dayEvts = useMemo(() => calEvents.filter(e => isSameDay(e.start, calDate2)).sort((a, b) => a.start.getTime() - b.start.getTime()), []);
                         return (
-                            <div className="flex-1 overflow-y-auto custom-scrollbar bg-white">
+                            <div className="flex-1 overflow-y-auto custom-scrollbar" style={{ background: '#0e0e11' }}>
                                 <div className="max-w-3xl mx-auto w-full p-6 md:p-10 animate-in fade-in zoom-in-95 duration-300">
-                                    <h3 className="text-3xl font-black text-gray-900 mb-8 capitalize flex items-center gap-3">
-                                        <span className="w-1.5 h-8 bg-red-600 rounded-full"></span>
+                                    <h3 className="text-3xl font-black mb-8 capitalize flex items-center gap-3" style={{ color: '#dde1e7' }}>
+                                        <span className="w-1.5 h-8 bg-red-600 rounded-full shadow-[0_0_12px_rgba(225,29,72,0.4)]"></span>
                                         {format(calDate2, 'EEEE d, MMMM', { locale: es })}
                                     </h3>
                                     {dayEvts.length === 0 ? (
-                                        <div className="flex flex-col items-center justify-center py-20 text-gray-400 border-2 border-dashed border-gray-100 rounded-3xl bg-gray-50/50">
-                                            <div className="size-20 bg-white rounded-full flex items-center justify-center mb-4 shadow-sm">
-                                                <span className="material-symbols-outlined text-4xl opacity-30 text-gray-400">self_improvement</span>
+                                        <div className="flex flex-col items-center justify-center py-20 rounded-3xl" style={{ border: '2px dashed rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.01)' }}>
+                                            <div className="size-20 rounded-full flex items-center justify-center mb-4" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                                <span className="material-symbols-outlined text-4xl opacity-30" style={{ color: '#6b7280' }}>self_improvement</span>
                                             </div>
-                                            <p className="text-lg font-bold text-gray-500">Sin sesiones</p>
-                                            <p className="text-sm opacity-60">No hay clases ni eventos este día.</p>
+                                            <p className="text-lg font-bold" style={{ color: '#9ca3af' }}>Sin sesiones</p>
+                                            <p className="text-sm opacity-60" style={{ color: '#6b7280' }}>No hay clases ni eventos este día.</p>
                                         </div>
                                     ) : (
-                                        <div className="relative border-l border-gray-100 ml-4 space-y-8 py-2">
-                                            {dayEvts.map(evt => (
-                                                <div key={evt.id} onClick={() => handleEventClick2(evt)} className="relative pl-8 group cursor-pointer">
-                                                    <div className={`absolute -left-[5px] top-4 size-2.5 rounded-full border-2 border-white shadow-sm ring-1 ring-gray-100 transition-colors ${evt.status === 'cancelled' ? 'bg-gray-300' : 'bg-red-600 group-hover:scale-125'}`}></div>
-                                                    <div className={`flex items-center gap-6 p-6 rounded-2xl border transition-all hover:shadow-lg hover:-translate-y-1 bg-white ${
-                                                        evt.status === 'cancelled' ? 'border-gray-100 opacity-60 grayscale bg-gray-50' : 'border-gray-100 hover:border-red-100'
-                                                    }`}>
-                                                        <div className="flex flex-col items-center min-w-[60px] text-center">
-                                                            <span className="text-lg font-black text-gray-900 leading-none">{format(evt.start, 'HH:mm')}</span>
-                                                            <span className="text-xs font-bold text-gray-400 mt-1">{format(evt.end, 'HH:mm')}</span>
-                                                        </div>
-                                                        <div className="w-px h-10 bg-gray-100"></div>
-                                                        <div className="flex-1">
-                                                            <h4 className={`text-xl font-bold ${evt.status === 'cancelled' ? 'text-gray-500 line-through' : 'text-gray-900 group-hover:text-red-700 transition-colors'}`}>{evt.title}</h4>
-                                                            <div className="flex items-center gap-3 mt-1.5">
-                                                                <span className="text-sm text-gray-500 font-medium flex items-center gap-1 bg-gray-50 px-2 py-0.5 rounded-md">
-                                                                    <span className="material-symbols-outlined text-sm">person</span>
-                                                                    {evt.instructor}
-                                                                </span>
-                                                                {evt.status === 'cancelled' && (
-                                                                    <span className="bg-red-50 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded uppercase border border-red-100">Cancelada</span>
-                                                                )}
+                                        <div className="relative border-l ml-4 space-y-8 py-2" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+                                            {dayEvts.map(evt => {
+                                                const isCancelled = evt.status === 'cancelled';
+                                                const accentColor = isCancelled ? '#374151' :
+                                                                    evt.type === 'exam' ? '#d97706' :
+                                                                    evt.type === 'tournament' ? '#2563eb' :
+                                                                    evt.type === 'seminar' ? '#7c3aed' :
+                                                                    '#e11d48';
+
+                                                return (
+                                                    <div key={evt.id} onClick={() => handleEventClick2(evt)} className="relative pl-8 group cursor-pointer">
+                                                        <div className={`absolute -left-[5px] top-4 size-2.5 rounded-full border-2 border-[#0e0e11] shadow-sm transition-all duration-300 ${isCancelled ? '' : 'group-hover:scale-125'}`} 
+                                                            style={{ 
+                                                                background: accentColor,
+                                                                boxShadow: isCancelled ? 'none' : `0 0 10px ${accentColor}66`
+                                                            }}
+                                                        ></div>
+                                                        <div className={`flex items-center gap-6 p-6 rounded-2xl border transition-all hover:-translate-y-1 ${
+                                                            isCancelled 
+                                                                ? 'bg-transparent opacity-60 grayscale' 
+                                                                : 'hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)]'
+                                                        }`} style={{ 
+                                                            background: 'rgba(255,255,255,0.02)', 
+                                                            borderColor: isCancelled ? 'rgba(255,255,255,0.03)' : 'rgba(255,255,255,0.06)'
+                                                        }}>
+                                                            <div className="flex flex-col items-center min-w-[60px] text-center">
+                                                                <span className="text-lg font-black leading-none" style={{ color: '#dde1e7' }}>{format(evt.start, 'HH:mm')}</span>
+                                                                <span className="text-xs font-bold mt-1" style={{ color: '#6b7280' }}>{format(evt.end, 'HH:mm')}</span>
+                                                            </div>
+                                                            <div className="w-px h-10" style={{ background: 'rgba(255,255,255,0.05)' }}></div>
+                                                            <div className="flex-1">
+                                                                <h4 className={`text-xl font-bold transition-colors ${isCancelled ? 'line-through' : ''}`} 
+                                                                    style={{ 
+                                                                        color: isCancelled ? '#6b7280' : '#dde1e7'
+                                                                    }}
+                                                                    onMouseEnter={(e) => !isCancelled && (e.currentTarget.style.color = accentColor)}
+                                                                    onMouseLeave={(e) => !isCancelled && (e.currentTarget.style.color = '#dde1e7')}
+                                                                >{evt.title}</h4>
+                                                                <div className="flex items-center gap-3 mt-1.5">
+                                                                    <span className="text-sm font-medium flex items-center gap-1 px-2.5 py-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)', color: '#9ca3af' }}>
+                                                                        <span className="material-symbols-outlined text-sm">person</span>
+                                                                        {evt.instructor}
+                                                                    </span>
+                                                                    {isCancelled && (
+                                                                        <span className="bg-red-900/20 text-red-500 text-[10px] font-bold px-2 py-0.5 rounded uppercase border border-red-500/20">Cancelada</span>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            <div className="size-10 rounded-full flex items-center justify-center transition-colors" style={{ background: 'rgba(255,255,255,0.03)', color: '#6b7280' }}>
+                                                                <span className="material-symbols-outlined">chevron_right</span>
                                                             </div>
                                                         </div>
-                                                        <div className="size-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:bg-red-50 group-hover:text-red-600 transition-colors">
-                                                            <span className="material-symbols-outlined">chevron_right</span>
-                                                        </div>
                                                     </div>
-                                                </div>
-                                            ))}
+                                                );
+                                            })}
                                         </div>
                                     )}
                                 </div>
@@ -698,39 +749,40 @@ const ClassesManager: React.FC = () => {
                                     />
                                     <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
                                         transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-                                        className="fixed inset-y-0 right-0 z-[230] w-full max-w-md bg-white shadow-2xl flex flex-col"
+                                        className="fixed inset-y-0 right-0 z-[230] w-full max-w-md shadow-2xl flex flex-col"
+                                        style={{ background: '#101014', borderLeft: '1px solid rgba(255,255,255,0.08)' }}
                                     >
-                                        <div className="p-8 border-b border-gray-100 flex justify-between items-start bg-white shrink-0">
+                                        <div className="p-8 flex justify-between items-start shrink-0" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                                             <div>
-                                                <h2 className="text-3xl font-black text-gray-900 tracking-tight capitalize">{format(drawerState2.date, 'EEEE', { locale: es })}</h2>
-                                                <p className="text-gray-500 font-medium text-lg capitalize">{format(drawerState2.date, 'd MMMM yyyy', { locale: es })}</p>
+                                                <h2 className="text-3xl font-black tracking-tight capitalize" style={{ color: '#dde1e7' }}>{format(drawerState2.date, 'EEEE', { locale: es })}</h2>
+                                                <p className="font-medium text-lg capitalize" style={{ color: '#9ca3af' }}>{format(drawerState2.date, 'd MMMM yyyy', { locale: es })}</p>
                                             </div>
-                                            <button onClick={() => setDrawerState2(p => ({ ...p, isOpen: false }))} className="p-2 hover:bg-gray-100 rounded-full text-gray-400 hover:text-gray-900 transition-colors">
+                                            <button onClick={() => setDrawerState2(p => ({ ...p, isOpen: false }))} className="p-2.5 rounded-xl transition-all active:scale-90" style={{ background: 'rgba(255,255,255,0.05)', color: '#6b7280' }}>
                                                 <span className="material-symbols-outlined">close</span>
                                             </button>
                                         </div>
-                                        <div className="flex-1 overflow-y-auto p-8 bg-white custom-scrollbar">
+                                        <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
                                             {drawerState2.events.length === 0 ? (
-                                                <div className="h-full flex flex-col items-center justify-center text-center text-gray-400">
-                                                    <span className="material-symbols-outlined text-6xl opacity-20 mb-4">event_busy</span>
-                                                    <p className="font-medium">No hay actividades programadas.</p>
+                                                <div className="h-full flex flex-col items-center justify-center text-center">
+                                                    <span className="material-symbols-outlined text-6xl opacity-10 mb-4" style={{ color: '#dde1e7' }}>event_busy</span>
+                                                    <p className="font-medium" style={{ color: '#6b7280' }}>No hay actividades programadas.</p>
                                                 </div>
                                             ) : (
                                                 <div className="space-y-6 relative">
-                                                    <div className="absolute left-[19px] top-4 bottom-4 w-[2px] bg-gray-100"></div>
+                                                    <div className="absolute left-[19px] top-4 bottom-4 w-[2px]" style={{ background: 'rgba(255,255,255,0.05)' }}></div>
                                                     {drawerState2.events.map(evt => (
                                                         <div key={evt.id} onClick={() => { setDrawerState2(p => ({ ...p, isOpen: false })); handleEventClick2(evt); }}
-                                                            className="relative pl-10 group cursor-pointer"
+                                                            className="relative pl-12 group cursor-pointer"
                                                         >
-                                                            <div className={`absolute left-2 top-2 size-6 rounded-full border-4 border-white shadow-sm z-10 box-content ${evt.status === 'cancelled' ? 'bg-gray-300' : 'bg-red-600'}`}></div>
-                                                            <div className={`p-5 rounded-2xl border transition-all ${evt.status === 'cancelled' ? 'bg-gray-50 border-gray-100 opacity-60' : 'bg-white border-gray-100 hover:border-red-100 hover:shadow-lg hover:shadow-red-500/5'}`}>
+                                                            <div className={`absolute left-2 top-2 size-6 rounded-full border-4 border-[#101014] shadow-sm z-10 box-content ${evt.status === 'cancelled' ? 'bg-[#374151]' : 'bg-red-600'}`}></div>
+                                                            <div className={`p-5 rounded-2xl border transition-all ${evt.status === 'cancelled' ? 'bg-transparent opacity-60' : 'hover:border-red-500/30 hover:shadow-[0_8px_30px_rgba(0,0,0,0.4)]'}`} style={{ background: 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.06)' }}>
                                                                 <div className="flex justify-between items-start mb-2">
-                                                                    <span className={`text-xs font-bold uppercase tracking-wider ${evt.status === 'cancelled' ? 'text-gray-400' : 'text-red-600'}`}>
+                                                                    <span className={`text-[11px] font-black uppercase tracking-wider ${evt.status === 'cancelled' ? 'text-gray-500' : 'text-red-500'}`}>
                                                                         {format(evt.start, 'HH:mm')} - {format(evt.end, 'HH:mm')}
                                                                     </span>
                                                                 </div>
-                                                                <h3 className={`font-bold text-lg leading-tight mb-1 ${evt.status === 'cancelled' ? 'text-gray-500 line-through' : 'text-gray-900'}`}>{evt.title}</h3>
-                                                                <p className="text-sm text-gray-500">{evt.instructor}</p>
+                                                                <h3 className={`font-bold text-lg leading-tight mb-2 ${evt.status === 'cancelled' ? 'text-gray-500 line-through' : ''}`} style={{ color: evt.status === 'cancelled' ? '#6b7280' : '#dde1e7' }}>{evt.title}</h3>
+                                                                <p className="text-sm font-medium" style={{ color: '#9ca3af' }}>{evt.instructor}</p>
                                                             </div>
                                                         </div>
                                                     ))}
@@ -748,43 +800,43 @@ const ClassesManager: React.FC = () => {
                         if (!isEventModal2 || !selectedEvent2) return null;
                         const isCancelled = selectedEvent2.status === 'cancelled';
                         return (
-                            <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-white/60 backdrop-blur-md animate-in fade-in zoom-in-95 duration-200" onClick={() => setIsEventModal2(false)}>
-                                <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden flex flex-col relative border border-gray-100" onClick={e => e.stopPropagation()}>
-                                    <div className={`h-32 ${isCancelled ? 'bg-red-500' : 'bg-gray-900'} relative overflow-hidden flex items-center justify-center`}>
-                                        <div className="absolute inset-0 opacity-10">
+                            <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 backdrop-blur-md animate-in fade-in zoom-in-95 duration-200" style={{ background: 'rgba(0,0,0,0.6)' }} onClick={() => setIsEventModal2(false)}>
+                                <div className="rounded-[2.5rem] shadow-2xl w-full max-w-sm overflow-hidden flex flex-col relative" style={{ background: '#101014', border: '1px solid rgba(255,255,255,0.08)' }} onClick={e => e.stopPropagation()}>
+                                    <div className={`h-32 ${isCancelled ? 'bg-red-900/40' : 'bg-red-600'} relative overflow-hidden flex items-center justify-center`}>
+                                        <div className="absolute inset-0 opacity-20">
                                             <div className="absolute -top-10 -right-10 size-40 bg-white rounded-full blur-3xl"></div>
                                             <div className="absolute bottom-0 left-0 size-32 bg-white rounded-full blur-3xl"></div>
                                         </div>
                                         <div className="relative z-10 text-center flex flex-col items-center">
-                                            <span className="material-symbols-outlined text-4xl text-white mb-2">
+                                            <span className="material-symbols-outlined text-4xl text-white mb-2 shadow-[0_4px_12px_rgba(0,0,0,0.3)]">
                                                 {selectedEvent2.type === 'class' ? 'sports_martial_arts' : selectedEvent2.type === 'exam' ? 'workspace_premium' : 'emoji_events'}
                                             </span>
-                                            <div className="bg-white/20 backdrop-blur-md px-4 py-1 rounded-full text-white text-[10px] font-bold uppercase tracking-widest border border-white/20">
+                                            <div className="bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full text-white text-[10px] font-black uppercase tracking-widest border border-white/20">
                                                 {selectedEvent2.type === 'class' ? 'Clase' : 'Evento'}
                                             </div>
                                         </div>
-                                        <button onClick={() => setIsEventModal2(false)} className="absolute top-5 right-5 bg-black/20 hover:bg-black/40 text-white p-2 rounded-full transition-colors backdrop-blur-md active:scale-95">
-                                            <span className="material-symbols-outlined text-lg">close</span>
+                                        <button onClick={() => setIsEventModal2(false)} className="absolute top-5 right-5 bg-black/20 hover:bg-black/40 text-white p-2.5 rounded-full transition-all backdrop-blur-md active:scale-90">
+                                            <span className="material-symbols-outlined text-lg leading-none">close</span>
                                         </button>
                                     </div>
                                     <div className="px-8 pb-10 -mt-6 relative z-10">
-                                        <div className="bg-white p-6 rounded-3xl shadow-lg border border-gray-50 flex flex-col gap-6 text-center">
+                                        <div className="p-7 rounded-[2rem] shadow-2xl flex flex-col gap-6 text-center" style={{ background: '#121217', border: '1px solid rgba(255,255,255,0.05)' }}>
                                             <div>
-                                                <h2 className={`text-2xl font-black text-gray-900 leading-tight mb-2 ${isCancelled ? 'line-through text-gray-400' : ''}`}>{selectedEvent2.title}</h2>
-                                                {isCancelled && <span className="inline-block px-3 py-1 rounded-lg bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-wider border border-red-100">Clase Cancelada</span>}
+                                                <h2 className={`text-2xl font-black leading-tight mb-2 ${isCancelled ? 'line-through' : ''}`} style={{ color: isCancelled ? '#6b7280' : '#dde1e7' }}>{selectedEvent2.title}</h2>
+                                                {isCancelled && <span className="inline-block px-3 py-1 rounded-lg bg-red-500/10 text-red-500 text-[10px] font-black uppercase tracking-wider border border-red-500/20">Clase Cancelada</span>}
                                             </div>
                                             <div className="flex flex-col gap-3">
-                                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl">
-                                                    <span className="text-xs font-bold text-gray-400 uppercase">Fecha</span>
-                                                    <span className="font-bold text-gray-900 text-sm capitalize">{format(selectedEvent2.start, 'd MMMM, yyyy', { locale: es })}</span>
+                                                <div className="flex items-center justify-between p-4 rounded-2xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.03)' }}>
+                                                    <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#6b7280' }}>Fecha</span>
+                                                    <span className="font-bold text-sm capitalize" style={{ color: '#dde1e7' }}>{format(selectedEvent2.start, 'd MMMM, yyyy', { locale: es })}</span>
                                                 </div>
-                                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl">
-                                                    <span className="text-xs font-bold text-gray-400 uppercase">Horario</span>
-                                                    <span className="font-bold text-gray-900 text-sm">{format(selectedEvent2.start, 'HH:mm')} - {format(selectedEvent2.end, 'HH:mm')}</span>
+                                                <div className="flex items-center justify-between p-4 rounded-2xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.03)' }}>
+                                                    <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#6b7280' }}>Horario</span>
+                                                    <span className="font-bold text-sm" style={{ color: '#dde1e7' }}>{format(selectedEvent2.start, 'HH:mm')} - {format(selectedEvent2.end, 'HH:mm')}</span>
                                                 </div>
-                                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-2xl">
-                                                    <span className="text-xs font-bold text-gray-400 uppercase">Instructor</span>
-                                                    <span className="font-bold text-gray-900 text-sm">{selectedEvent2.instructor || selectedEvent2.instructorName}</span>
+                                                <div className="flex items-center justify-between p-4 rounded-2xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.03)' }}>
+                                                    <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: '#6b7280' }}>Instructor</span>
+                                                    <span className="font-bold text-sm" style={{ color: '#dde1e7' }}>{selectedEvent2.instructor || selectedEvent2.instructorName}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -795,23 +847,24 @@ const ClassesManager: React.FC = () => {
                     };
 
                     return (
-                        <div className="fixed inset-0 z-[200] bg-white flex flex-col font-sans overflow-hidden">
+                        <div className="fixed inset-0 z-[200] flex flex-col font-sans overflow-hidden" style={{ background: '#08080a' }}>
                             {/* Header */}
-                            <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 border-b border-gray-100 bg-white shrink-0 gap-4 z-20">
+                            <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 shrink-0 gap-4 z-20" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: '#101014' }}>
                                 <div className="flex items-center gap-4 w-full md:w-auto">
                                     <button onClick={() => setShowFullCalendar(false)}
-                                        className="flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-colors group"
+                                        className="flex items-center gap-2 transition-colors group"
+                                        style={{ color: '#6b7280' }}
                                     >
-                                        <div className="size-9 rounded-xl border border-gray-200 bg-gray-50 group-hover:bg-white group-hover:shadow-sm flex items-center justify-center transition-all">
+                                        <div className="size-9 rounded-xl flex items-center justify-center transition-all" style={{ border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.05)' }}>
                                             <span className="material-symbols-outlined text-[20px]">arrow_back</span>
                                         </div>
                                     </button>
-                                    <h1 className="text-3xl font-black tracking-tight text-gray-900 capitalize min-w-[200px]">
+                                    <h1 className="text-2xl font-black tracking-tight capitalize min-w-[200px]" style={{ color: '#dde1e7' }}>
                                         {headerTitle2}
                                     </h1>
                                 </div>
-                                <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end overflow-x-auto no-scrollbar">
-                                    <div className="flex bg-gray-100 p-1 rounded-xl">
+                                <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end overflow-x-auto no-scrollbar">
+                                    <div className="flex p-1 rounded-lg" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.07)' }}>
                                         {([
                                             { id: 'year', label: 'Año' },
                                             { id: 'month', label: 'Mes' },
@@ -819,18 +872,20 @@ const ClassesManager: React.FC = () => {
                                             { id: 'day', label: 'Día' },
                                         ] as { id: CalViewType; label: string }[]).map(v => (
                                             <button key={v.id} onClick={() => setCalView2(v.id)}
-                                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                                                    calView2 === v.id ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-200/50'
-                                                }`}
+                                                className="px-3 py-1.5 rounded-md text-[11px] font-bold transition-all whitespace-nowrap"
+                                                style={calView2 === v.id
+                                                    ? { background: 'rgba(255,255,255,0.1)', color: '#dde1e7', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }
+                                                    : { color: '#6b7280' }
+                                                }
                                             >{v.label}</button>
                                         ))}
                                     </div>
                                     <div className="flex items-center gap-1">
-                                        <button onClick={() => handleNavigate2('PREV')} className="size-9 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-all">
+                                        <button onClick={() => handleNavigate2('PREV')} className="size-9 flex items-center justify-center rounded-full transition-all" style={{ color: '#9ca3af' }}>
                                             <span className="material-symbols-outlined text-xl">chevron_left</span>
                                         </button>
-                                        <button onClick={() => handleNavigate2('TODAY')} className="px-3 py-1.5 rounded-lg hover:bg-gray-100 text-xs font-bold text-gray-900 uppercase transition-all">Hoy</button>
-                                        <button onClick={() => handleNavigate2('NEXT')} className="size-9 flex items-center justify-center rounded-full hover:bg-gray-100 text-gray-500 hover:text-gray-900 transition-all">
+                                        <button onClick={() => handleNavigate2('TODAY')} className="px-3 py-1.5 rounded-lg text-xs font-bold uppercase transition-all" style={{ color: '#9ca3af' }}>Hoy</button>
+                                        <button onClick={() => handleNavigate2('NEXT')} className="size-9 flex items-center justify-center rounded-full transition-all" style={{ color: '#9ca3af' }}>
                                             <span className="material-symbols-outlined text-xl">chevron_right</span>
                                         </button>
                                     </div>
@@ -838,16 +893,16 @@ const ClassesManager: React.FC = () => {
                             </div>
 
                             {/* Calendar Body */}
-                            <div className="flex-1 relative bg-white overflow-hidden flex flex-col">
+                            <div className="flex-1 relative overflow-hidden flex flex-col" style={{ background: '#08080a' }}>
                                 {calView2 === 'month' && <MonthGrid />}
                                 {calView2 === 'week' && <WeekView />}
                                 {calView2 === 'day' && <DayView />}
                                 {calView2 === 'year' && (
                                     <div className="h-full overflow-y-auto p-6 custom-scrollbar">
                                         {!yearReady ? (
-                                            <div className="flex flex-col items-center justify-center h-full gap-4 text-gray-400">
-                                                <div className="size-10 border-[3px] border-gray-200 border-t-red-500 rounded-full animate-spin"></div>
-                                                <p className="text-sm font-semibold">Cargando calendario anual...</p>
+                                            <div className="flex flex-col items-center justify-center h-full gap-4 text-[#6b7280]">
+                                                <div className="size-10 border-[3px] rounded-full animate-spin" style={{ borderColor: 'rgba(211, 215, 224, 0.1)', borderTopColor: '#e11d48' }}></div>
+                                                <p className="text-sm font-bold uppercase tracking-widest opacity-60">Cargando calendario anual...</p>
                                             </div>
                                         ) : (
                                             <YearView
@@ -874,19 +929,19 @@ const ClassesManager: React.FC = () => {
                 return <MasterCalendarInner />;
             })()}
             {sessionModal && (
-                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[300] flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setSessionModal(null)}>
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md border border-gray-100" onClick={e => e.stopPropagation()}>
+                <div className="fixed inset-0 backdrop-blur-sm z-[300] flex items-center justify-center p-4 animate-in fade-in duration-200" style={{ background: 'rgba(0,0,0,0.75)' }} onClick={() => setSessionModal(null)}>
+                    <div className="rounded-2xl w-full max-w-md" style={{ background: '#101014', border: '1px solid rgba(255,255,255,0.09)', boxShadow: '0 24px 60px rgba(0,0,0,0.6)' }} onClick={e => e.stopPropagation()}>
 
                         {/* Header */}
-                        <div className="flex items-start justify-between p-7 border-b border-gray-100">
+                        <div className="flex items-start justify-between p-7" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                             <div>
-                                <h3 className="text-xl font-black text-gray-900">{sessionModal.className}</h3>
-                                <p className="text-sm font-semibold text-gray-400 mt-0.5">
+                                <h3 className="text-xl font-black" style={{ color: '#dde1e7' }}>{sessionModal.className}</h3>
+                                <p className="text-sm font-semibold mt-0.5" style={{ color: '#6b7280' }}>
                                     {new Date(sessionModal.date + 'T12:00:00').toLocaleDateString('es-MX', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                                 </p>
-                                <p className="text-sm text-gray-500 mt-1">{sessionModal.currentStartTime} {String.fromCharCode(8211)} {sessionModal.currentEndTime} {String.fromCharCode(183)} {sessionModal.currentInstructor}</p>
+                                <p className="text-sm mt-1" style={{ color: '#6b7280' }}>{sessionModal.currentStartTime} {String.fromCharCode(8211)} {sessionModal.currentEndTime} {String.fromCharCode(183)} {sessionModal.currentInstructor}</p>
                             </div>
-                            <button onClick={() => setSessionModal(null)} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
+                            <button onClick={() => setSessionModal(null)} className="p-2 rounded-xl transition-colors" style={{ color: '#6b7280', background: 'rgba(255,255,255,0.05)' }}>
                                 <span className="material-symbols-outlined text-[20px]">close</span>
                             </button>
                         </div>
@@ -896,29 +951,31 @@ const ClassesManager: React.FC = () => {
                             <div className="p-7 space-y-3">
                                 <button
                                     onClick={() => setSessionModal(prev => prev ? { ...prev, view: 'edit' } : null)}
-                                    className="w-full flex items-center gap-4 p-5 rounded-2xl border-2 border-gray-100 hover:border-blue-200 hover:bg-blue-50/30 transition-all group text-left"
+                                    className="w-full flex items-center gap-4 p-5 rounded-2xl transition-all text-left"
+                                    style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.03)' }}
                                 >
-                                    <div className="w-11 h-11 rounded-2xl bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
-                                        <span className="material-symbols-outlined text-blue-600 text-[20px]">edit_calendar</span>
+                                    <div className="w-11 h-11 rounded-2xl flex items-center justify-center transition-colors" style={{ background: 'rgba(59,130,246,0.12)' }}>
+                                        <span className="material-symbols-outlined text-[20px]" style={{ color: '#60a5fa' }}>edit_calendar</span>
                                     </div>
                                     <div>
-                                        <p className="font-black text-gray-800">Editar esta {String.fromCharCode(115)}esi{String.fromCharCode(243)}n</p>
-                                        <p className="text-sm text-gray-400 mt-0.5">Cambiar hora, instructor o fecha</p>
+                                        <p className="font-black" style={{ color: '#dde1e7' }}>Editar esta {String.fromCharCode(115)}esi{String.fromCharCode(243)}n</p>
+                                        <p className="text-sm mt-0.5" style={{ color: '#6b7280' }}>Cambiar hora, instructor o fecha</p>
                                     </div>
-                                    <span className="material-symbols-outlined text-gray-300 ml-auto">chevron_right</span>
+                                    <span className="material-symbols-outlined ml-auto" style={{ color: '#4b5563' }}>chevron_right</span>
                                 </button>
                                 <button
                                     onClick={() => setSessionModal(prev => prev ? { ...prev, view: 'confirm_cancel' } : null)}
-                                    className="w-full flex items-center gap-4 p-5 rounded-2xl border-2 border-gray-100 hover:border-red-200 hover:bg-red-50/30 transition-all group text-left"
+                                    className="w-full flex items-center gap-4 p-5 rounded-2xl transition-all text-left"
+                                    style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.03)' }}
                                 >
-                                    <div className="w-11 h-11 rounded-2xl bg-red-100 flex items-center justify-center group-hover:bg-red-200 transition-colors">
-                                        <span className="material-symbols-outlined text-red-500 text-[20px]">event_busy</span>
+                                    <div className="w-11 h-11 rounded-2xl flex items-center justify-center transition-colors" style={{ background: 'rgba(225,29,72,0.1)' }}>
+                                        <span className="material-symbols-outlined text-[20px]" style={{ color: '#e11d48' }}>event_busy</span>
                                     </div>
                                     <div>
-                                        <p className="font-black text-gray-800">Cancelar esta clase</p>
-                                        <p className="text-sm text-gray-400 mt-0.5">Marcar como cancelada para los alumnos</p>
+                                        <p className="font-black" style={{ color: '#dde1e7' }}>Cancelar esta clase</p>
+                                        <p className="text-sm mt-0.5" style={{ color: '#6b7280' }}>Marcar como cancelada para los alumnos</p>
                                     </div>
-                                    <span className="material-symbols-outlined text-gray-300 ml-auto">chevron_right</span>
+                                    <span className="material-symbols-outlined ml-auto" style={{ color: '#4b5563' }}>chevron_right</span>
                                 </button>
                             </div>
                         )}
@@ -926,13 +983,13 @@ const ClassesManager: React.FC = () => {
                         {/* EDIT VIEW */}
                         {sessionModal.view === 'edit' && (
                             <div className="p-7 space-y-5">
-                                <button onClick={() => setSessionModal(prev => prev ? { ...prev, view: 'menu' } : null)} className="flex items-center gap-1 text-sm font-semibold text-gray-400 hover:text-gray-700 transition-colors">
+                                <button onClick={() => setSessionModal(prev => prev ? { ...prev, view: 'menu' } : null)} className="flex items-center gap-1 text-sm font-semibold transition-colors" style={{ color: '#6b7280' }}>
                                     <span className="material-symbols-outlined text-[16px]">chevron_left</span> Volver
                                 </button>
 
                                 <div>
-                                    <label className="text-xs font-black text-gray-500 uppercase tracking-wider mb-2 block">Fecha de esta {String.fromCharCode(115)}esi{String.fromCharCode(243)}n</label>
-                                    <input type="date" className="w-full rounded-xl border border-gray-200 p-3 font-semibold text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                    <label className="text-[10px] font-black uppercase tracking-widest mb-2 block" style={{ color: '#6b7280' }}>Fecha de esta {String.fromCharCode(115)}esi{String.fromCharCode(243)}n</label>
+                                    <input type="date" className="w-full rounded-xl p-3 font-semibold outline-none" style={{ background: '#18181d', border: '1px solid rgba(255,255,255,0.08)', color: '#dde1e7' }}
                                         value={sessionModal.editForm.newDate}
                                         onChange={e => setSessionModal(prev => prev ? { ...prev, editForm: { ...prev.editForm, newDate: e.target.value } } : null)}
                                     />
@@ -940,15 +997,15 @@ const ClassesManager: React.FC = () => {
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="text-xs font-black text-gray-500 uppercase tracking-wider mb-2 block">Inicio</label>
-                                        <input type="time" className="w-full rounded-xl border border-gray-200 p-3 font-semibold text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                        <label className="text-[10px] font-black uppercase tracking-widest mb-2 block" style={{ color: '#6b7280' }}>Inicio</label>
+                                        <input type="time" className="w-full rounded-xl p-3 font-semibold outline-none" style={{ background: '#18181d', border: '1px solid rgba(255,255,255,0.08)', color: '#dde1e7' }}
                                             value={sessionModal.editForm.newStartTime}
                                             onChange={e => setSessionModal(prev => prev ? { ...prev, editForm: { ...prev.editForm, newStartTime: e.target.value } } : null)}
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-xs font-black text-gray-500 uppercase tracking-wider mb-2 block">Fin</label>
-                                        <input type="time" className="w-full rounded-xl border border-gray-200 p-3 font-semibold text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                        <label className="text-[10px] font-black uppercase tracking-widest mb-2 block" style={{ color: '#6b7280' }}>Fin</label>
+                                        <input type="time" className="w-full rounded-xl p-3 font-semibold outline-none" style={{ background: '#18181d', border: '1px solid rgba(255,255,255,0.08)', color: '#dde1e7' }}
                                             value={sessionModal.editForm.newEndTime}
                                             onChange={e => setSessionModal(prev => prev ? { ...prev, editForm: { ...prev.editForm, newEndTime: e.target.value } } : null)}
                                         />
@@ -956,8 +1013,8 @@ const ClassesManager: React.FC = () => {
                                 </div>
 
                                 <div>
-                                    <label className="text-xs font-black text-gray-500 uppercase tracking-wider mb-2 block">Instructor</label>
-                                    <input type="text" className="w-full rounded-xl border border-gray-200 p-3 font-semibold text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                    <label className="text-[10px] font-black uppercase tracking-widest mb-2 block" style={{ color: '#6b7280' }}>Instructor</label>
+                                    <input type="text" className="w-full rounded-xl p-3 font-semibold outline-none" style={{ background: '#18181d', border: '1px solid rgba(255,255,255,0.08)', color: '#dde1e7' }}
                                         value={sessionModal.editForm.newInstructor}
                                         onChange={e => setSessionModal(prev => prev ? { ...prev, editForm: { ...prev.editForm, newInstructor: e.target.value } } : null)}
                                         placeholder="Nombre del instructor"
@@ -965,8 +1022,8 @@ const ClassesManager: React.FC = () => {
                                 </div>
 
                                 <div className="flex gap-3 pt-2">
-                                    <button onClick={() => setSessionModal(null)} className="flex-1 py-3.5 rounded-xl border-2 border-gray-100 font-bold text-gray-500 hover:bg-gray-50 transition-colors">Cancelar</button>
-                                    <button onClick={handleSaveSessionEdit} className="flex-1 py-3.5 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-200">Guardar Cambios</button>
+                                    <button onClick={() => setSessionModal(null)} className="flex-1 py-3.5 rounded-xl font-bold text-sm transition-all" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: '#9ca3af' }}>Cancelar</button>
+                                    <button onClick={handleSaveSessionEdit} className="flex-1 py-3.5 rounded-xl font-bold text-sm text-white transition-all" style={{ background: '#3b82f6', boxShadow: '0 4px 16px rgba(59,130,246,0.3)' }}>Guardar Cambios</button>
                                 </div>
                             </div>
                         )}
@@ -975,17 +1032,17 @@ const ClassesManager: React.FC = () => {
                         {sessionModal.view === 'confirm_cancel' && (
                             <div className="p-7 space-y-6">
                                 <div className="flex flex-col items-center text-center gap-3 py-4">
-                                    <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
-                                        <span className="material-symbols-outlined text-red-500 text-3xl">event_busy</span>
+                                    <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ background: 'rgba(225,29,72,0.1)' }}>
+                                        <span className="material-symbols-outlined text-3xl" style={{ color: '#e11d48' }}>event_busy</span>
                                     </div>
-                                    <h4 className="text-xl font-black text-gray-900">{String.fromCharCode(191)}Cancelar esta clase?</h4>
-                                    <p className="text-gray-500 text-sm max-w-xs">
-                                        Los alumnos ver{String.fromCharCode(225)}n esta clase como <span className="font-bold text-red-500">cancelada</span> en su dashboard.
+                                    <h4 className="text-xl font-black" style={{ color: '#dde1e7' }}>{String.fromCharCode(191)}Cancelar esta clase?</h4>
+                                    <p className="text-sm max-w-xs" style={{ color: '#6b7280' }}>
+                                        Los alumnos ver{String.fromCharCode(225)}n esta clase como <span className="font-bold" style={{ color: '#e11d48' }}>cancelada</span> en su dashboard.
                                     </p>
                                 </div>
                                 <div className="flex gap-3">
-                                    <button onClick={() => setSessionModal(prev => prev ? { ...prev, view: 'menu' } : null)} className="flex-1 py-3.5 rounded-xl border-2 border-gray-100 font-bold text-gray-500 hover:bg-gray-50 transition-colors">Volver</button>
-                                    <button onClick={handleCancelSession} className="flex-1 py-3.5 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600 transition-colors shadow-lg shadow-red-200">S{String.fromCharCode(237)}, Cancelar Clase</button>
+                                    <button onClick={() => setSessionModal(prev => prev ? { ...prev, view: 'menu' } : null)} className="flex-1 py-3.5 rounded-xl font-bold text-sm transition-all" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: '#9ca3af' }}>Volver</button>
+                                    <button onClick={handleCancelSession} className="flex-1 py-3.5 rounded-xl font-bold text-sm text-white transition-all" style={{ background: '#e11d48', boxShadow: '0 4px 16px rgba(225,29,72,0.3)' }}>S{String.fromCharCode(237)}, Cancelar Clase</button>
                                 </div>
                             </div>
                         )}
@@ -996,31 +1053,35 @@ const ClassesManager: React.FC = () => {
 
             {/* --- GLOBAL EDIT CLASS MODAL --- */}
             {showCreateModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in zoom-in-95">
-                    <div className="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl">
-                        <h2 className="text-2xl font-bold mb-6 text-text-main">
+                <div className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in zoom-in-95" style={{ background: 'rgba(0,0,0,0.7)' }}>
+                    <div className="rounded-2xl p-8 w-full max-w-lg" style={{ background: '#101014', border: '1px solid rgba(255,255,255,0.09)', boxShadow: '0 24px 60px rgba(0,0,0,0.6)' }}>
+                        <h2 className="text-2xl font-bold mb-6" style={{ color: '#dde1e7' }}>
                             {editingClassId ? 'Configuración General de Clase' : 'Crear Nueva Clase'}
                         </h2>
                         <form onSubmit={handleSaveClass} className="flex flex-col gap-5">
-                            <input required value={classForm.name} onChange={e => setClassForm({ ...classForm, name: e.target.value })} className="w-full rounded-xl border-gray-300 p-3 text-sm" placeholder="Nombre de la Clase" />
+                            <input required value={classForm.name} onChange={e => setClassForm({ ...classForm, name: e.target.value })} className="w-full rounded-xl p-3 text-sm outline-none" style={{ background: '#18181d', border: '1px solid rgba(255,255,255,0.08)', color: '#dde1e7' }} placeholder="Nombre de la Clase" />
                             <div>
-                                <label className="text-xs font-bold text-text-secondary uppercase mb-2 block">Días Recurrentes</label>
+                                <label className="text-[10px] font-black uppercase tracking-widest mb-2 block" style={{ color: '#6b7280' }}>Días Recurrentes</label>
                                 <div className="flex flex-wrap gap-2">
                                     {daysOptions.map(day => (
                                         <button key={day.key} type="button" onClick={() => toggleDay(day.key)}
-                                            className={`px-3 py-2 rounded-lg text-xs font-bold transition-all border ${classForm.selectedDays.includes(day.key) ? 'bg-primary text-white border-primary shadow-md' : 'bg-white text-text-secondary border-gray-200 hover:bg-gray-50'}`}
+                                            className="px-3 py-2 rounded-lg text-xs font-bold transition-all"
+                                            style={classForm.selectedDays.includes(day.key)
+                                                ? { background: '#e11d48', color: '#fff', boxShadow: '0 2px 8px rgba(225,29,72,0.3)' }
+                                                : { background: 'rgba(255,255,255,0.05)', color: '#9ca3af', border: '1px solid rgba(255,255,255,0.08)' }
+                                            }
                                         >{day.label}</button>
                                     ))}
                                 </div>
                             </div>
                             <div className="grid grid-cols-2 gap-4">
-                                <input required type="time" value={classForm.startTime} onChange={e => setClassForm({ ...classForm, startTime: e.target.value })} className="w-full rounded-xl border-gray-300 p-3 text-sm" />
-                                <input required type="time" value={classForm.endTime} onChange={e => setClassForm({ ...classForm, endTime: e.target.value })} className="w-full rounded-xl border-gray-300 p-3 text-sm" />
+                                <input required type="time" value={classForm.startTime} onChange={e => setClassForm({ ...classForm, startTime: e.target.value })} className="w-full rounded-xl p-3 text-sm outline-none" style={{ background: '#18181d', border: '1px solid rgba(255,255,255,0.08)', color: '#dde1e7' }} />
+                                <input required type="time" value={classForm.endTime} onChange={e => setClassForm({ ...classForm, endTime: e.target.value })} className="w-full rounded-xl p-3 text-sm outline-none" style={{ background: '#18181d', border: '1px solid rgba(255,255,255,0.08)', color: '#dde1e7' }} />
                             </div>
-                            <input required value={classForm.instructor} onChange={e => setClassForm({ ...classForm, instructor: e.target.value })} className="w-full rounded-xl border-gray-300 p-3 text-sm" placeholder="Instructor por Defecto" />
-                            <div className="flex gap-3 mt-4">
-                                <button type="button" onClick={() => { setShowCreateModal(false); resetClassForm(); }} className="flex-1 py-3 rounded-xl border border-gray-300 font-bold text-text-secondary">Cancelar</button>
-                                <button type="submit" className="flex-1 py-3 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all">Guardar</button>
+                            <input required value={classForm.instructor} onChange={e => setClassForm({ ...classForm, instructor: e.target.value })} className="w-full rounded-xl p-3 text-sm outline-none" style={{ background: '#18181d', border: '1px solid rgba(255,255,255,0.08)', color: '#dde1e7' }} placeholder="Instructor por Defecto" />
+                            <div className="flex gap-3 mt-2">
+                                <button type="button" onClick={() => { setShowCreateModal(false); resetClassForm(); }} className="flex-1 py-3 rounded-xl font-bold text-sm transition-all" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: '#9ca3af' }}>Cancelar</button>
+                                <button type="submit" className="flex-1 py-3 rounded-xl font-bold text-sm text-white transition-all" style={{ background: '#e11d48', boxShadow: '0 4px 16px rgba(225,29,72,0.3)' }}>Guardar</button>
                             </div>
                         </form>
                     </div>
@@ -1029,37 +1090,37 @@ const ClassesManager: React.FC = () => {
 
             {/* --- GLOBAL NEW EVENT MODAL --- */}
             {showEventModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in zoom-in-95">
-                    <div className="bg-white rounded-3xl p-8 w-full max-w-lg shadow-2xl">
-                        <h2 className="text-2xl font-bold mb-6 text-text-main">Publicar Nuevo Evento</h2>
+                <div className="fixed inset-0 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in zoom-in-95" style={{ background: 'rgba(0,0,0,0.7)' }}>
+                    <div className="rounded-2xl p-8 w-full max-w-lg" style={{ background: '#101014', border: '1px solid rgba(255,255,255,0.09)', boxShadow: '0 24px 60px rgba(0,0,0,0.6)' }}>
+                        <h2 className="text-2xl font-bold mb-6" style={{ color: '#dde1e7' }}>Publicar Nuevo Evento</h2>
                         <form onSubmit={handleCreateEvent} className="flex flex-col gap-5">
-                            <input required value={eventForm.title} onChange={e => setEventForm({ ...eventForm, title: e.target.value })} className="w-full rounded-xl border-gray-300 p-3 text-sm" placeholder="Nombre del Evento" />
+                            <input required value={eventForm.title} onChange={e => setEventForm({ ...eventForm, title: e.target.value })} className="w-full rounded-xl p-3 text-sm outline-none" style={{ background: '#18181d', border: '1px solid rgba(255,255,255,0.08)', color: '#dde1e7' }} placeholder="Nombre del Evento" />
                             <div className="grid grid-cols-2 gap-4">
-                                <select value={eventForm.type} onChange={e => setEventForm({ ...eventForm, type: e.target.value as any })} className="w-full rounded-xl border-gray-300 p-3 text-sm bg-white">
+                                <select value={eventForm.type} onChange={e => setEventForm({ ...eventForm, type: e.target.value as any })} className="w-full rounded-xl p-3 text-sm outline-none" style={{ background: '#18181d', border: '1px solid rgba(255,255,255,0.08)', color: '#dde1e7' }}>
                                     <option value="exam">Examen de Grado</option>
                                     <option value="tournament">Torneo</option>
                                     <option value="seminar">Seminario</option>
                                 </select>
-                                <input required type="number" min="1" value={eventForm.capacity} onChange={e => setEventForm({ ...eventForm, capacity: parseInt(e.target.value) })} className="w-full rounded-xl border-gray-300 p-3 text-sm" placeholder="Capacidad Max" />
+                                <input required type="number" min="1" value={eventForm.capacity} onChange={e => setEventForm({ ...eventForm, capacity: parseInt(e.target.value) })} className="w-full rounded-xl p-3 text-sm outline-none" style={{ background: '#18181d', border: '1px solid rgba(255,255,255,0.08)', color: '#dde1e7' }} placeholder="Capacidad Max" />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
-                                <input required type="date" value={eventForm.date} onChange={e => setEventForm({ ...eventForm, date: e.target.value })} className="w-full rounded-xl border-gray-300 p-3 text-sm" />
-                                <input required type="time" value={eventForm.time} onChange={e => setEventForm({ ...eventForm, time: e.target.value })} className="w-full rounded-xl border-gray-300 p-3 text-sm" />
+                                <input required type="date" value={eventForm.date} onChange={e => setEventForm({ ...eventForm, date: e.target.value })} className="w-full rounded-xl p-3 text-sm outline-none" style={{ background: '#18181d', border: '1px solid rgba(255,255,255,0.08)', color: '#dde1e7' }} />
+                                <input required type="time" value={eventForm.time} onChange={e => setEventForm({ ...eventForm, time: e.target.value })} className="w-full rounded-xl p-3 text-sm outline-none" style={{ background: '#18181d', border: '1px solid rgba(255,255,255,0.08)', color: '#dde1e7' }} />
                             </div>
-                            <textarea required value={eventForm.description} onChange={e => setEventForm({ ...eventForm, description: e.target.value })} className="w-full rounded-xl border-gray-300 p-3 text-sm" placeholder="Detalles del evento..." rows={3} />
-                            <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex items-center justify-between">
+                            <textarea required value={eventForm.description} onChange={e => setEventForm({ ...eventForm, description: e.target.value })} className="w-full rounded-xl p-3 text-sm outline-none" style={{ background: '#18181d', border: '1px solid rgba(255,255,255,0.08)', color: '#dde1e7' }} placeholder="Detalles del evento..." rows={3} />
+                            <div className="p-4 rounded-xl flex items-center justify-between" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
                                 <div>
-                                    <span className="block text-sm font-bold text-text-main">Visible para Alumnos</span>
-                                    <span className="text-xs text-gray-500">Permitir inscripciones desde el dashboard.</span>
+                                    <span className="block text-sm font-bold" style={{ color: '#dde1e7' }}>Visible para Alumnos</span>
+                                    <span className="text-xs" style={{ color: '#6b7280' }}>Permitir inscripciones desde el dashboard.</span>
                                 </div>
                                 <label className="relative inline-flex items-center cursor-pointer">
                                     <input type="checkbox" className="sr-only peer" checked={eventForm.isVisibleToStudents} onChange={e => setEventForm({ ...eventForm, isVisibleToStudents: e.target.checked })} />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:ring-4 peer-focus:ring-blue-100 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                                    <div className="w-11 h-6 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600" style={{ background: 'rgba(255,255,255,0.1)' }}></div>
                                 </label>
                             </div>
-                            <div className="flex gap-3 mt-4">
-                                <button type="button" onClick={() => setShowEventModal(false)} className="flex-1 py-3 rounded-xl border border-gray-300 font-bold text-text-secondary">Cancelar</button>
-                                <button type="submit" className="flex-1 py-3 rounded-xl bg-primary text-white font-bold hover:shadow-lg transition-all">Publicar Evento</button>
+                            <div className="flex gap-3 mt-2">
+                                <button type="button" onClick={() => setShowEventModal(false)} className="flex-1 py-3 rounded-xl font-bold text-sm transition-all" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', color: '#9ca3af' }}>Cancelar</button>
+                                <button type="submit" className="flex-1 py-3 rounded-xl font-bold text-sm text-white transition-all" style={{ background: '#e11d48', boxShadow: '0 4px 16px rgba(225,29,72,0.3)' }}>Publicar Evento</button>
                             </div>
                         </form>
                     </div>

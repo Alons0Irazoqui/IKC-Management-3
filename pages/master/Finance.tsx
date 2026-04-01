@@ -17,39 +17,39 @@ const StatusBadge: React.FC<{ status: TuitionStatus; amount: number; penalty: nu
     switch (status) {
         case 'paid':
             return (
-                <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 uppercase tracking-wider">
-                    <span className="material-symbols-outlined text-[12px] filled">check_circle</span>
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-semibold bg-emerald-500/10 text-emerald-400/90 uppercase tracking-wider border border-emerald-500/10">
+                    <span className="material-symbols-outlined text-[11px] filled">check_circle</span>
                     Pagado
                 </span>
             );
         case 'in_review':
             return (
-                <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 uppercase tracking-wider">
-                    <span className="material-symbols-outlined text-[12px] filled">hourglass_top</span>
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-semibold bg-blue-500/10 text-blue-400/90 uppercase tracking-wider border border-blue-500/10">
+                    <span className="material-symbols-outlined text-[11px] filled">hourglass_top</span>
                     Revisión
                 </span>
             );
         case 'overdue':
             return (
                 <div className="flex flex-col items-start gap-1">
-                    <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold bg-red-50 text-red-700 uppercase tracking-wider">
-                        <span className="material-symbols-outlined text-[12px] filled">warning</span>
+                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-semibold bg-red-500/10 text-red-500/90 uppercase tracking-wider border border-red-500/10">
+                        <span className="material-symbols-outlined text-[11px] filled">warning</span>
                         Vencido
                     </span>
-                    {penalty > 0 && <span className="text-[10px] text-red-600 font-bold ml-1 tabular-nums">+${penalty} Mora</span>}
+                    {penalty > 0 && <span className="text-[9px] text-red-400/80 font-semibold ml-1 tabular-nums">+${penalty} Mora</span>}
                 </div>
             );
         case 'partial':
             return (
-                <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 uppercase tracking-wider">
-                    <span className="material-symbols-outlined text-[12px] filled">pie_chart</span>
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-semibold bg-amber-500/10 text-amber-400/90 uppercase tracking-wider border border-amber-500/10">
+                    <span className="material-symbols-outlined text-[11px] filled">pie_chart</span>
                     Parcial
                 </span>
             );
         default: // pending
             return (
-                <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold bg-gray-50 text-gray-500 uppercase tracking-wider">
-                    <span className="material-symbols-outlined text-[12px]">pending</span>
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[9px] font-semibold bg-zinc-800/50 text-zinc-400 uppercase tracking-wider border border-zinc-700/30">
+                    <span className="material-symbols-outlined text-[11px]">pending</span>
                     Pendiente
                 </span>
             );
@@ -81,10 +81,10 @@ const DebtAmountEditor = ({ item, onUpdate }: { item: TuitionRecord, onUpdate: (
         <div className="flex flex-col items-end gap-2" onClick={e => e.stopPropagation()}>
             <div className="flex items-center">
                 <div className="relative group">
-                    <span className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-400 font-bold pointer-events-none text-xs">$</span>
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 text-zinc-500 font-bold pointer-events-none text-xs">$</span>
                     <input 
                         type="number"
-                        className="w-20 pl-3 pr-0 py-1 bg-transparent border-none text-xs font-mono font-bold text-slate-900 outline-none focus:bg-gray-50 transition-all text-right rounded-md placeholder-gray-300"
+                        className="w-20 pl-3 pr-0 py-1 bg-transparent border-none text-xs font-mono font-bold text-zinc-100 outline-none focus:bg-zinc-800/50 transition-all text-right rounded-md placeholder-zinc-700"
                         value={val}
                         onChange={(e) => setVal(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && hasChanged && handleSave()}
@@ -96,7 +96,7 @@ const DebtAmountEditor = ({ item, onUpdate }: { item: TuitionRecord, onUpdate: (
             {hasChanged && (
                 <button 
                     onClick={handleSave}
-                    className="text-[10px] font-bold text-red-600 hover:text-red-700 bg-red-50 px-2 py-0.5 rounded"
+                    className="text-[10px] font-bold text-red-400 hover:text-red-300 bg-red-500/10 px-2 py-0.5 rounded border border-red-500/20"
                 >
                     Guardar
                 </button>
@@ -139,6 +139,37 @@ const Finance: React.FC = () => {
   const [selectedGroup, setSelectedGroup] = useState<GroupedTransaction | null>(null);
   const [viewDetailRecord, setViewDetailRecord] = useState<TuitionRecord | null>(null);
   const [isChargeModalOpen, setIsChargeModalOpen] = useState(false);
+
+  // --- ALL MOVEMENTS MODAL STATES ---
+  const [showAllMovementsModal, setShowAllMovementsModal] = useState(false);
+  const [modalSearch, setModalSearch] = useState('');
+  const [modalMonthFilter, setModalMonthFilter] = useState('');
+
+  const modalMovements = useMemo(() => {
+        let filtered = records;
+        
+        if (modalSearch) {
+            const q = modalSearch.toLowerCase();
+            filtered = filtered.filter(r => 
+                (r.studentName || '').toLowerCase().includes(q) || 
+                (r.concept || '').toLowerCase().includes(q) || 
+                r.amount.toString().includes(q) ||
+                (r.description || '').toLowerCase().includes(q)
+            );
+        }
+
+        if (modalMonthFilter) {
+            filtered = filtered.filter(r => (r.paymentDate || r.dueDate).startsWith(modalMonthFilter));
+        }
+
+        return filtered.sort((a, b) => new Date(b.dueDate).getTime() - new Date(a.dueDate).getTime());
+  }, [records, modalSearch, modalMonthFilter]);
+
+  const uniqueModalMonths = useMemo(() => {
+        const set = new Set<string>();
+        records.forEach(r => set.add((r.paymentDate || r.dueDate).substring(0, 7))); // "YYYY-MM"
+        return Array.from(set).sort().reverse();
+  }, [records]);
 
   // -- DATA PROCESSING --
   const rawFilteredRecords = useMemo(() => {
@@ -302,11 +333,15 @@ const Finance: React.FC = () => {
       });
   }, [activeGroup, amountToApprove]);
 
-  // -- ACTIONS --
   const handleApprove = () => {
       if (!activeGroup) return;
-      if (activeGroup.isBatch) approveBatchPayment(activeGroup.id, activeGroup.declaredAmount || activeGroup.totalRemainingDebt);
-      else approvePayment(activeGroup.id, activeGroup.totalRemainingDebt);
+      const targetAmount = amountToApprove > 0 ? amountToApprove : activeGroup.totalRemainingDebt;
+      
+      if (activeGroup.isBatch) {
+          approveBatchPayment(activeGroup.id, targetAmount);
+      } else {
+          approvePayment(activeGroup.id, targetAmount);
+      }
       setSelectedGroup(null);
   };
 
@@ -360,76 +395,123 @@ const Finance: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col min-h-screen bg-transparent animate-in fade-in duration-700 ease-out relative z-10">
         {/* --- HEADER --- */}
-        <div className="bg-white border-b border-gray-50 px-6 py-6 md:px-10 sticky top-0 z-20 shadow-sm">
-            <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+        <div className="px-6 py-8 md:px-10 max-w-[1600px] mx-auto w-full">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-8">
                 <div>
-                    <h1 className="text-3xl font-black tracking-tight text-slate-900">Tesorería</h1>
-                    <p className="text-slate-500 mt-1 font-medium text-sm">Conciliación bancaria y gestión de flujos.</p>
+                    <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] mb-1" style={{color: 'var(--color-brand)'}}>IKC Management</p>
+                    <h1 className="text-3xl sm:text-4xl font-black tracking-tighter" style={{color: 'var(--color-text-primary)'}}>Tesorería</h1>
+                    <p className="mt-1 text-xs sm:text-sm" style={{color: 'var(--color-text-muted)'}}>Control de flujos, conciliación y auditoría de pagos.</p>
                 </div>
+                
                 <div className="flex flex-wrap gap-3">
-                    <button onClick={handleExport} className="px-4 py-2.5 bg-white border border-gray-100 text-slate-600 font-bold rounded-lg hover:bg-gray-50 transition-all text-xs uppercase tracking-wide flex items-center gap-2">
-                        <span className="material-symbols-outlined text-lg">download</span> Exportar
+                    <button onClick={handleExport} className="px-4 py-2 bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold rounded-xl hover:bg-zinc-800 hover:text-zinc-200 transition-all text-[11px] uppercase tracking-wider flex items-center gap-2">
+                        <span className="material-symbols-outlined text-base">download</span> Exportar
                     </button>
-                    <button onClick={() => setIsChargeModalOpen(true)} className="px-5 py-2.5 bg-gradient-to-br from-red-600 to-red-700 text-white font-bold rounded-lg hover:shadow-lg hover:shadow-red-600/20 transition-all text-xs uppercase tracking-wide flex items-center gap-2 active:scale-95">
-                        <span className="material-symbols-outlined text-lg">add_circle</span> Nuevo Cargo
+                    <button onClick={handleGenerateBilling} className="px-4 py-2 bg-zinc-900 border border-zinc-800 text-zinc-400 font-bold rounded-xl hover:bg-zinc-800 hover:text-zinc-200 transition-all text-[11px] uppercase tracking-wider flex items-center gap-2">
+                        <span className="material-symbols-outlined text-base">payments</span> Facturar Mes
                     </button>
-                    <button onClick={handleGenerateBilling} className="px-5 py-2.5 bg-white border border-gray-100 text-slate-900 font-bold rounded-lg hover:bg-gray-50 transition-all text-xs uppercase tracking-wide flex items-center gap-2">
-                        <span className="material-symbols-outlined text-lg">payments</span> Generar Mensualidad
+                    <button onClick={() => setIsChargeModalOpen(true)} className="px-5 py-2 bg-red-600 text-white font-black rounded-xl hover:bg-red-500 transition-all text-[11px] uppercase tracking-wider flex items-center gap-2 active:scale-95 shadow-lg shadow-red-600/10">
+                        <span className="material-symbols-outlined text-base">add_circle</span> Nuevo Cargo
                     </button>
                 </div>
             </div>
 
-            {/* --- TABS (Borderless) --- */}
-            <div className="max-w-[1600px] mx-auto mt-8 flex flex-col md:flex-row gap-6 justify-between items-center">
-                <div className="flex bg-gray-50 p-1 rounded-xl w-full md:w-auto overflow-x-auto no-scrollbar">
-                    {[
-                        { id: 'review', label: 'Por Revisar', count: stats.review },
-                        { id: 'pending', label: 'Pendientes', count: stats.pending },
-                        { id: 'overdue', label: 'Vencidos', count: stats.overdue },
-                        { id: 'paid', label: 'Pagados', count: null },
-                        { id: 'all', label: 'Todos', count: null },
-                    ].map(tab => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id as any)}
-                            className={`flex items-center gap-2 px-6 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
-                                activeTab === tab.id 
-                                ? 'bg-white text-slate-900 shadow-sm' 
-                                : 'text-gray-400 hover:text-slate-900'
-                            }`}
-                        >
-                            {tab.label}
-                            {tab.count !== null && tab.count > 0 && (
-                                <span className={`ml-1 flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-md text-[9px] ${
-                                    tab.id === 'review' ? 'bg-blue-600 text-white' : 
-                                    tab.id === 'overdue' ? 'bg-red-600 text-white' : 
-                                    activeTab === tab.id ? 'bg-slate-900 text-white' : 'bg-gray-200 text-gray-500'
-                                }`}>
-                                    {tab.count}
-                                </span>
-                            )}
-                        </button>
-                    ))}
+            {/* KPI Cards — Matching Dashboard Style */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 mb-10"
+                style={{
+                    border: '1px solid var(--color-border-subtle)',
+                    borderRadius: '12px',
+                    overflow: 'hidden',
+                    backgroundColor: 'var(--color-border-subtle)'
+                }}>
+                
+                {/* Review */}
+                <div onClick={() => setActiveTab('review')} className={`flex flex-col justify-between p-6 cursor-pointer transition-all ${activeTab === 'review' ? 'bg-zinc-900/50' : 'bg-[#0a0a0d] hover:bg-zinc-900/30'}`}>
+                    <div>
+                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-3" style={{color: 'var(--color-text-muted)'}}>Por Revisar</p>
+                        <p className="text-3xl font-black tracking-tighter" style={{color: activeTab === 'review' ? 'var(--color-brand)' : 'var(--color-text-primary)'}}>{stats.review}</p>
+                    </div>
+                    <div className="flex items-center justify-between mt-5 pt-4" style={{borderTop: '1px solid var(--color-border-subtle)'}}>
+                        <span className="text-[10px] font-medium" style={{color: 'var(--color-text-muted)'}}>Validaciones pendientes</span>
+                        <span className="material-symbols-outlined" style={{fontSize: '16px', color: stats.review > 0 ? 'var(--color-brand)' : 'var(--color-text-muted)'}}>{stats.review > 0 ? 'mark_email_unread' : 'check_circle'}</span>
+                    </div>
                 </div>
 
-                <div className="relative w-full md:w-80 group">
-                    <span className="absolute left-4 top-2.5 text-gray-400 material-symbols-outlined text-[18px]">search</span>
+                {/* Pending */}
+                <div onClick={() => setActiveTab('pending')} className={`flex flex-col justify-between p-6 cursor-pointer transition-all ${activeTab === 'pending' ? 'bg-zinc-900/50' : 'bg-[#0a0a0d] hover:bg-zinc-900/30'}`}>
+                    <div>
+                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-3" style={{color: 'var(--color-text-muted)'}}>Pendientes / Parciales</p>
+                        <p className="text-3xl font-black tracking-tighter" style={{color: activeTab === 'pending' ? 'var(--color-brand)' : 'var(--color-text-primary)'}}>{stats.pending}</p>
+                    </div>
+                    <div className="flex items-center justify-between mt-5 pt-4" style={{borderTop: '1px solid var(--color-border-subtle)'}}>
+                        <span className="text-[10px] font-medium" style={{color: 'var(--color-text-muted)'}}>Cuentas abiertas</span>
+                        <span className="material-symbols-outlined" style={{fontSize: '16px', color: 'var(--color-text-muted)'}}>pending_actions</span>
+                    </div>
+                </div>
+
+                {/* Overdue */}
+                <div onClick={() => setActiveTab('overdue')} className={`flex flex-col justify-between p-6 cursor-pointer transition-all ${activeTab === 'overdue' ? 'bg-zinc-900/50' : 'bg-[#0a0a0d] hover:bg-zinc-900/30'}`}>
+                    <div>
+                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-3" style={{color: 'var(--color-text-muted)'}}>Vencidos</p>
+                        <p className="text-3xl font-black tracking-tighter" style={{color: activeTab === 'overdue' ? 'var(--color-brand)' : 'var(--color-text-primary)'}}>{stats.overdue}</p>
+                    </div>
+                    <div className="flex items-center justify-between mt-5 pt-4" style={{borderTop: '1px solid var(--color-border-subtle)'}}>
+                        <span className="text-[10px] font-medium" style={{color: 'var(--color-text-muted)'}}>Tickets en mora</span>
+                        <span className="material-symbols-outlined" style={{fontSize: '16px', color: stats.overdue > 0 ? 'var(--color-brand)' : 'var(--color-text-muted)'}}>warning</span>
+                    </div>
+                </div>
+
+                {/* All History */}
+                <div onClick={() => setShowAllMovementsModal(true)} className="flex flex-col justify-between p-6 cursor-pointer bg-[#0a0a0d] hover:bg-zinc-900/50 transition-all">
+                    <div>
+                        <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-3" style={{color: 'var(--color-text-muted)'}}>Historial Completo</p>
+                        <p className="text-3xl font-black tracking-tighter" style={{color: 'var(--color-text-primary)'}}>{records.length}</p>
+                    </div>
+                    <div className="flex items-center justify-between mt-5 pt-4" style={{borderTop: '1px solid var(--color-border-subtle)'}}>
+                        <span className="text-[10px] font-medium" style={{color: 'var(--color-text-muted)'}}>Ver todos los registros</span>
+                        <span className="material-symbols-outlined" style={{fontSize: '16px', color: 'var(--color-text-muted)'}}>history</span>
+                    </div>
+                </div>
+            </div>
+
+            {/* Filter & Search Area */}
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-6">
+                <div className="flex items-center gap-0 border-b-2" style={{borderColor: 'var(--color-border-subtle)'}}>
+                    <button onClick={() => setActiveTab('paid')} className={`px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest transition-all relative ${activeTab === 'paid' ? 'text-white' : 'text-zinc-500'}`}>
+                        Pagados
+                        {activeTab === 'paid' && <div className="absolute bottom-[-2px] left-0 right-0 h-[2px] bg-red-600 animate-in fade-in duration-300"></div>}
+                    </button>
+                    <button onClick={() => setActiveTab('all')} className={`px-6 py-2.5 text-[10px] font-bold uppercase tracking-widest transition-all relative ${activeTab === 'all' ? 'text-white' : 'text-zinc-500'}`}>
+                        Todos
+                        {activeTab === 'all' && <div className="absolute bottom-[-2px] left-0 right-0 h-[2px] bg-red-600 animate-in fade-in duration-300"></div>}
+                    </button>
+                </div>
+
+                <div className="relative group w-full md:w-80">
+                    <span className="absolute left-5 top-1/2 -translate-y-1/2 text-zinc-700 material-symbols-outlined text-[20px] group-focus-within:text-red-500 transition-colors pointer-events-none">search</span>
+                    <style>
+                        {`
+                            input.search-finance-override {
+                                padding-left: 58px !important;
+                            }
+                        `}
+                    </style>
                     <input 
                         type="text" 
                         value={searchQuery} 
                         onChange={e => setSearchQuery(e.target.value)} 
-                        placeholder="Buscar alumno, concepto..." 
-                        className="w-full pl-10 pr-4 py-2 bg-[#F9FAFB] border-transparent rounded-lg text-sm font-medium focus:bg-white focus:ring-2 focus:ring-primary/10 transition-all placeholder:text-gray-300" 
+                        placeholder="Buscar alumno o concepto..." 
+                        className="w-full pr-5 py-3 !bg-[#0a0a0d] !border-zinc-800 rounded-2xl text-xs font-semibold text-white focus:!border-red-600/50 transition-all placeholder:text-zinc-800 outline-none search-finance-override" 
                     />
                 </div>
             </div>
         </div>
 
         {/* --- LIST CONTENT (Structured Minimalism) --- */}
-        <div className="flex-1 overflow-y-auto p-6 md:px-10">
-            <div className="max-w-[1600px] mx-auto bg-white rounded-3xl shadow-soft border border-gray-100 overflow-hidden min-h-[400px]">
+        <div className="px-6 md:px-10 pb-10">
+            <div className="max-w-[1600px] mx-auto bg-[#0a0a0d] rounded-3xl overflow-hidden min-h-[500px]" style={{border: '1px solid var(--color-border-subtle)'}}>
                 {groupedTransactions.length === 0 ? (
                     <EmptyState 
                         title="Sin movimientos financieros" 
@@ -438,17 +520,17 @@ const Finance: React.FC = () => {
                     />
                 ) : (
                     <table className="w-full text-left border-collapse">
-                        <thead className="bg-white sticky top-0 z-10 border-b border-gray-50">
+                        <thead className="sticky top-0 z-10" style={{backgroundColor: 'var(--color-bg-raised)', borderBottom: '1px solid var(--color-border-subtle)'}}>
                             <tr>
-                                <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Fecha</th>
-                                <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Alumno</th>
-                                <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Concepto</th>
-                                <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Estado</th>
-                                <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Importe</th>
-                                <th className="px-8 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Acción</th>
+                                <th className="px-8 py-5 text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Fecha</th>
+                                <th className="px-6 py-5 text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Alumno</th>
+                                <th className="px-6 py-5 text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Concepto</th>
+                                <th className="px-6 py-5 text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em]">Estado</th>
+                                <th className="px-6 py-5 text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em] text-right">Importe</th>
+                                <th className="px-8 py-5 text-[9px] font-bold text-zinc-500 uppercase tracking-[0.2em] text-right">Acción</th>
                             </tr>
                         </thead>
-                        <tbody className="">
+                        <tbody className="divide-y divide-zinc-800/30">
                             {groupedTransactions.map(group => {
                                 const { mainRecord, isBatch, totalOriginalAmount, totalRemainingDebt, declaredAmount } = group;
                                 const isPaid = mainRecord.status === 'paid';
@@ -458,191 +540,195 @@ const Finance: React.FC = () => {
                                 const breakdownTooltip = `Total: $${totalOriginalAmount} \nPagado: $${paidSoFar} \nRestante: $${totalRemainingDebt}`;
 
                                 return (
-                                    <tr 
-                                        key={group.id} 
-                                        className="hover:bg-gray-50/50 transition-colors group cursor-pointer border-b border-gray-50 last:border-0"
-                                        onClick={() => setViewDetailRecord(group.mainRecord)}
-                                    >
-                                        <td className="px-8 py-4">
-                                            <div className="flex flex-col">
-                                                <span className="font-bold text-slate-900 text-sm tabular-nums">{formatDateDisplay(mainRecord.dueDate)}</span>
-                                                {mainRecord.paymentDate && (
-                                                    <span className="text-[10px] text-gray-400 font-medium mt-0.5">
-                                                        Pagado: {formatDateDisplay(mainRecord.paymentDate)}
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <div className="font-bold text-slate-900 text-sm">{mainRecord.studentName}</div>
-                                        </td>
-                                        <td className="px-6 py-4 text-sm text-gray-500 font-medium">
-                                            {isBatch ? (
+                                        <tr 
+                                            key={group.id} 
+                                            className="transition-colors group cursor-pointer border-b last:border-0"
+                                            style={{borderColor: 'var(--color-border-subtle)'}}
+                                            onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-bg-hover)'}
+                                            onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor = ''}
+                                            onClick={() => setViewDetailRecord(group.mainRecord)}
+                                        >
+                                            <td className="px-8 py-6">
                                                 <div className="flex flex-col">
-                                                    <span className="font-bold text-slate-900 text-xs uppercase tracking-wide flex items-center gap-1">
-                                                        <span className="material-symbols-outlined text-[14px] text-purple-600">layers</span>
-                                                        Lote ({group.itemCount})
-                                                    </span>
-                                                    <span className="text-xs mt-0.5 truncate max-w-[200px] text-gray-400">
-                                                        {group.records.map(r => r.concept).join(', ')}
-                                                    </span>
-                                                </div>
-                                            ) : (
-                                                <span className="text-slate-700">{mainRecord.concept}</span>
-                                            )}
-                                            {mainRecord.method && <span className="ml-2 text-[10px] bg-gray-50 px-1.5 py-0.5 rounded text-gray-400 uppercase tracking-wide">{mainRecord.method}</span>}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <StatusBadge status={mainRecord.status} amount={mainRecord.amount} penalty={mainRecord.penaltyAmount} />
-                                        </td>
-                                        
-                                        <td className="px-6 py-4 text-right" title={breakdownTooltip}>
-                                            {mainRecord.status === 'in_review' && !isBatch && isMensualidad ? (
-                                                <div className="flex justify-end">
-                                                    <DebtAmountEditor 
-                                                        item={mainRecord} 
-                                                        onUpdate={(id, val) => updateRecordAmount(id, val)} 
-                                                    />
-                                                </div>
-                                            ) : (
-                                                <div className="flex flex-col items-end">
-                                                    <span className={`font-bold text-sm tabular-nums tracking-tight ${isPaid ? 'text-emerald-700' : 'text-slate-900'}`}>
-                                                        ${totalOriginalAmount.toFixed(2)}
-                                                    </span>
-                                                    {isPartial && !isPaid && (
-                                                        <div className="mt-1 flex flex-col items-end gap-0.5">
-                                                            <div className="h-1 w-12 bg-gray-100 rounded-full overflow-hidden">
-                                                                <div 
-                                                                    className="h-full bg-emerald-500 rounded-full" 
-                                                                    style={{ width: `${(paidSoFar / totalOriginalAmount) * 100}%` }}
-                                                                ></div>
-                                                            </div>
-                                                            <span className="text-[10px] text-emerald-700 font-bold tabular-nums">
-                                                                Abonado: ${paidSoFar.toFixed(2)}
-                                                            </span>
-                                                        </div>
+                                                    <span className="font-bold text-[13px] tabular-nums" style={{color: 'var(--color-text-primary)'}}>{formatDateDisplay(mainRecord.dueDate)}</span>
+                                                    {mainRecord.paymentDate && (
+                                                        <span className="text-[10px] font-bold mt-1 uppercase tracking-wider" style={{color: 'var(--color-brand)'}}>
+                                                            Pagado: {formatDateDisplay(mainRecord.paymentDate)}
+                                                        </span>
                                                     )}
                                                 </div>
-                                            )}
-                                        </td>
-                                        
-                                        <td className="px-8 py-4 text-right">
-                                            {mainRecord.status === 'in_review' ? (
-                                                <button 
-                                                    onClick={(e) => { e.stopPropagation(); setSelectedGroup(group); }}
-                                                    className="bg-gradient-to-br from-red-600 to-red-700 text-white text-xs font-bold px-4 py-2 rounded-lg transition-all active:scale-95 flex items-center gap-2 ml-auto shadow-lg shadow-red-600/20 uppercase tracking-wide hover:shadow-red-600/30"
-                                                >
-                                                    <span className="material-symbols-outlined text-sm">visibility</span>
-                                                    Validar
-                                                </button>
-                                            ) : (mainRecord.status === 'paid' || mainRecord.status === 'partial') ? (
-                                                <button 
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        if (group.isBatch) {
-                                                            group.records.forEach(r => generateReceipt(r, academySettings, currentUser));
-                                                        } else {
-                                                            generateReceipt(mainRecord, academySettings, currentUser);
-                                                        }
-                                                    }}
-                                                    className="size-8 bg-transparent hover:bg-gray-100 text-gray-300 hover:text-slate-900 rounded-lg transition-all flex items-center justify-center ml-auto"
-                                                >
-                                                    <span className="material-symbols-outlined text-[18px]">
-                                                        {group.isBatch ? 'folder_open' : 'receipt_long'}
-                                                    </span>
-                                                </button>
-                                            ) : (
-                                                <span className="text-gray-200 text-xs font-medium">-</span>
-                                            )}
-                                        </td>
-                                    </tr>
+                                            </td>
+                                            <td className="px-6 py-6 font-bold text-[13px]" style={{color: 'var(--color-text-primary)'}}>
+                                                {mainRecord.studentName}
+                                            </td>
+                                            <td className="px-6 py-6 text-[13px] font-medium" style={{color: 'var(--color-text-secondary)'}}>
+                                                {isBatch ? (
+                                                    <div className="flex flex-col gap-1">
+                                                        <span className="font-black text-[10px] uppercase tracking-wider flex items-center gap-1.5" style={{color: 'var(--color-text-primary)'}}>
+                                                            <span className="material-symbols-outlined text-[14px]">layers</span>
+                                                            Lote ({group.itemCount})
+                                                        </span>
+                                                        <span className="text-[11px] truncate max-w-[200px]" style={{color: 'var(--color-text-muted)'}}>
+                                                            {group.records.map(r => r.concept).join(', ')}
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <span>{mainRecord.concept}</span>
+                                                )}
+                                                {mainRecord.method && <span className="ml-2 text-[9px] px-1.5 py-0.5 rounded uppercase tracking-widest font-black" style={{backgroundColor: 'var(--color-bg-raised)', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-strong)'}}>{mainRecord.method}</span>}
+                                            </td>
+                                            <td className="px-6 py-6">
+                                                <StatusBadge status={mainRecord.status} amount={mainRecord.amount} penalty={mainRecord.penaltyAmount} />
+                                            </td>
+                                            
+                                            <td className="px-6 py-6 text-right" title={breakdownTooltip}>
+                                                {mainRecord.status === 'in_review' && !isBatch && isMensualidad ? (
+                                                    <div className="flex justify-end">
+                                                        <DebtAmountEditor 
+                                                            item={mainRecord} 
+                                                            onUpdate={(id, val) => updateRecordAmount(id, val)} 
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-col items-end">
+                                                        <span className="font-black text-sm tabular-nums tracking-tight" style={{color: isPaid ? 'var(--color-success)' : 'var(--color-text-primary)'}}>
+                                                            ${totalOriginalAmount.toFixed(2)}
+                                                        </span>
+                                                        {isPartial && !isPaid && (
+                                                            <div className="mt-2 flex flex-col items-end gap-1.5">
+                                                                <div className="h-1 w-16 bg-zinc-900 rounded-full overflow-hidden">
+                                                                    <div 
+                                                                        className="h-full rounded-full shadow-sm" 
+                                                                        style={{ backgroundColor: 'var(--color-success)', width: `${(paidSoFar / totalOriginalAmount) * 100}%` }}
+                                                                    ></div>
+                                                                </div>
+                                                                <span className="text-[9px] font-black tabular-nums uppercase tracking-tighter" style={{color: 'var(--color-success)'}}>
+                                                                    Abonado: ${paidSoFar.toFixed(2)}
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </td>
+                                            
+                                            <td className="px-8 py-6 text-right">
+                                                {mainRecord.status === 'in_review' ? (
+                                                    <button 
+                                                        onClick={(e) => { e.stopPropagation(); setSelectedGroup(group); }}
+                                                        className="bg-zinc-900 border border-zinc-800 text-zinc-400 text-[9px] font-bold px-4 py-2 rounded-lg transition-all active:scale-95 flex items-center gap-2 ml-auto uppercase tracking-wider hover:bg-zinc-800 hover:text-white"
+                                                    >
+                                                        <span className="material-symbols-outlined text-xs">visibility</span>
+                                                        Validar
+                                                    </button>
+                                                ) : (mainRecord.status === 'paid' || mainRecord.status === 'partial') ? (
+                                                    <button 
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if (group.isBatch) {
+                                                                group.records.forEach(r => generateReceipt(r, academySettings, currentUser));
+                                                            } else {
+                                                                generateReceipt(mainRecord, academySettings, currentUser);
+                                                            }
+                                                        }}
+                                                        className="size-8 bg-zinc-900 border border-zinc-800 text-zinc-500 hover:text-white hover:bg-zinc-800 rounded-lg flex items-center justify-center ml-auto transition-all"
+                                                    >
+                                                        <span className="material-symbols-outlined text-base">
+                                                            {group.isBatch ? 'folder_open' : 'receipt_long'}
+                                                        </span>
+                                                    </button>
+                                                ) : (
+                                                    <span className="text-zinc-800 text-xs">-</span>
+                                                )}
+                                            </td>
+                                        </tr>
                                 );
                             })}
                         </tbody>
                     </table>
                 )}
             </div>
+            
+            {/* Spacer */}
+            <div className="h-10" />
         </div>
 
         {/* --- REVIEW MODAL --- */}
         {activeGroup && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-                <div className="bg-white rounded-3xl w-full max-w-5xl h-[85vh] shadow-soft border border-gray-100 flex overflow-hidden animate-in zoom-in-95 duration-200">
-                    
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+                <div className="bg-[#0f0f0f] rounded-3xl w-full max-w-5xl h-[85vh] border border-zinc-800 flex overflow-hidden animate-in zoom-in-95 duration-200 shadow-2xl">
                     {/* Left: Proof */}
-                    <div className="w-1/2 bg-gray-50 flex items-center justify-center relative p-8">
+                    <div className="w-1/2 bg-[#050505] flex items-center justify-center relative p-10">
                         {activeGroup.mainRecord.proofUrl ? (
                             activeGroup.mainRecord.proofType?.includes('pdf') ? (
-                                <iframe src={activeGroup.mainRecord.proofUrl} className="w-full h-full rounded-2xl shadow-sm border border-gray-200" />
+                                <iframe src={activeGroup.mainRecord.proofUrl} className="w-full h-full rounded-2xl border" style={{borderColor: 'var(--color-border-subtle)'}} />
                             ) : (
-                                <img src={activeGroup.mainRecord.proofUrl} className="max-w-full max-h-full object-contain rounded-2xl shadow-lg" />
+                                <img src={activeGroup.mainRecord.proofUrl} className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl border border-white/5" />
                             )
                         ) : (
-                            <div className="text-gray-300 flex flex-col items-center">
-                                <span className="material-symbols-outlined text-6xl mb-4 opacity-50">broken_image</span>
-                                <p className="font-bold text-sm uppercase tracking-wide">Sin comprobante visible</p>
+                            <div className="flex flex-col items-center" style={{color: 'var(--color-text-muted)'}}>
+                                <span className="material-symbols-outlined text-7xl mb-6 opacity-20">broken_image</span>
+                                <p className="font-bold text-[10px] uppercase tracking-[0.3em] opacity-30">Sin comprobante digital</p>
                             </div>
                         )}
                     </div>
 
                     {/* Right: Details & Action */}
-                    <div className="w-1/2 flex flex-col bg-white">
-                        <div className="p-8 border-b border-gray-50 flex justify-between items-start">
+                    <div className="w-1/2 flex flex-col bg-[#0a0a0d] border-l" style={{borderColor: 'var(--color-border-subtle)'}}>
+                        <div className="p-8 border-b flex justify-between items-start" style={{borderColor: 'var(--color-border-subtle)'}}>
                             <div>
-                                <h2 className="text-2xl font-black text-slate-900 mb-1 tracking-tight">Conciliación</h2>
-                                <p className="text-gray-400 text-sm font-medium">Verifica el monto y distribuye el pago.</p>
+                                <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-1" style={{color: 'var(--color-brand)'}}>Conciliación</p>
+                                <h2 className="text-xl font-black text-white tracking-tight">Vincular Pago</h2>
+                                <p className="text-zinc-500 text-xs mt-1">Verifica el depósito y distribuye el saldo.</p>
                             </div>
-                            <button onClick={() => setSelectedGroup(null)} className="p-2 hover:bg-gray-50 rounded-full text-gray-400 hover:text-slate-900 transition-colors">
+                            <button onClick={() => setSelectedGroup(null)} className="p-2 hover:bg-zinc-800/50 rounded-full text-zinc-500 hover:text-white transition-colors">
                                 <span className="material-symbols-outlined">close</span>
                             </button>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-8 space-y-8">
-                            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-100">
-                                <div className="flex items-center justify-between mb-2">
-                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Monto a Aprobar</p>
-                                    <span className="bg-white px-3 py-1 rounded-md text-xs font-bold text-slate-600 uppercase shadow-sm border border-gray-200">
+                        <div className="flex-1 overflow-y-auto p-8 space-y-10 no-scrollbar">
+                            <div className="p-7 rounded-2xl border" style={{backgroundColor: 'var(--color-bg-raised)', borderColor: 'var(--color-border-subtle)'}}>
+                                <div className="flex items-center justify-between mb-3">
+                                    <p className="text-[9px] font-bold uppercase tracking-[0.2em]" style={{color: 'var(--color-text-muted)'}}>Importe Declarado</p>
+                                    <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest" style={{backgroundColor: 'var(--color-bg-hover)', color: 'var(--color-text-muted)', border: '1px solid var(--color-border-strong)'}}>
                                         {activeGroup.mainRecord.method}
                                     </span>
                                 </div>
-                                <p className="text-5xl font-black text-slate-900 tracking-tighter tabular-nums">
+                                <p className="text-4xl font-black tracking-tighter" style={{color: 'var(--color-text-primary)'}}>
                                     ${amountToApprove.toFixed(2)}
                                 </p>
                             </div>
 
                             <div>
-                                <h4 className="text-xs font-bold text-gray-400 uppercase mb-4 tracking-wider">Desglose de Aplicación (Orden de Prioridad)</h4>
-                                <div className="space-y-3">
+                                <h4 className="text-[9px] font-bold uppercase tracking-[0.2em] mb-5" style={{color: 'var(--color-text-muted)'}}>Distribución Automática</h4>
+                                <div className="space-y-4">
                                     {previewDistribution.map((item: any) => {
                                         const isMensualidadModal = item.category === 'Mensualidad' || item.concept.toLowerCase().includes('mensualidad');
                                         return (
-                                            <div key={item.id} className="flex flex-col p-4 bg-white border border-gray-100 rounded-xl relative overflow-hidden group hover:border-gray-200 transition-all shadow-sm">
-                                                <div className={`absolute left-0 top-0 bottom-0 w-1 ${
-                                                    item._status === 'paid' ? 'bg-emerald-500' : item._status === 'partial' ? 'bg-amber-500' : 'bg-red-400'
-                                                }`}></div>
+                                            <div key={item.id} className="flex flex-col p-5 rounded-2xl relative overflow-hidden group transition-all" style={{backgroundColor: 'var(--color-bg-surface)', border: '1px solid var(--color-border-subtle)'}}>
+                                                <div className="absolute left-0 top-0 bottom-0 w-1" style={{backgroundColor: item._status === 'paid' ? 'var(--color-success)' : item._status === 'partial' ? 'var(--color-warning)' : 'rgba(255,255,255,0.05)'}}></div>
                                                 
-                                                <div className="flex justify-between items-center pl-3">
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-sm font-bold text-slate-900 block">{item.concept}</span>
-                                                            {isMensualidadModal && <span className="text-[9px] font-black bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded uppercase tracking-tighter">Prioritario</span>}
+                                                <div className="flex justify-between items-start pl-4">
+                                                    <div className="flex-1 pr-4">
+                                                        <div className="flex items-center gap-2 mb-1">
+                                                            <span className="text-sm font-bold text-white block">{item.concept}</span>
+                                                            {isMensualidadModal && <span className="text-[8.5px] font-black px-1.5 py-0.5 rounded uppercase tracking-tighter" style={{backgroundColor: 'var(--color-brand-glow-strong)', color: 'var(--color-brand)', border: '1px solid var(--color-brand-glow-strong)'}}>Prioridad Alta</span>}
                                                         </div>
-                                                        <div className="mt-1">
+                                                        <div className="mt-2">
                                                             {isMensualidadModal ? (
                                                                 <DebtAmountEditor 
                                                                     item={item} 
                                                                     onUpdate={(id, val) => updateRecordAmount(id, val)}
                                                                 />
                                                             ) : (
-                                                                <span className="text-xs text-gray-400 font-mono">Total Deuda: ${item.amount + (item.penaltyAmount || 0)}</span>
+                                                                <span className="text-[11px] font-bold" style={{color: 'var(--color-text-muted)'}}>Total Deuda: ${item.amount + (item.penaltyAmount || 0)}</span>
                                                             )}
                                                         </div>
                                                     </div>
                                                     <div className="text-right">
-                                                        <span className={`font-mono font-bold text-lg tabular-nums ${item._status === 'paid' ? 'text-emerald-700' : item._paid > 0 ? 'text-amber-700' : 'text-slate-400'}`}>
+                                                        <span className="font-black text-xl tabular-nums block" style={{color: item._status === 'paid' ? 'var(--color-success)' : item._paid > 0 ? 'var(--color-warning)' : 'var(--color-text-muted)'}}>
                                                             ${item._paid.toFixed(2)}
                                                         </span>
-                                                        <div className={`text-[10px] font-bold uppercase mt-0.5 tracking-wider ${item._status === 'paid' ? 'text-emerald-600' : item._paid > 0 ? 'text-amber-600' : 'text-gray-300'}`}>
+                                                        <div className="text-[9px] font-black uppercase mt-1 tracking-[0.15em]" style={{color: item._status === 'paid' ? 'var(--color-success)' : item._paid > 0 ? 'var(--color-warning)' : 'var(--color-text-muted)'}}>
                                                             {item._status === 'paid' ? 'Cubierto' : item._status === 'partial' ? 'Abono' : 'Sin Saldo'}
                                                         </div>
                                                     </div>
@@ -654,14 +740,138 @@ const Finance: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="p-8 border-t border-gray-50 bg-white flex gap-4">
-                            <button onClick={handleReject} className="px-6 py-4 rounded-xl text-red-500 font-bold hover:bg-red-50 transition-all text-sm uppercase tracking-wide">
-                                Rechazar Pago
+                        <div className="p-8 border-t flex gap-4" style={{backgroundColor: 'var(--color-bg-surface)', borderColor: 'var(--color-border-subtle)'}}>
+                            <button onClick={handleReject} className="px-6 py-4 rounded-xl text-zinc-500 font-bold hover:text-zinc-200 hover:bg-zinc-800 transition-all text-[10px] uppercase tracking-widest">
+                                Rechazar
                             </button>
-                            <button onClick={handleApprove} className="flex-1 py-4 rounded-xl bg-gradient-to-br from-red-600 to-red-700 text-white font-bold hover:shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 text-sm uppercase tracking-wide shadow-md shadow-red-600/20">
-                                <span className="material-symbols-outlined">check_circle</span>
-                                Confirmar y Aplicar
+                            <button onClick={handleApprove} className="flex-1 py-4 rounded-xl bg-white text-black font-black hover:bg-zinc-200 transition-all active:scale-[0.98] flex items-center justify-center gap-3 text-xs uppercase tracking-widest shadow-xl">
+                                <span className="material-symbols-outlined text-xl">verified</span>
+                                Aprobar Movimiento
                             </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* --- MODAL PANTALLA COMPLETA: TODOS LOS MOVIMIENTOS --- */}
+        {showAllMovementsModal && (
+            <div className="fixed inset-0 z-[60] bg-[#050505] flex flex-col animate-in fade-in slide-in-from-bottom-5 duration-300">
+                <div className="bg-[#0a0a0d] border-b px-6 py-6 md:px-10 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xl shrink-0" style={{borderColor: 'var(--color-border-subtle)'}}>
+                    <div className="flex items-center gap-6">
+                        <button onClick={() => setShowAllMovementsModal(false)} className="size-10 flex items-center justify-center bg-zinc-900 border border-zinc-800 rounded-full text-zinc-400 hover:text-white transition-all hover:scale-110 active:scale-90">
+                            <span className="material-symbols-outlined">arrow_back</span>
+                        </button>
+                        <div>
+                            <p className="text-[9px] font-bold uppercase tracking-[0.2em] mb-1" style={{color: 'var(--color-brand)'}}>IKC Management</p>
+                            <h1 className="text-2xl font-black text-white tracking-tighter leading-none">Todos los Movimientos</h1>
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col md:flex-row gap-4">
+                        <div className="relative group">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-600 material-symbols-outlined text-[18px] group-focus-within:text-red-500 transition-colors pointer-events-none">search</span>
+                            {/* Technical Override: Ensuring icon doesn't overlap text */}
+                            <style>
+                                {`
+                                    input.search-modal-finance-override {
+                                        padding-left: 54px !important;
+                                    }
+                                `}
+                            </style>
+                            <input
+                                type="text"
+                                placeholder="Buscar alumno o concepto..."
+                                value={modalSearch}
+                                onChange={(e) => setModalSearch(e.target.value)}
+                                className="w-full md:w-80 pr-4 py-3 bg-[#050505] !border-zinc-800 rounded-2xl text-sm text-white outline-none focus:!border-red-600/50 transition-all font-semibold placeholder:font-normal placeholder:text-zinc-800 search-modal-finance-override"
+                            />
+                            {modalSearch && (
+                                <button onClick={() => setModalSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-700 hover:text-white">
+                                    <span className="material-symbols-outlined text-sm">close</span>
+                                </button>
+                            )}
+                        </div>
+                        <select
+                            value={modalMonthFilter}
+                            onChange={(e) => setModalMonthFilter(e.target.value)}
+                            className="w-full md:w-56 px-5 py-3 bg-[#050505] !border-zinc-800 rounded-2xl text-[11px] font-black text-zinc-400 outline-none focus:!border-red-600 transition-all cursor-pointer appearance-none uppercase tracking-widest"
+                        >
+                            <option value="">Todos los Meses</option>
+                            {uniqueModalMonths.map(m => {
+                                const [y, mm] = m.split('-');
+                                const dateObj = new Date(parseInt(y), parseInt(mm) - 1, 1);
+                                return (
+                                    <option key={m} value={m}>
+                                        {formatDateDisplay(dateObj.toISOString(), { month: 'long', year: 'numeric' })}
+                                    </option>
+                                );
+                            })}
+                        </select>
+                    </div>
+                </div>
+
+                <div className="flex-1 overflow-auto p-6 md:p-10 max-w-[1500px] w-full mx-auto flex flex-col gap-8 no-scrollbar scroll-smooth">
+                    <div className="bg-[#0a0a0d] rounded-[32px] overflow-hidden flex-1 flex flex-col min-h-[400px] shadow-2xl" style={{border: '1px solid var(--color-border-subtle)'}}>
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead className="bg-[#0c0c0e] text-[9px] font-bold text-zinc-500 uppercase tracking-widest sticky top-0 z-10 border-b border-zinc-800/50">
+                                    <tr>
+                                        <th className="px-6 py-3.5 w-32">Fecha</th>
+                                        <th className="px-6 py-3.5">Concepto & Alumno</th>
+                                        <th className="px-6 py-3.5 w-32 text-center">Estado</th>
+                                        <th className="px-6 py-3.5 w-32 text-right">Total</th>
+                                        <th className="px-6 py-3.5 w-16 text-center">Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-zinc-800/30">
+                                    {modalMovements.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={5} className="py-20 text-center text-zinc-600 font-bold">
+                                                <div className="mx-auto size-16 bg-zinc-900 rounded-full flex items-center justify-center mb-4 border border-zinc-800">
+                                                    <span className="material-symbols-outlined text-zinc-700 text-2xl">search_off</span>
+                                                </div>
+                                                Sin movimientos encontrados.
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        modalMovements.map(rec => {
+                                            const totalDebt = rec.amount + (rec.penaltyAmount || 0);
+                                            const historyPaid = (rec.paymentHistory || []).reduce((acc, h) => acc + h.amount, 0);
+                                            const totalOriginal = totalDebt + historyPaid;
+
+                                            return (
+                                                <tr key={rec.id} onClick={() => setViewDetailRecord(rec)} className="hover:bg-zinc-800/20 transition-colors cursor-pointer group">
+                                                    <td className="px-6 py-4 whitespace-nowrap">
+                                                        <p className="font-bold text-zinc-100 text-sm">
+                                                            {formatDateDisplay(rec.paymentDate || rec.dueDate, { day: '2-digit', month: 'short', year: '2-digit' })}
+                                                        </p>
+                                                    </td>
+                                                    <td className="px-6 py-4">
+                                                        <p className="font-bold text-zinc-100 leading-tight">{rec.concept}</p>
+                                                        <p className="text-xs text-zinc-500 flex items-center gap-1.5 mt-1 capitalize">
+                                                            <span className="material-symbols-outlined text-[14px]">person</span> {rec.studentName}
+                                                        </p>
+                                                    </td>
+                                                    <td className="px-6 py-4 whitespace-nowrap text-center">
+                                                        <StatusBadge status={rec.status} amount={rec.amount} penalty={rec.penaltyAmount} />
+                                                    </td>
+                                                    <td className="px-6 py-4 text-right whitespace-nowrap">
+                                                        <span className="font-bold text-zinc-200 text-[13px] tabular-nums tracking-tight">
+                                                            ${totalOriginal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-center">
+                                                        <div className="flex items-center mx-auto justify-center size-8 bg-zinc-800/50 text-zinc-500 rounded-lg group-hover:bg-red-600 group-hover:text-white transition-all border border-zinc-700/50">
+                                                            <span className="material-symbols-outlined text-sm">open_in_new</span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
+                                    )}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -686,7 +896,6 @@ const Finance: React.FC = () => {
                      groupRecords = records.filter(item => item.batchPaymentId === r.batchPaymentId);
                 }
                 
-                // RECONSTRUCTION LOGIC FOR MODAL GROUPING
                 const totalRemaining = groupRecords.reduce((acc, item) => acc + item.amount + (item.penaltyAmount || 0), 0);
                 const totalPaidHistory = groupRecords.reduce((acc, item) => acc + (item.paymentHistory || []).reduce((h, p) => h + p.amount, 0), 0);
 

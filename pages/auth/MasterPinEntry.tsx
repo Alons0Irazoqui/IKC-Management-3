@@ -1,6 +1,6 @@
-
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import './Login.css';
 
 const MasterPinEntry: React.FC = () => {
   const navigate = useNavigate();
@@ -20,52 +20,59 @@ const MasterPinEntry: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 font-sans">
-      <div className="w-full max-w-sm">
+    <div className="login-dark-theme min-h-screen relative overflow-hidden flex flex-col items-center justify-center p-6 font-sans">
+      <div className="enterprise-bg" />
+      <div className="ambient-glow" />
+
+      <div className="w-full max-w-sm relative z-10">
         
-        <div className="flex flex-col items-center mb-10 text-center">
-            <span className="material-symbols-outlined text-4xl text-gray-900 mb-4">lock</span>
-            <h1 className="text-2xl font-black text-gray-900 tracking-tight">Acceso Restringido</h1>
-            <p className="text-gray-500 mt-2 text-sm">
+        <div className="flex flex-col items-center mb-10 text-center animate-in fade-in duration-700">
+            <span className="material-symbols-outlined text-5xl text-white mb-6 drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">lock</span>
+            <h1 className="text-4xl font-black text-white tracking-tighter drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">ACCESO RESTRINGIDO</h1>
+            <p className="text-[#EF4444] mt-3 text-[10px] font-black uppercase tracking-[0.4em]">
                 Solo personal autorizado de IKC.
             </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-            <div className="space-y-1">
-                <input 
-                    type="password" 
-                    autoFocus
-                    required 
-                    className="w-full rounded-lg bg-gray-100 px-4 py-4 text-center text-3xl font-black tracking-[0.5em] text-gray-900 placeholder:text-gray-300 focus:bg-white transition-all outline-none" 
-                    placeholder="••••••••"
-                    value={pin}
-                    onChange={(e) => {
-                        setPin(e.target.value);
-                        setError('');
-                    }}
-                    maxLength={8}
-                />
-            </div>
-
-            {error && (
-                <div className="bg-red-50 text-red-600 text-xs font-bold p-3 rounded-lg text-center">
-                    {error}
+        <div className="bg-[#0e0e11] p-10 rounded-[2.5rem] border border-white/5 shadow-2xl space-y-8 animate-in zoom-in-95 duration-500">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-8">
+                <div className="space-y-2">
+                    <label className="text-[10px] font-black text-zinc-500 uppercase tracking-widest ml-1 text-center block">Ingresa tu código de acceso</label>
+                    <input 
+                        type="password" 
+                        autoFocus
+                        required 
+                        className="w-full h-16 rounded-2xl bg-[#16161a] border border-white/5 px-4 text-center text-4xl font-black tracking-[0.5em] text-white focus:border-[#e11d48] focus:ring-0 transition-all outline-none shadow-inner" 
+                        placeholder="••••••••"
+                        value={pin}
+                        onChange={(e) => {
+                            setPin(e.target.value);
+                            setError('');
+                        }}
+                        maxLength={8}
+                    />
                 </div>
-            )}
 
-            <button 
-                type="submit" 
-                className="w-full bg-gray-900 hover:bg-black text-white font-bold py-4 rounded-lg transition-all"
-            >
-                Verificar
-            </button>
-        </form>
+                {error && (
+                    <div className="text-[#EF4444] text-[11px] font-bold text-center animate-in shake-in duration-300">
+                        {error}
+                    </div>
+                )}
 
-        <div className="mt-8 text-center">
-            <Link to="/role-selection" className="text-gray-400 font-bold hover:text-gray-600 text-xs uppercase tracking-wider transition-colors">
-                Cancelar
-            </Link>
+                <button 
+                    type="submit" 
+                    className="w-full bg-white hover:bg-[#e11d48] text-black hover:text-white font-black py-4 rounded-2xl transition-all shadow-xl active:scale-95 text-xs uppercase tracking-widest"
+                >
+                    Verificar
+                </button>
+            </form>
+
+            <div className="text-center">
+                <Link to="/role-selection" className="text-zinc-500 font-black hover:text-white text-[10px] uppercase tracking-[0.3em] transition-colors flex items-center justify-center gap-2">
+                    <span className="material-symbols-outlined text-lg">close</span>
+                    CANCELAR
+                </Link>
+            </div>
         </div>
       </div>
     </div>

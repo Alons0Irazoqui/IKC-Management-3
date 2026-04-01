@@ -132,20 +132,32 @@ const Settings: React.FC = () => {
             />
 
             <header className="mb-10">
-                <h1 className="text-3xl font-bold tracking-tight text-text-main">Configuración</h1>
-                <p className="text-text-secondary mt-2">Gestiona tu perfil, preferencias y seguridad.</p>
+                <h1 className="text-3xl font-bold tracking-tight" style={{color:'var(--color-text-primary)'}}>Configuración</h1>
+                <p className="mt-2" style={{color:'var(--color-text-muted)'}}>Gestiona tu perfil, preferencias y seguridad del sistema.</p>
             </header>
 
             <div className="flex flex-col lg:flex-row gap-8">
                 {/* Sidebar */}
-                <nav className="lg:w-64 flex flex-col gap-1">
+                <nav className="lg:w-64 flex flex-col gap-1.5">
                     {[
                         { id: 'profile', label: 'Perfil y Seguridad', icon: 'security' },
-                        ...(student ? [{ id: 'emergency', label: 'Contacto Emergencia', icon: 'contact_emergency' }] : []),
+                        ...(student ? [{ id: 'emergency', label: 'Información del Alumno', icon: 'contact_emergency' }] : []),
                         ...(currentUser?.role === 'master' ? [{ id: 'academy', label: 'Academia & Banco', icon: 'domain' }] : []),
                     ].map(item => (
-                        <button key={item.id} onClick={() => setActiveTab(item.id as any)} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === item.id ? 'bg-white text-primary shadow-sm ring-1 ring-black/5' : 'text-text-secondary hover:bg-white/50 hover:text-text-main'}`}>
-                            <span className={`material-symbols-outlined text-[20px] ${activeTab === item.id ? 'filled' : ''}`}>{item.icon}</span>
+                        <button 
+                            key={item.id} 
+                            onClick={() => setActiveTab(item.id as any)} 
+                            className={`flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-bold transition-all relative overflow-hidden group`}
+                            style={activeTab === item.id 
+                                ? { backgroundColor: 'var(--color-bg-surface)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border-subtle)', boxShadow: '0 4px 12px rgba(0,0,0,0.2)'} 
+                                : { color: 'var(--color-text-muted)' }}
+                            onMouseEnter={e => { if(activeTab !== item.id) e.currentTarget.style.backgroundColor = 'var(--color-bg-raised)'; }}
+                            onMouseLeave={e => { if(activeTab !== item.id) e.currentTarget.style.backgroundColor = 'transparent'; }}
+                        >
+                            {activeTab === item.id && (
+                                <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-[#EF4444] rounded-r-full shadow-[0_0_12px_rgba(239,68,68,0.4)]" />
+                            )}
+                            <span className={`material-symbols-outlined text-[20px] ${activeTab === item.id ? 'filled' : ''}`} style={{color: activeTab === item.id ? '#EF4444' : 'inherit'}}>{item.icon}</span>
                             {item.label}
                         </button>
                     ))}
@@ -156,74 +168,125 @@ const Settings: React.FC = () => {
                     {activeTab === 'profile' && (
                         <div className="flex flex-col gap-8">
                             {/* Public Profile Form */}
-                            <form onSubmit={handleProfileSave} className="bg-white rounded-3xl p-8 shadow-card border border-gray-100">
-                                <h3 className="text-lg font-bold text-text-main mb-6">Información Básica</h3>
-                                <div className="flex items-center gap-6 mb-8">
-                                    <div className="relative group cursor-pointer" onClick={triggerFileInput}>
+                            <form onSubmit={handleProfileSave} className="rounded-3xl p-8 border shadow-2xl" style={{backgroundColor:'var(--color-bg-surface)',borderColor:'var(--color-border-subtle)'}}>
+                                <h3 className="text-lg font-bold mb-6 tracking-tight" style={{color:'var(--color-text-primary)'}}>Información Básica</h3>
+                                <div className="flex items-center gap-8 mb-10">
+                                    <div className="relative group cursor-pointer shrink-0" onClick={triggerFileInput}>
                                         <Avatar
                                             src={profileData.avatarUrl}
                                             name={profileData.name}
-                                            className="size-24 rounded-full ring-4 ring-gray-50 text-2xl"
+                                            className="size-24 rounded-2xl ring-4 ring-offset-4 ring-offset-zinc-900 border-2 border-white/20 text-2xl font-black shadow-lg"
                                         />
-                                        <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-[2px]">
-                                            <span className="material-symbols-outlined text-white">photo_camera</span>
+                                        <div className="absolute inset-0 bg-black/60 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-sm border border-white/20">
+                                            <span className="material-symbols-outlined text-white text-3xl">photo_camera</span>
                                         </div>
                                     </div>
-                                    <input type="file" ref={fileInputRef} onChange={handleImageUpload} className="hidden" accept="image/*" />
-                                    <button type="button" onClick={triggerFileInput} className="px-4 py-2 border border-gray-200 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors">Cambiar Foto</button>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-text-main">Nombre</label>
-                                        <input value={profileData.name} onChange={e => setProfileData({ ...profileData, name: e.target.value })} className="w-full rounded-xl border-gray-200 bg-gray-50/50 px-4 py-2.5 text-sm focus:bg-white focus:border-primary focus:ring-primary" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-text-main">Email (Login)</label>
-                                        <input value={profileData.email} disabled className="w-full rounded-xl border-gray-200 bg-gray-100 px-4 py-2.5 text-sm text-gray-500 cursor-not-allowed" />
+                                    <div className="flex flex-col gap-2">
+                                        <input type="file" ref={fileInputRef} onChange={handleImageUpload} className="hidden" accept="image/*" />
+                                        <button type="button" onClick={triggerFileInput} className="px-5 py-2.5 rounded-xl text-sm font-bold transition-all border" style={{backgroundColor:'var(--color-bg-app)',borderColor:'var(--color-border-subtle)',color:'var(--color-text-secondary)'}} onMouseEnter={e=>(e.currentTarget as HTMLElement).style.backgroundColor='var(--color-bg-raised)'} onMouseLeave={e=>(e.currentTarget as HTMLElement).style.backgroundColor='var(--color-bg-app)'}>Cambiar Foto</button>
+                                        <p className="text-[11px]" style={{color:'var(--color-text-muted)'}}>Recomendado: JPG o PNG de al menos 400x400px</p>
                                     </div>
                                 </div>
-                                <div className="mt-8 flex justify-end">
-                                    <button type="submit" disabled={isSavingProfile} className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-white text-sm font-bold shadow-lg hover:bg-primary-hover disabled:opacity-70 disabled:cursor-not-allowed">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="space-y-2.5">
+                                        <label className="text-xs font-bold uppercase tracking-widest pl-1" style={{color:'var(--color-text-muted)'}}>Nombre completo</label>
+                                        <input 
+                                            value={profileData.name} 
+                                            onChange={e => setProfileData({ ...profileData, name: e.target.value })} 
+                                            className="w-full rounded-2xl px-5 py-3.5 text-sm font-medium transition-all outline-none border" 
+                                            style={{backgroundColor:'var(--color-bg-app)',borderColor:'var(--color-border-subtle)',color:'var(--color-text-primary)'}}
+                                            onFocus={e => e.currentTarget.style.borderColor = '#EF4444'}
+                                            onBlur={e => e.currentTarget.style.borderColor = 'var(--color-border-subtle)'}
+                                        />
+                                    </div>
+                                    <div className="space-y-2.5">
+                                        <label className="text-xs font-bold uppercase tracking-widest pl-1" style={{color:'var(--color-text-muted)'}}>Email (Login)</label>
+                                        <input 
+                                            value={profileData.email} 
+                                            disabled 
+                                            className="w-full rounded-2xl px-5 py-3.5 text-sm font-medium cursor-not-allowed border opacity-60" 
+                                            style={{backgroundColor:'var(--color-bg-app)',borderColor:'var(--color-border-subtle)',color:'var(--color-text-muted)'}}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="mt-10 flex justify-end">
+                                    <button 
+                                        type="submit" 
+                                        disabled={isSavingProfile} 
+                                        className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold transition-all shadow-xl text-sm disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+                                        style={{backgroundColor: 'rgba(239,68,68,0.15)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.3)'}}
+                                        onMouseEnter={e => { if(!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.25)'; }}
+                                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.15)'}
+                                    >
                                         {isSavingProfile ? (
                                             <>
-                                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <svg className="animate-spin h-4 w-4" style={{color:'#EF4444'}} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                 </svg>
                                                 Guardando...
                                             </>
                                         ) : (
-                                            'Guardar Cambios'
+                                            <>
+                                                Guardar Cambios
+                                                <span className="material-symbols-outlined text-lg">check_circle</span>
+                                            </>
                                         )}
                                     </button>
                                 </div>
                             </form>
 
                             {/* Password Form */}
-                            <form onSubmit={handlePasswordChange} className="bg-white rounded-3xl p-8 shadow-card border border-gray-100">
-                                <h3 className="text-lg font-bold text-text-main mb-6">Seguridad</h3>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-text-main">Nueva Contraseña</label>
-                                        <input type="password" value={passwords.new} onChange={e => setPasswords({ ...passwords, new: e.target.value })} className="w-full rounded-xl border-gray-200 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary" />
+                            <form onSubmit={handlePasswordChange} className="rounded-3xl p-8 border shadow-2xl" style={{backgroundColor:'var(--color-bg-surface)',borderColor:'var(--color-border-subtle)'}}>
+                                <h3 className="text-lg font-bold mb-6 tracking-tight" style={{color:'var(--color-text-primary)'}}>Seguridad</h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="space-y-2.5">
+                                        <label className="text-xs font-bold uppercase tracking-widest pl-1" style={{color:'var(--color-text-muted)'}}>Nueva Contraseña</label>
+                                        <input 
+                                            type="password" 
+                                            value={passwords.new} 
+                                            onChange={e => setPasswords({ ...passwords, new: e.target.value })} 
+                                            className="w-full rounded-2xl px-5 py-3.5 text-sm font-medium transition-all outline-none border" 
+                                            style={{backgroundColor:'var(--color-bg-app)',borderColor:'var(--color-border-subtle)',color:'var(--color-text-primary)'}}
+                                            onFocus={e => e.currentTarget.style.borderColor = '#EF4444'}
+                                            onBlur={e => e.currentTarget.style.borderColor = 'var(--color-border-subtle)'}
+                                        />
                                     </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-text-main">Confirmar Contraseña</label>
-                                        <input type="password" value={passwords.confirm} onChange={e => setPasswords({ ...passwords, confirm: e.target.value })} className="w-full rounded-xl border-gray-200 px-4 py-2.5 text-sm focus:border-primary focus:ring-primary" />
+                                    <div className="space-y-2.5">
+                                        <label className="text-xs font-bold uppercase tracking-widest pl-1" style={{color:'var(--color-text-muted)'}}>Confirmar Contraseña</label>
+                                        <input 
+                                            type="password" 
+                                            value={passwords.confirm} 
+                                            onChange={e => setPasswords({ ...passwords, confirm: e.target.value })} 
+                                            className="w-full rounded-2xl px-5 py-3.5 text-sm font-medium transition-all outline-none border" 
+                                            style={{backgroundColor:'var(--color-bg-app)',borderColor:'var(--color-border-subtle)',color:'var(--color-text-primary)'}}
+                                            onFocus={e => e.currentTarget.style.borderColor = '#EF4444'}
+                                            onBlur={e => e.currentTarget.style.borderColor = 'var(--color-border-subtle)'}
+                                        />
                                     </div>
                                 </div>
-                                <div className="mt-8 flex justify-end">
-                                    <button type="submit" disabled={isSavingPassword} className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gray-900 text-white text-sm font-bold shadow-lg hover:bg-black disabled:opacity-70 disabled:cursor-not-allowed">
+                                <div className="mt-10 flex justify-end">
+                                    <button 
+                                        type="submit" 
+                                        disabled={isSavingPassword} 
+                                        className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold transition-all shadow-xl text-sm disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+                                        style={{backgroundColor: 'var(--color-bg-app)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border-subtle)'}}
+                                        onMouseEnter={e => { if(!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = 'var(--color-bg-raised)'; }}
+                                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'var(--color-bg-app)'}
+                                    >
                                         {isSavingPassword ? (
                                             <>
-                                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <svg className="animate-spin h-4 w-4" style={{color:'var(--color-text-primary)'}} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                 </svg>
                                                 Actualizando...
                                             </>
                                         ) : (
-                                            'Actualizar Contraseña'
+                                            <>
+                                                Actualizar Contraseña
+                                                <span className="material-symbols-outlined text-lg">lock_reset</span>
+                                            </>
                                         )}
                                     </button>
                                 </div>
@@ -237,73 +300,148 @@ const Settings: React.FC = () => {
                             {/* Read-Only View of Current Data */}
                             <EmergencyCard student={emergencyData} />
 
-                            <form onSubmit={handleEmergencySave} className="bg-white rounded-3xl p-8 shadow-card border border-gray-100">
-                                <div className="flex justify-between items-start mb-6">
+                            <form onSubmit={handleEmergencySave} className="rounded-3xl p-8 border shadow-2xl" style={{backgroundColor:'var(--color-bg-surface)',borderColor:'var(--color-border-subtle)'}}>
+                                <div className="flex justify-between items-start mb-10">
                                     <div>
-                                        <h3 className="text-lg font-bold text-text-main">Editar Datos de Contacto</h3>
-                                        <p className="text-sm text-text-secondary mt-1">Mantén esta información actualizada para casos de emergencia.</p>
+                                        <h3 className="text-lg font-bold tracking-tight" style={{color:'var(--color-text-primary)'}}>EDITAR PERFIL DEL ALUMNO</h3>
+                                        <p className="text-sm mt-1" style={{color:'var(--color-text-muted)'}}>Actualiza tus datos físicos y de contacto de emergencia.</p>
                                     </div>
                                 </div>
 
-                                <div className="space-y-5">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                                        <label className="block">
-                                            <span className="text-xs font-bold text-text-secondary uppercase">Nombre Tutor</span>
-                                            <input value={emergencyData.guardian.fullName} onChange={e => setEmergencyData({ ...emergencyData, guardian: { ...emergencyData.guardian, fullName: e.target.value } })} className="mt-1 w-full rounded-xl border-gray-200 p-2.5 text-sm" />
+                                <div className="space-y-8">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <label className="block space-y-2.5">
+                                            <span className="text-xs font-bold uppercase tracking-widest pl-1" style={{color:'var(--color-text-muted)'}}>Nombre Tutor</span>
+                                            <input 
+                                                value={emergencyData.guardian.fullName} 
+                                                onChange={e => setEmergencyData({ ...emergencyData, guardian: { ...emergencyData.guardian, fullName: e.target.value } })} 
+                                                className="w-full rounded-2xl px-5 py-3.5 text-sm font-medium transition-all outline-none border" 
+                                                style={{backgroundColor:'var(--color-bg-app)',borderColor:'var(--color-border-subtle)',color:'var(--color-text-primary)'}}
+                                                onFocus={e => e.currentTarget.style.borderColor = '#EF4444'}
+                                                onBlur={e => e.currentTarget.style.borderColor = 'var(--color-border-subtle)'}
+                                            />
                                         </label>
-                                        <label className="block">
-                                            <span className="text-xs font-bold text-text-secondary uppercase">Parentesco</span>
-                                            <select value={emergencyData.guardian.relationship} onChange={e => setEmergencyData({ ...emergencyData, guardian: { ...emergencyData.guardian, relationship: e.target.value as any } })} className="mt-1 w-full rounded-xl border-gray-200 p-2.5 text-sm">
+                                        <label className="block space-y-2.5">
+                                            <span className="text-xs font-bold uppercase tracking-widest pl-1" style={{color:'var(--color-text-muted)'}}>Parentesco</span>
+                                            <select 
+                                                value={emergencyData.guardian.relationship} 
+                                                onChange={e => setEmergencyData({ ...emergencyData, guardian: { ...emergencyData.guardian, relationship: e.target.value as any } })} 
+                                                className="w-full rounded-2xl px-5 py-3.5 text-sm font-medium transition-all outline-none border appearance-none" 
+                                                style={{backgroundColor:'var(--color-bg-app)',borderColor:'var(--color-border-subtle)',color:'var(--color-text-primary)'}}
+                                            >
                                                 {['Padre', 'Madre', 'Tutor Legal', 'Familiar', 'Otro'].map(r => <option key={r} value={r}>{r}</option>)}
                                             </select>
                                         </label>
                                     </div>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                                        <label className="block">
-                                            <span className="text-xs font-bold text-text-secondary uppercase">Tel. Principal</span>
-                                            <input value={emergencyData.guardian.phones.main} onChange={e => setEmergencyData({ ...emergencyData, guardian: { ...emergencyData.guardian, phones: { ...emergencyData.guardian.phones, main: e.target.value } } })} className="mt-1 w-full rounded-xl border-gray-200 p-2.5 text-sm" />
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                        <label className="block space-y-2.5">
+                                            <span className="text-xs font-bold uppercase tracking-widest pl-1" style={{color:'var(--color-text-muted)'}}>Tel. Principal</span>
+                                            <input 
+                                                value={emergencyData.guardian.phones.main} 
+                                                onChange={e => setEmergencyData({ ...emergencyData, guardian: { ...emergencyData.guardian, phones: { ...emergencyData.guardian.phones, main: e.target.value } } })} 
+                                                className="w-full rounded-2xl px-5 py-3.5 text-sm font-medium transition-all outline-none border" 
+                                                style={{backgroundColor:'var(--color-bg-app)',borderColor:'var(--color-border-subtle)',color:'var(--color-text-primary)'}}
+                                                onFocus={e => e.currentTarget.style.borderColor = '#EF4444'}
+                                                onBlur={e => e.currentTarget.style.borderColor = 'var(--color-border-subtle)'}
+                                            />
                                         </label>
-                                        <label className="block">
-                                            <span className="text-xs font-bold text-text-secondary uppercase">Tel. 2 (Opcional)</span>
-                                            <input value={emergencyData.guardian.phones.secondary || ''} onChange={e => setEmergencyData({ ...emergencyData, guardian: { ...emergencyData.guardian, phones: { ...emergencyData.guardian.phones, secondary: e.target.value } } })} className="mt-1 w-full rounded-xl border-gray-200 p-2.5 text-sm" />
+                                        <label className="block space-y-2.5">
+                                            <span className="text-xs font-bold uppercase tracking-widest pl-1" style={{color:'var(--color-text-muted)'}}>Tel. 2 (Opcional)</span>
+                                            <input 
+                                                value={emergencyData.guardian.phones.secondary || ''} 
+                                                onChange={e => setEmergencyData({ ...emergencyData, guardian: { ...emergencyData.guardian, phones: { ...emergencyData.guardian.phones, secondary: e.target.value } } })} 
+                                                className="w-full rounded-2xl px-5 py-3.5 text-sm font-medium transition-all outline-none border" 
+                                                style={{backgroundColor:'var(--color-bg-app)',borderColor:'var(--color-border-subtle)',color:'var(--color-text-primary)'}}
+                                                onFocus={e => e.currentTarget.style.borderColor = '#EF4444'}
+                                                onBlur={e => e.currentTarget.style.borderColor = 'var(--color-border-subtle)'}
+                                            />
                                         </label>
-                                        <label className="block">
-                                            <span className="text-xs font-bold text-text-secondary uppercase">Tel. 3 (Opcional)</span>
-                                            <input value={emergencyData.guardian.phones.tertiary || ''} onChange={e => setEmergencyData({ ...emergencyData, guardian: { ...emergencyData.guardian, phones: { ...emergencyData.guardian.phones, tertiary: e.target.value } } })} className="mt-1 w-full rounded-xl border-gray-200 p-2.5 text-sm" />
+                                        <label className="block space-y-2.5">
+                                            <span className="text-xs font-bold uppercase tracking-widest pl-1" style={{color:'var(--color-text-muted)'}}>Tel. 3 (Opcional)</span>
+                                            <input 
+                                                value={emergencyData.guardian.phones.tertiary || ''} 
+                                                onChange={e => setEmergencyData({ ...emergencyData, guardian: { ...emergencyData.guardian, phones: { ...emergencyData.guardian.phones, tertiary: e.target.value } } })} 
+                                                className="w-full rounded-2xl px-5 py-3.5 text-sm font-medium transition-all outline-none border" 
+                                                style={{backgroundColor:'var(--color-bg-app)',borderColor:'var(--color-border-subtle)',color:'var(--color-text-primary)'}}
+                                                onFocus={e => e.currentTarget.style.borderColor = '#EF4444'}
+                                                onBlur={e => e.currentTarget.style.borderColor = 'var(--color-border-subtle)'}
+                                            />
                                         </label>
                                     </div>
 
-                                    <div className="pt-4 border-t border-gray-100">
-                                        <span className="text-xs font-bold text-text-secondary uppercase mb-2 block">Dirección de Emergencia</span>
-                                        <div className="grid grid-cols-4 gap-3">
+                                    <div className="pt-8 border-t" style={{borderColor:'var(--color-border-subtle)'}}>
+                                        <span className="text-xs font-bold uppercase tracking-widest pl-1 mb-4 block" style={{color:'var(--color-text-muted)'}}>Dirección de Emergencia</span>
+                                        <div className="grid grid-cols-4 gap-4">
                                             <div className="col-span-3">
-                                                <input placeholder="Calle" value={emergencyData.guardian.address.street} onChange={e => setEmergencyData({ ...emergencyData, guardian: { ...emergencyData.guardian, address: { ...emergencyData.guardian.address, street: e.target.value } } })} className="block w-full rounded-xl border-gray-200 p-2.5 text-sm" />
+                                                <input 
+                                                    placeholder="Calle" 
+                                                    value={emergencyData.guardian.address.street} 
+                                                    onChange={e => setEmergencyData({ ...emergencyData, guardian: { ...emergencyData.guardian, address: { ...emergencyData.guardian.address, street: e.target.value } } })} 
+                                                    className="w-full rounded-2xl px-5 py-3.5 text-sm font-medium transition-all outline-none border" 
+                                                    style={{backgroundColor:'var(--color-bg-app)',borderColor:'var(--color-border-subtle)',color:'var(--color-text-primary)'}}
+                                                    onFocus={e => e.currentTarget.style.borderColor = '#EF4444'}
+                                                    onBlur={e => e.currentTarget.style.borderColor = 'var(--color-border-subtle)'}
+                                                />
                                             </div>
                                             <div className="col-span-1">
-                                                <input placeholder="No. Ext" value={emergencyData.guardian.address.exteriorNumber} onChange={e => setEmergencyData({ ...emergencyData, guardian: { ...emergencyData.guardian, address: { ...emergencyData.guardian.address, exteriorNumber: e.target.value } } })} className="block w-full rounded-xl border-gray-200 p-2.5 text-sm" />
+                                                <input 
+                                                    placeholder="No. Ext" 
+                                                    value={emergencyData.guardian.address.exteriorNumber} 
+                                                    onChange={e => setEmergencyData({ ...emergencyData, guardian: { ...emergencyData.guardian, address: { ...emergencyData.guardian.address, exteriorNumber: e.target.value } } })} 
+                                                    className="w-full rounded-2xl px-5 py-3.5 text-sm font-medium transition-all outline-none border" 
+                                                    style={{backgroundColor:'var(--color-bg-app)',borderColor:'var(--color-border-subtle)',color:'var(--color-text-primary)'}}
+                                                    onFocus={e => e.currentTarget.style.borderColor = '#EF4444'}
+                                                    onBlur={e => e.currentTarget.style.borderColor = 'var(--color-border-subtle)'}
+                                                />
                                             </div>
                                             <div className="col-span-2">
-                                                <input placeholder="Colonia" value={emergencyData.guardian.address.colony} onChange={e => setEmergencyData({ ...emergencyData, guardian: { ...emergencyData.guardian, address: { ...emergencyData.guardian.address, colony: e.target.value } } })} className="block w-full rounded-xl border-gray-200 p-2.5 text-sm" />
+                                                <input 
+                                                    placeholder="Colonia" 
+                                                    value={emergencyData.guardian.address.colony} 
+                                                    onChange={e => setEmergencyData({ ...emergencyData, guardian: { ...emergencyData.guardian, address: { ...emergencyData.guardian.address, colony: e.target.value } } })} 
+                                                    className="w-full rounded-2xl px-5 py-3.5 text-sm font-medium transition-all outline-none border" 
+                                                    style={{backgroundColor:'var(--color-bg-app)',borderColor:'var(--color-border-subtle)',color:'var(--color-text-primary)'}}
+                                                    onFocus={e => e.currentTarget.style.borderColor = '#EF4444'}
+                                                    onBlur={e => e.currentTarget.style.borderColor = 'var(--color-border-subtle)'}
+                                                />
                                             </div>
-                                            <div className="col-span-1">
-                                                <input placeholder="CP" value={emergencyData.guardian.address.zipCode} onChange={e => setEmergencyData({ ...emergencyData, guardian: { ...emergencyData.guardian, address: { ...emergencyData.guardian.address, zipCode: e.target.value } } })} className="block w-full rounded-xl border-gray-200 p-2.5 text-sm" />
+                                            <div className="col-span-2">
+                                                <input 
+                                                    placeholder="CP" 
+                                                    value={emergencyData.guardian.address.zipCode} 
+                                                    onChange={e => setEmergencyData({ ...emergencyData, guardian: { ...emergencyData.guardian, address: { ...emergencyData.guardian.address, zipCode: e.target.value } } })} 
+                                                    className="w-full rounded-2xl px-5 py-3.5 text-sm font-medium transition-all outline-none border" 
+                                                    style={{backgroundColor:'var(--color-bg-app)',borderColor:'var(--color-border-subtle)',color:'var(--color-text-primary)'}}
+                                                    onFocus={e => e.currentTarget.style.borderColor = '#EF4444'}
+                                                    onBlur={e => e.currentTarget.style.borderColor = 'var(--color-border-subtle)'}
+                                                />
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="mt-8 flex justify-end">
-                                    <button type="submit" disabled={isSavingEmergency} className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-white text-sm font-bold shadow-lg hover:bg-primary-hover disabled:opacity-70 disabled:cursor-not-allowed">
+                                <div className="mt-10 flex justify-end">
+                                    <button 
+                                        type="submit" 
+                                        disabled={isSavingEmergency} 
+                                        className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold transition-all shadow-xl text-sm disabled:opacity-40 disabled:cursor-not-allowed active:scale-95"
+                                        style={{backgroundColor: 'rgba(239,68,68,0.15)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.3)'}}
+                                        onMouseEnter={e => { if(!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.25)'; }}
+                                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.15)'}
+                                    >
                                         {isSavingEmergency ? (
                                             <>
-                                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                <svg className="animate-spin h-4 w-4" style={{color:'#EF4444'}} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                 </svg>
                                                 Guardando...
                                             </>
                                         ) : (
-                                            'Actualizar Información'
+                                            <>
+                                                Actualizar Información
+                                                <span className="material-symbols-outlined text-lg">save</span>
+                                            </>
                                         )}
                                     </button>
                                 </div>
@@ -314,27 +452,44 @@ const Settings: React.FC = () => {
                     {/* Academy Tab (Master Only) - Simplified for brevity as logic is unchanged, just ensuring render */}
                     {activeTab === 'academy' && currentUser?.role === 'master' && (
                         <form onSubmit={handleAcademySave} className="flex flex-col gap-8">
-                            <div className="bg-gradient-to-r from-primary to-blue-600 rounded-3xl p-8 text-white shadow-lg relative overflow-hidden group">
-                                <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-6">
+                            <div className="rounded-3xl p-8 text-white shadow-2xl relative overflow-hidden group border" style={{background:'linear-gradient(135deg, #1e1e1e 0%, #121212 100%)', borderColor:'var(--color-border-subtle)'}}>
+                                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
+                                    <span className="material-symbols-outlined text-[120px]">vpn_key</span>
+                                </div>
+                                <div className="relative z-10 flex flex-col md:flex-row justify-between items-center gap-8">
                                     <div>
-                                        <h3 className="text-blue-100 font-bold text-sm uppercase tracking-wider mb-2 flex items-center gap-2">
-                                            <span className="material-symbols-outlined text-lg">vpn_key</span>
+                                        <h3 className="text-[#EF4444] font-black text-xs uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                                            <span className="material-symbols-outlined text-lg">key</span>
                                             Código de Vinculación
                                         </h3>
-                                        <p className="text-white/90 text-sm max-w-md">
-                                            Comparte este código con tus alumnos para que puedan registrarse.
+                                        <p className="text-zinc-400 text-sm max-w-sm font-medium">
+                                            Comparte este código exclusivo con tus alumnos para sincronizar sus perfiles.
                                         </p>
                                     </div>
-                                    <div className="flex items-center gap-4 bg-white/10 p-2 pr-4 rounded-xl border border-white/20 backdrop-blur-sm">
-                                        <span className="text-4xl font-black tracking-widest font-mono pl-2">{academySettings.code}</span>
-                                        <button type="button" onClick={copyCode} className="size-10 bg-white text-primary rounded-lg flex items-center justify-center hover:bg-blue-50 transition-colors shadow-sm"><span className="material-symbols-outlined">content_copy</span></button>
+                                    <div className="flex items-center gap-5 p-2 pr-6 rounded-2xl border bg-black/40 backdrop-blur-xl transition-all hover:bg-black/60" style={{borderColor:'rgba(239,68,68,0.2)'}}>
+                                        <span className="text-4xl font-black tracking-[0.2em] font-mono pl-4 text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">{academySettings.code}</span>
+                                        <button 
+                                            type="button" 
+                                            onClick={copyCode} 
+                                            className="size-12 rounded-xl flex items-center justify-center transition-all bg-zinc-800 hover:bg-[#EF4444] text-white shadow-lg active:scale-90 border border-white/10"
+                                        >
+                                            <span className="material-symbols-outlined text-xl">content_copy</span>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
 
                             {/* ...Rest of Academy Settings (unchanged logic)... */}
-                            <div className="flex justify-end pt-4">
-                                <button type="submit" className="px-8 py-3 rounded-xl bg-primary text-white text-sm font-bold shadow-lg hover:bg-primary-hover">Guardar Configuración</button>
+                            <div className="flex justify-end pt-8">
+                                <button 
+                                    type="submit" 
+                                    className="px-10 py-4 rounded-2xl font-black tracking-wide shadow-2xl transition-all active:scale-95 text-sm"
+                                    style={{backgroundColor: 'rgba(239,68,68,0.15)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.3)'}}
+                                    onMouseEnter={e => e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.25)'}
+                                    onMouseLeave={e => e.currentTarget.style.backgroundColor = 'rgba(239,68,68,0.15)'}
+                                >
+                                    Guardar Configuración General
+                                </button>
                             </div>
                         </form>
                     )}

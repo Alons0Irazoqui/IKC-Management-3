@@ -7,7 +7,7 @@ interface ConfirmationOptions {
     type?: 'danger' | 'info' | 'success';
     confirmText?: string;
     cancelText?: string;
-    onConfirm: () => void;
+    onConfirm: () => void | Promise<void>;
 }
 
 interface ConfirmationContextType {
@@ -18,20 +18,28 @@ const ConfirmationContext = createContext<ConfirmationContextType | undefined>(u
 
 export const ConfirmationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [modalConfig, setModalConfig] = useState<ConfirmationOptions | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const confirm = useCallback((options: ConfirmationOptions) => {
         setModalConfig(options);
     }, []);
 
-    const handleConfirm = () => {
+    const handleConfirm = async () => {
         if (modalConfig) {
-            modalConfig.onConfirm();
-            setModalConfig(null);
+            setIsLoading(true);
+            try {
+                await modalConfig.onConfirm();
+            } finally {
+                setIsLoading(false);
+                setModalConfig(null);
+            }
         }
     };
 
     const handleCancel = () => {
-        setModalConfig(null);
+        if (!isLoading) {
+            setModalConfig(null);
+        }
     };
 
     return (
@@ -45,6 +53,7 @@ export const ConfirmationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                     type={modalConfig.type}
                     confirmText={modalConfig.confirmText}
                     cancelText={modalConfig.cancelText}
+                    isLoading={isLoading}
                     onConfirm={handleConfirm}
                     onCancel={handleCancel}
                 />

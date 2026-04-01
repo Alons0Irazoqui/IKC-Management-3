@@ -68,28 +68,30 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`pointer-events-auto min-w-[320px] max-w-sm p-4 rounded-2xl shadow-xl border flex items-center gap-3 transform transition-all duration-300 animate-in slide-in-from-top-5 fade-in ${
-              toast.type === 'success' ? 'bg-white border-green-100 text-green-800' :
-              toast.type === 'error' ? 'bg-white border-red-100 text-red-800' :
-              'bg-white border-gray-100 text-gray-800'
+            className={`pointer-events-auto min-w-[320px] max-w-sm p-4 rounded-2xl shadow-2xl border backdrop-blur-md flex items-center gap-3 transform transition-all duration-300 animate-in slide-in-from-top-5 fade-in ${
+              toast.type === 'success' ? 'bg-[#0a0a0c]/90 border-emerald-500/20 text-[#dde1e7]' :
+              toast.type === 'error' ? 'bg-[#0a0a0c]/90 border-red-500/20 text-[#dde1e7]' :
+              'bg-[#101014]/90 border-sky-500/20 text-[#dde1e7]'
             }`}
           >
             <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-               toast.type === 'success' ? 'bg-green-100 text-green-600' :
-               toast.type === 'error' ? 'bg-red-100 text-red-600' :
-               'bg-blue-100 text-blue-600'
+               toast.type === 'success' ? 'bg-emerald-500/10 text-emerald-500' :
+               toast.type === 'error' ? 'bg-red-500/10 text-red-500' :
+               'bg-sky-500/10 text-sky-500'
             }`}>
               <span className="material-symbols-outlined text-[20px]">
                 {toast.type === 'success' ? 'check_circle' : toast.type === 'error' ? 'error' : 'info'}
               </span>
             </div>
             <div className="flex-1">
-              <p className="text-sm font-semibold">{toast.type === 'success' ? 'Éxito' : toast.type === 'error' ? 'Error' : 'Información'}</p>
-              <p className="text-sm opacity-90">{toast.message}</p>
+              <p className="text-[13px] font-black uppercase tracking-widest opacity-50 mb-0.5" style={{ color: toast.type === 'success' ? 'var(--color-success)' : toast.type === 'error' ? 'var(--color-danger)' : 'var(--color-text-secondary)' }}>
+                {toast.type === 'success' ? 'Éxito' : toast.type === 'error' ? 'Error' : 'Información'}
+              </p>
+              <p className="text-sm font-semibold tracking-tight">{toast.message}</p>
             </div>
             <button 
                 onClick={() => removeToast(toast.id)} 
-                className="p-1 rounded-full hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                className="size-8 rounded-full hover:bg-white/5 text-zinc-500 hover:text-white transition-colors flex items-center justify-center"
             >
               <span className="material-symbols-outlined text-sm">close</span>
             </button>
