@@ -36,8 +36,12 @@ const InputField: React.FC<InputFieldProps> = ({
         {...register(name)}
         type={type}
         placeholder={placeholder}
-        className={`w-full h-11 py-0 rounded-2xl bg-[#16161a] text-sm font-medium text-white px-5 transition-all placeholder:text-zinc-600 border border-white/5 focus:bg-[#1c1c21] focus:outline-none focus:ring-0 focus:border-[#e11d48] ${errors[name] ? 'border-[#e11d48]/50 bg-[#e11d48]/5' : ''
-          }`}
+        className={`block w-full rounded-xl p-3 text-sm outline-none transition-all placeholder:text-zinc-600 ${
+          errors[name]
+            ? 'border-[#e11d48]/50 bg-[#e11d48]/5 border border-solid'
+            : ''
+        }`}
+        style={{ backgroundColor: '#16161a', borderColor: errors[name] ? undefined : 'rgba(255,255,255,0.08)', borderStyle: 'solid', borderWidth: '1px', color: '#ffffff' }}
       />
     </div>
     {errors[name] && (
@@ -188,7 +192,11 @@ const StudentRegistration: React.FC = () => {
 
                   <div className="col-span-1">
                     <label className="block text-[10px] font-black text-zinc-500 uppercase mb-2 ml-1 tracking-widest">T. Sangre</label>
-                    <select {...register('bloodType')} className="w-full h-11 rounded-2xl bg-[#16161a] px-5 text-sm font-medium text-white border border-white/5 focus:border-[#e11d48] outline-none transition-all appearance-none shadow-inner">
+                    <select
+                      {...register('bloodType')}
+                      className="block w-full rounded-xl p-3 text-sm outline-none transition-all appearance-none"
+                      style={{ backgroundColor: '#16161a', borderColor: 'rgba(255,255,255,0.08)', borderStyle: 'solid', borderWidth: '1px', color: '#ffffff' }}
+                    >
                       <option value="">--</option>
                       {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(t => <option key={t} value={t}>{t}</option>)}
                     </select>
@@ -211,7 +219,11 @@ const StudentRegistration: React.FC = () => {
                     <InputField register={register} errors={errors} label="Nombre Tutor" name="guardianName" placeholder="Nombre completo" />
                     <div className="col-span-1">
                       <label className="block text-[10px] font-black text-zinc-500 uppercase mb-2 ml-1 tracking-widest">Parentesco</label>
-                      <select {...register('guardianRelationship')} className="w-full h-11 rounded-2xl bg-[#16161a] px-5 text-sm font-medium text-white border border-white/5 focus:border-[#e11d48] outline-none transition-all appearance-none shadow-inner text-white">
+                      <select
+                        {...register('guardianRelationship')}
+                        className="block w-full rounded-xl p-3 text-sm outline-none transition-all appearance-none"
+                        style={{ backgroundColor: '#16161a', borderColor: 'rgba(255,255,255,0.08)', borderStyle: 'solid', borderWidth: '1px', color: '#ffffff' }}
+                      >
                         {['Padre', 'Madre', 'Tutor Legal', 'Familiar', 'Otro'].map(o => <option key={o} value={o}>{o}</option>)}
                       </select>
                     </div>
