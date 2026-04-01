@@ -69,7 +69,7 @@ const Login: React.FC = () => {
 
                         {/* Logo */}
                         <div className="auth-logo">
-                            <img src={`${import.meta.env.BASE_URL}logo.svg`} alt="IKC Logo" style={{ height: '68px', filter: 'brightness(0) invert(1)' }} />
+                            <img src="/logo.svg" alt="IKC Logo" style={{ height: '68px', filter: 'brightness(0) invert(1)' }} />
                         </div>
 
                         {/* Separador */}

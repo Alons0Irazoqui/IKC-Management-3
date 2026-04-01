@@ -416,20 +416,19 @@ const StudentDashboard: React.FC = () => {
 
                             {/* Belt Image — grande y centrada */}
                             {(() => {
-                                const base = import.meta.env.BASE_URL;
                                 const kyuImageMap: Record<string, string> = {
-                                    'Blanca':       `${base}Grados/10%20kyu.png`,
-                                    'Blanca Av.':   `${base}Grados/9%20kyu.png`,
-                                    'Amarilla':     `${base}Grados/8%20kyu.png`,
-                                    'Amarilla Av.': `${base}Grados/7%20kyu.png`,
-                                    'Verde':        `${base}Grados/6%20kyu.png`,
-                                    'Verde Av.':    `${base}Grados/5%20kyu.png`,
-                                    'Azul':         `${base}Grados/4%20kyu.png`,
-                                    'Azul Av.':     `${base}Grados/3%20kyu.png`,
-                                    'Cafe':         `${base}Grados/2%20kyu.png`,
-                                    'Cafe Av.':     `${base}Grados/1%20kyu.png`,
-                                    'Shodan Ho':    `${base}Grados/1%20kyu.png`,
-                                    'Negra':        `${base}Grados/negra.png`,
+                                    'Blanca':       '/Grados/10%20kyu.png',
+                                    'Blanca Av.':   '/Grados/9%20kyu.png',
+                                    'Amarilla':     '/Grados/8%20kyu.png',
+                                    'Amarilla Av.': '/Grados/7%20kyu.png',
+                                    'Verde':        '/Grados/6%20kyu.png',
+                                    'Verde Av.':    '/Grados/5%20kyu.png',
+                                    'Azul':         '/Grados/4%20kyu.png',
+                                    'Azul Av.':     '/Grados/3%20kyu.png',
+                                    'Cafe':         '/Grados/2%20kyu.png',
+                                    'Cafe Av.':     '/Grados/1%20kyu.png',
+                                    'Shodan Ho':    '/Grados/1%20kyu.png',
+                                    'Negra':        '/Grados/negra.png',
                                 };
                                 const beltImg = kyuImageMap[currentRankConfig?.name] || null;
                                 return (
