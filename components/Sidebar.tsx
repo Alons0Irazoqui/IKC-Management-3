@@ -55,13 +55,13 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
       <aside
         className={`
           fixed md:relative inset-y-0 left-0 z-50 md:z-0
-          flex flex-col w-full md:w-64 h-full
+          flex flex-col w-[85%] max-w-[300px] md:w-64 h-full
           transform transition-transform duration-300 ease-out
           ${isOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0'}
         `}
         style={{
           backgroundColor: 'var(--color-bg-surface)',
-          borderRight: '1px solid var(--color-border-subtle)',
+          borderRight: '1px solid rgba(255,255,255,0.1)',
         }}
       >
         {/* ── LOGO ── */}
@@ -126,6 +126,25 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
               </Link>
             );
           })}
+
+          {/* Mobile Logout Option */}
+          <button
+            onClick={handleLogout}
+            className="md:hidden flex items-center gap-4 mx-4 px-4 py-4 min-h-[48px] transition-all duration-150 relative text-[#F87171]"
+            style={{
+              backgroundColor: 'transparent',
+              borderRadius: '8px',
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLElement).style.backgroundColor = 'rgba(248,113,113,0.05)';
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLElement).style.backgroundColor = 'transparent';
+            }}
+          >
+            <span className="material-symbols-outlined" style={{ fontSize: '22px', flexShrink: 0 }}>logout</span>
+            <span style={{ fontSize: '16px', fontWeight: 500, letterSpacing: '0.01em' }}>Cerrar Sesión</span>
+          </button>
         </nav>
 
         {/* ── USER PROFILE + LOGOUT ── */}
@@ -144,11 +163,11 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
                 {role === 'master' ? 'Administrador' : 'Alumno'}
               </span>
             </div>
-            {/* Logout icon button */}
+            {/* Logout icon button (Hidden on mobile as it's now in the nav) */}
             <button
               onClick={handleLogout}
               title="Cerrar sesión"
-              className="shrink-0 p-1.5 min-h-[48px] min-w-[48px] flex items-center justify-center rounded-md transition-all"
+              className="hidden md:flex shrink-0 p-1.5 min-h-[48px] min-w-[48px] items-center justify-center rounded-md transition-all"
               style={{ color: 'var(--color-text-muted)' }}
               onMouseEnter={e => {
                 (e.currentTarget as HTMLElement).style.color = 'var(--color-brand)';

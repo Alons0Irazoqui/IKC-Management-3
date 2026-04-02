@@ -555,9 +555,9 @@ const StudentSchedule: React.FC = () => {
     }, [view, date]);
 
     return (
-        <div className="w-full h-full flex flex-col font-sans overflow-hidden" style={{backgroundColor: 'var(--color-bg-app)'}}>  
+        <div className="w-full min-h-full flex flex-col font-sans overflow-y-auto custom-scrollbar" style={{backgroundColor: 'var(--color-bg-app)'}}>  
             
-            {/* --- IMMERSIVE HEADER --- */}
+            {/* --- IMMERSIVE HEADER (Relative now) --- */}
             <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 shrink-0 gap-4 z-20 border-b" style={{backgroundColor: 'var(--color-bg-surface)', borderColor: 'var(--color-border-subtle)'}}>
                 <div className="flex items-center gap-6 w-full md:w-auto">
                     <h1 className="text-3xl font-black tracking-tight capitalize min-w-[200px]" style={{color: 'var(--color-text-primary)'}}>
@@ -603,8 +603,8 @@ const StudentSchedule: React.FC = () => {
                 </div>
             </div>
 
-            {/* --- MAIN CANVAS CONTENT (Scroll Container) --- */}
-            <div className="flex-1 relative overflow-hidden flex flex-col" style={{backgroundColor: 'var(--color-bg-app)'}}>
+            {/* --- MAIN CANVAS CONTENT --- */}
+            <div className="flex-1 relative flex flex-col" style={{backgroundColor: 'var(--color-bg-app)'}}>
                 
                 {/* 1. VIEW: AGENDA (Scrolls Internally) */}
                 {view === 'agenda' && (

@@ -11,6 +11,7 @@ const Login: React.FC = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     // Mount Status Ref
     const isMounted = React.useRef(true);
@@ -98,9 +99,9 @@ const Login: React.FC = () => {
                                 <label htmlFor="email" className="floating-label">Correo Institucional</label>
                             </div>
 
-                            <div className="form-group">
+                            <div className="form-group" style={{ position: 'relative' }}>
                                 <input
-                                    type="password"
+                                    type={showPassword ? "text" : "password"}
                                     id="password"
                                     className="form-control"
                                     placeholder=" "
@@ -110,6 +111,30 @@ const Login: React.FC = () => {
                                     onChange={e => setFormData({ ...formData, password: e.target.value })}
                                 />
                                 <label htmlFor="password" className="floating-label">Contraseña</label>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    style={{
+                                        position: 'absolute',
+                                        right: '16px',
+                                        top: '50%',
+                                        transform: 'translateY(-50%)',
+                                        background: 'transparent',
+                                        border: 'none',
+                                        outline: 'none',
+                                        color: 'var(--color-text-muted)',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        padding: 0,
+                                        zIndex: 10
+                                    }}
+                                    tabIndex={-1}
+                                    title={showPassword ? "Ocultar Contraseña" : "Mostrar Contraseña"}
+                                >
+                                    <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
+                                        {showPassword ? 'visibility' : 'visibility_off'}
+                                    </span>
+                                </button>
                             </div>
 
                             <div className="form-actions">
@@ -117,7 +142,7 @@ const Login: React.FC = () => {
                                     <input type="checkbox" id="remember" />
                                     <span>Mantener sesión</span>
                                 </label>
-                                <a href="#">Recuperar acceso</a>
+                                <a href="https://wa.me/526682276539?text=Hola,%20buen%20día.%20Quisiera%20recuperar%20el%20acceso%20a%20mi%20cuenta." target="_blank">Recuperar acceso</a>
                             </div>
 
                             <button type="submit" className={`btn-primary ${loading ? 'is-loading' : ''}`} id="loginBtn" disabled={loading}>

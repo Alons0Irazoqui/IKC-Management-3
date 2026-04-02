@@ -199,6 +199,27 @@
     transition: background-color 5000s ease-in-out 0s;
 }
 
+.auth-side #email,
+.auth-side #password {
+  padding-top: 1.75rem !important;
+  padding-bottom: 0.5rem !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+  font-size: 1rem !important;
+}
+
+.auth-side #email::placeholder,
+.auth-side #password::placeholder {
+  color: transparent !important;
+}
+
+.auth-side #email:focus,
+.auth-side #password:focus {
+  background-color: var(--bg-input-hover) !important;
+  border-color: rgba(255,255,255,0.2) !important;
+  box-shadow: none !important;
+}
+
 .floating-label {
     position: absolute;
     left: 1rem;

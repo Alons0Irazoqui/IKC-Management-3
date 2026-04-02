@@ -16,36 +16,36 @@ const StatusBadge: React.FC<{ status: TuitionRecord['status'] }> = ({ status }) 
     switch (status) {
         case 'paid':
             return (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-lg sm:text-[9px] font-bold uppercase tracking-[0.15em]" style={{backgroundColor:'rgba(52,211,153,0.06)',color:'#34D399',border:'1px solid rgba(52,211,153,0.1)'}}>
-                    <span className="material-symbols-outlined text-[12px] sm:text-[18px] opacity-70">check_circle</span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-[0.15em]" style={{backgroundColor:'rgba(52,211,153,0.06)',color:'#34D399',border:'1px solid rgba(52,211,153,0.1)'}}>
+                    <span className="material-symbols-outlined text-[14px] opacity-70">check_circle</span>
                     Pagado
                 </span>
             );
         case 'in_review':
             return (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-lg sm:text-[9px] font-bold uppercase tracking-[0.15em]" style={{backgroundColor:'rgba(255,82,82,0.06)',color:'#FF5252',border:'1px solid rgba(255,82,82,0.1)'}}>
-                    <span className="material-symbols-outlined text-[12px] sm:text-[18px] opacity-70">hourglass_top</span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-[0.15em]" style={{backgroundColor:'rgba(56,189,248,0.06)',color:'#38BDF8',border:'1px solid rgba(56,189,248,0.1)'}}>
+                    <span className="material-symbols-outlined text-[14px] opacity-70">hourglass_top</span>
                     En Revisión
                 </span>
             );
         case 'overdue':
             return (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-lg sm:text-[9px] font-bold uppercase tracking-[0.15em]" style={{backgroundColor:'rgba(255,82,82,0.06)',color:'#F87171',border:'1px solid rgba(255,82,82,0.1)'}}>
-                    <span className="material-symbols-outlined text-[12px] sm:text-[18px] opacity-70">warning</span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-[0.15em]" style={{backgroundColor:'rgba(255,82,82,0.06)',color:'#F87171',border:'1px solid rgba(255,82,82,0.1)'}}>
+                    <span className="material-symbols-outlined text-[14px] opacity-70">warning</span>
                     Vencido
                 </span>
             );
         case 'partial':
             return (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-lg sm:text-[9px] font-bold uppercase tracking-[0.15em]" style={{backgroundColor:'rgba(251,191,36,0.06)',color:'#FBBF24',border:'1px solid rgba(251,191,36,0.1)'}}>
-                    <span className="material-symbols-outlined text-[12px] sm:text-[18px] opacity-70">pie_chart</span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-[0.15em]" style={{backgroundColor:'rgba(251,191,36,0.06)',color:'#FBBF24',border:'1px solid rgba(251,191,36,0.1)'}}>
+                    <span className="material-symbols-outlined text-[14px] opacity-70">pie_chart</span>
                     Restante
                 </span>
             );
         default:
             return (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-lg sm:text-[9px] font-bold uppercase tracking-[0.15em]" style={{backgroundColor:'rgba(255,255,255,0.03)',color:'var(--color-text-muted)',border:'1px solid var(--color-border-subtle)',opacity:0.5}}>
-                    <span className="material-symbols-outlined text-[12px] sm:text-[18px] opacity-70">pending</span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-[0.15em]" style={{backgroundColor:'rgba(255,255,255,0.03)',color:'var(--color-text-muted)',border:'1px solid var(--color-border-subtle)',opacity:0.5}}>
+                    <span className="material-symbols-outlined text-[14px] opacity-70">pending</span>
                     Por Pagar
                 </span>
             );
@@ -540,60 +540,67 @@ const StudentPayments: React.FC = () => {
                                                 animate={{ opacity: 1, y: 0 }}
                                                 exit={{ opacity: 0, scale: 0.95 }}
                                                 onClick={() => setSelectedDetailRecord(record)}
-                                                className="rounded-xl md:rounded-2xl p-4 md:p-5 transition-all group relative overflow-hidden cursor-pointer border"
+                                                className="rounded-xl md:rounded-2xl p-5 md:p-6 transition-all group relative overflow-hidden cursor-pointer border shadow-sm"
                                                 style={{backgroundColor:'var(--color-bg-surface)',borderColor: isOverdue ? 'rgba(248,113,113,0.3)' : 'var(--color-border-subtle)'}}
-                                                onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = isOverdue ? 'rgba(248,113,113,0.5)' : 'var(--color-border-strong)'; el.style.transform='translateY(-1px)'; }}
+                                                onMouseEnter={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = isOverdue ? 'rgba(248,113,113,0.5)' : 'var(--color-border-strong)'; el.style.transform='translateY(-2px)'; }}
                                                 onMouseLeave={e => { const el = e.currentTarget as HTMLElement; el.style.borderColor = isOverdue ? 'rgba(248,113,113,0.3)' : 'var(--color-border-subtle)'; el.style.transform='translateY(0)'; }}
                                             >
-                                                {isOverdue && <div className="absolute left-0 top-0 bottom-0 w-[3px] rounded-l-2xl" style={{backgroundColor:'#F87171'}}></div>}
+                                                {isOverdue && <div className="absolute left-0 top-0 bottom-0 w-[4px] rounded-l-2xl" style={{backgroundColor:'#F87171'}}></div>}
 
-                                                <div className="flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center pl-2">
-                                                    <div className="flex-1 w-full">
-                                                        <div className="flex justify-between items-start mb-2">
-                                                            <StatusBadge status={record.status} />
-                                                            <span className="text-lg sm:text-xs font-bold sm:font-medium px-2 py-1 rounded-lg" style={{color:'var(--color-text-muted)',backgroundColor:'var(--color-bg-app)',border:'1px solid var(--color-border-subtle)'}}>Vence: {formatDateDisplay(record.dueDate)}</span>
+                                                <div className="flex flex-col gap-4 sm:gap-6">
+                                                    {/* Top Row: Status & Date */}
+                                                    <div className="flex justify-between items-center w-full">
+                                                        <StatusBadge status={record.status} />
+                                                        <div className="flex flex-col items-end">
+                                                            <span className="text-[10px] font-bold uppercase tracking-widest opacity-30" style={{color:'var(--color-text-muted)'}}>Vencimiento</span>
+                                                            <span className="text-[11px] font-bold" style={{color:'var(--color-text-primary)'}}>{formatDateDisplay(record.dueDate)}</span>
                                                         </div>
-                                                        <h4 className="text-base font-semibold mb-1" style={{color:'var(--color-text-primary)'}}>{record.concept}</h4>
-                                                        {isOverdue && (
-                                                            <p className="text-[10px] font-bold flex items-center gap-1 w-fit px-2 py-0.5 rounded-md uppercase tracking-wider" style={{color:'#F87171',backgroundColor:'rgba(255,82,82,0.06)',border:'1px solid rgba(255,82,82,0.1)'}}>
-                                                                <span className="material-symbols-outlined text-[12px]">error_outline</span>
-                                                                Recargo: ${record.penaltyAmount}
-                                                            </p>
-                                                        )}
-                                                        {record.status === 'partial' && (
-                                                            <p className="text-[10px] font-bold flex items-center gap-1 uppercase tracking-wider" style={{color:'#FBBF24'}}>
-                                                                <span className="material-symbols-outlined text-[12px]">pie_chart</span>
-                                                                Saldo pendiente
-                                                            </p>
-                                                        )}
                                                     </div>
 
-                                                    <div className="flex items-center gap-5 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-4 sm:pt-0" style={{borderColor:'var(--color-border-subtle)'}}>
-                                                        <div className="text-right">
-                                                            <span className="block text-[9px] uppercase tracking-[0.2em] font-bold mb-1 opacity-30" style={{color:'var(--color-text-muted)'}}>Monto Total</span>
-                                                            <span className="text-2xl font-bold tabular-nums tracking-tight" style={{color: isOverdue ? '#F87171' : 'var(--color-text-primary)'}}>
+                                                    {/* Middle Row: Concept & Status Details */}
+                                                    <div className="space-y-2">
+                                                        <h4 className="text-lg font-bold tracking-tight" style={{color:'var(--color-text-primary)'}}>{record.concept}</h4>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {isOverdue && (
+                                                                <span className="text-[9px] font-bold flex items-center gap-1 px-2 py-0.5 rounded bg-red-500/10 text-red-500 border border-red-500/20 uppercase tracking-widest">
+                                                                    <span className="material-symbols-outlined text-[12px]">error</span> Recargo: ${record.penaltyAmount}
+                                                                </span>
+                                                            )}
+                                                            {record.status === 'partial' && (
+                                                                <span className="text-[9px] font-bold flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/20 uppercase tracking-widest">
+                                                                    <span className="material-symbols-outlined text-[12px]">pie_chart</span> Saldo pendiente
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+
+                                                    {/* Bottom Row: Amount & Action */}
+                                                    <div className="flex items-center justify-between pt-4 border-t border-zinc-800/50">
+                                                        <div className="shrink-0">
+                                                            <span className="block text-[9px] uppercase tracking-[0.2em] font-bold mb-0.5 opacity-30" style={{color:'var(--color-text-muted)'}}>Monto Total</span>
+                                                            <span className="text-xl md:text-2xl font-black tabular-nums tracking-tighter" style={{color: isOverdue ? '#F87171' : 'var(--color-text-primary)'}}>
                                                                 ${amountDisplay.toFixed(2)}
                                                             </span>
                                                         </div>
 
-                                                        <div className="flex items-center gap-3">
+                                                        <div className="flex items-center gap-2">
                                                             {record.status === 'partial' && (
                                                                 <button
                                                                     onClick={(e) => { e.stopPropagation(); handleDownloadReceipt(record); }}
-                                                                    className="size-10 md:size-11 rounded-lg md:rounded-xl flex items-center justify-center transition-all bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.05] text-zinc-500 hover:text-white min-h-[48px] min-w-[48px]"
+                                                                    className="size-11 rounded-xl flex items-center justify-center transition-all bg-zinc-900 border border-zinc-800 hover:bg-zinc-800 text-zinc-500 hover:text-white"
                                                                 >
-                                                                    <span className="material-symbols-outlined text-[18px] md:text-[20px]">receipt_long</span>
+                                                                    <span className="material-symbols-outlined text-[20px]">receipt_long</span>
                                                                 </button>
                                                             )}
                                                             <button
                                                                 onClick={(e) => { e.stopPropagation(); handleOpenPaymentModal(record); }}
-                                                                className="px-4 md:px-6 py-2.5 md:py-3 min-h-[48px] rounded-lg md:rounded-xl font-bold flex items-center gap-2 transition-all active:scale-95 whitespace-nowrap text-[12px] md:text-[11px] uppercase tracking-widest shadow-lg shadow-black/20"
-                                                                style={{backgroundColor:'rgba(255,82,82,0.08)',color:'#FF5252',border:'1px solid rgba(255,82,82,0.15)'}}
-                                                                onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor='rgba(255,82,82,0.12)'}
-                                                                onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor='rgba(255,82,82,0.08)'}
+                                                                className="h-11 px-6 rounded-xl font-black text-[11px] uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-black/20 flex items-center gap-2"
+                                                                style={{backgroundColor:'#FF5252', color:'#fff'}}
+                                                                onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor='#ff6b6b'}
+                                                                onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor='#FF5252'}
                                                             >
-                                                                <span className="material-symbols-outlined text-[16px] md:text-[18px]">payment</span>
-                                                                Pagar ahora
+                                                                <span className="material-symbols-outlined text-[18px]">bolt</span>
+                                                                Pagar
                                                             </button>
                                                         </div>
                                                     </div>
@@ -608,19 +615,35 @@ const StudentPayments: React.FC = () => {
                                         key={record.id}
                                         layout
                                         onClick={() => setSelectedDetailRecord(record)}
-                                        className="rounded-2xl p-5 flex flex-col sm:flex-row gap-4 justify-between items-center cursor-pointer border"
-                                        style={{backgroundColor:'var(--color-bg-surface)',borderColor:'rgba(255,82,82,0.2)',opacity:0.85}}
+                                        className="rounded-2xl p-5 md:p-6 flex flex-col gap-5 justify-between items-stretch cursor-pointer border shadow-sm transition-all hover:scale-[1.01]"
+                                        style={{backgroundColor:'var(--color-bg-surface)',borderColor:'rgba(56,189,248,0.2)'}}
                                     >
-                                        <div className="flex-1 w-full">
-                                            <div className="flex justify-between items-start mb-2">
-                                                <StatusBadge status="in_review" />
-                                                <span className="text-lg sm:text-xs font-bold sm:font-medium" style={{color:'var(--color-text-muted)'}}>Enviado: {formatDateDisplay(record.paymentDate || '')}</span>
+                                        <div className="flex justify-between items-center w-full">
+                                            <StatusBadge status="in_review" />
+                                            <div className="flex flex-col items-end">
+                                                <span className="text-[10px] font-bold uppercase tracking-widest opacity-30" style={{color:'var(--color-text-muted)'}}>Enviado</span>
+                                                <span className="text-[11px] font-bold" style={{color:'var(--color-text-primary)'}}>{formatDateDisplay(record.paymentDate || '')}</span>
                                             </div>
-                                            <h4 className="text-base font-bold" style={{color:'var(--color-text-secondary)'}}>{record.concept}</h4>
                                         </div>
-                                        <div className="text-right w-full sm:w-auto flex justify-between sm:block items-center">
-                                            <span className="text-lg font-bold block" style={{color:'var(--color-text-secondary)'}}>${((record.amount || 0) + (record.penaltyAmount || 0)).toFixed(2)}</span>
-                                            <p className="text-[10px] font-bold uppercase tracking-wide mt-1" style={{color:'#FF5252'}}>Validando...</p>
+
+                                        <div className="space-y-1">
+                                            <h4 className="text-lg font-black tracking-tight leading-tight" style={{color:'var(--color-text-primary)'}}>{record.concept}</h4>
+                                        </div>
+
+                                        <div className="flex items-center justify-between pt-4 border-t border-zinc-800/50">
+                                            <div>
+                                                <span className="block text-[10px] uppercase tracking-[0.15em] font-bold mb-0.5 opacity-30" style={{color:'var(--color-text-muted)'}}>Monto</span>
+                                                <span className="text-xl font-black tabular-nums tracking-tighter" style={{color:'#38BDF8'}}>
+                                                    ${((record.amount || 0) + (record.penaltyAmount || 0)).toFixed(2)}
+                                                </span>
+                                            </div>
+                                            <div className="flex flex-col items-end">
+                                                <span className="text-[10px] font-bold uppercase tracking-widest opacity-30 mb-0.5">Estado</span>
+                                                <p className="text-[11px] font-black uppercase tracking-wider flex items-center gap-1.5" style={{color:'#38BDF8'}}>
+                                                    <span className="material-symbols-outlined text-[14px]">sync</span>
+                                                    Validando...
+                                                </p>
+                                            </div>
                                         </div>
                                     </MotionDiv>
                                 ))}
@@ -653,31 +676,31 @@ const StudentPayments: React.FC = () => {
                                         onMouseEnter={e => (e.currentTarget as HTMLElement).style.backgroundColor='var(--color-bg-raised)'}
                                         onMouseLeave={e => (e.currentTarget as HTMLElement).style.backgroundColor='var(--color-bg-surface)'}
                                     >
-                                        <div>
-                                             <div className="flex items-center gap-3 mb-1">
-                                                 <span className="text-sm font-semibold" style={{color:'var(--color-text-primary)'}}>{record.concept}</span>
-                                                 <span className="text-lg sm:text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest"
-                                                       style={record.status === 'partial'
-                                                           ? {backgroundColor:'rgba(251,191,36,0.06)',color:'#FBBF24',border:'1px solid rgba(251,191,36,0.1)'}
-                                                           : {backgroundColor:'rgba(52,211,153,0.06)',color:'#34D399',border:'1px solid rgba(52,211,153,0.1)'}}>
-                                                     {record.status === 'partial' ? 'Parcial' : 'Pagado'}
-                                                 </span>
-                                             </div>
-                                             <p className="text-sm sm:text-[11px] font-medium opacity-60 sm:opacity-40 mt-1 sm:mt-0" style={{color:'var(--color-text-muted)'}}>
-                                                 {formatDateDisplay(record.paymentDate || '')} • {record.method}
-                                             </p>
-                                         </div>
-                                        <div className="flex items-center gap-4">
-                                            <span className="font-bold text-lg sm:text-sm" style={{color:'var(--color-text-primary)'}}>${(record.originalAmount || record.amount).toFixed(2)}</span>
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); handleDownloadReceipt(record); }}
-                                                className="size-8 rounded-lg flex items-center justify-center transition-colors min-h-[48px] min-w-[48px]"
-                                                style={{color:'var(--color-text-muted)',backgroundColor:'var(--color-bg-app)'}}
-                                                onMouseEnter={e => (e.currentTarget as HTMLElement).style.color='#FF5252'}
-                                                onMouseLeave={e => (e.currentTarget as HTMLElement).style.color='var(--color-text-muted)'}
-                                            >
-                                                <span className="material-symbols-outlined text-lg">description</span>
-                                            </button>
+                                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                            <div className="flex flex-col gap-1 w-full">
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <span className="text-sm font-bold truncate max-w-[200px]" style={{color:'var(--color-text-primary)'}}>{record.concept}</span>
+                                                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest"
+                                                          style={record.status === 'partial'
+                                                              ? {backgroundColor:'rgba(251,191,36,0.06)',color:'#FBBF24',border:'1px solid rgba(251,191,36,0.1)'}
+                                                              : {backgroundColor:'rgba(52,211,153,0.06)',color:'#34D399',border:'1px solid rgba(52,211,153,0.1)'}}>
+                                                        {record.status === 'partial' ? 'Parcial' : 'Pagado'}
+                                                    </span>
+                                                </div>
+                                                <p className="text-[10px] font-medium opacity-50 uppercase tracking-wider" style={{color:'var(--color-text-muted)'}}>
+                                                    {formatDateDisplay(record.paymentDate || '')} • {record.method}
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-4 pt-3 sm:pt-0 border-t sm:border-0 border-white/5">
+                                                <span className="font-bold text-lg sm:text-base tabular-nums" style={{color:'var(--color-text-primary)'}}>${(record.originalAmount || record.amount).toFixed(2)}</span>
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); handleDownloadReceipt(record); }}
+                                                    className="size-10 rounded-xl flex items-center justify-center transition-all bg-white/[0.03] border border-white/5 hover:bg-white/[0.05] hover:text-[#FF5252] min-h-[44px] min-w-[44px]"
+                                                    style={{color:'var(--color-text-muted)'}}
+                                                >
+                                                    <span className="material-symbols-outlined text-[18px]">receipt_long</span>
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
                                 ))}
