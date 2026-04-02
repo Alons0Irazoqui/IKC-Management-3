@@ -36,6 +36,22 @@
     overflow-x: hidden;
 }
 
+.back-link {
+    position: fixed;
+    top: 2rem;
+    left: 2rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    z-index: 100;
+    transition: var(--transition-fast);
+    font-size: 1.5rem;
+}
+
+.back-link:hover {
+    color: var(--text-primary);
+    transform: scale(1.1);
+}
+
 /* ==========================================================================
    FONDOS: MOSAICO + GLOW (mantiene el branding original)
    ========================================================================== */
@@ -123,7 +139,7 @@
     display: grid;
     place-content: center;
     font-size: 1.25rem;
-    box-shadow: 0 0 30px rgba(255,255,255,0.08);
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.08);
 }
 
 .auth-logo-name {
@@ -149,15 +165,17 @@
 
 .auth-header h2 {
     font-size: 1.55rem;
-    font-weight: 600;
+    font-weight: 900;
+    text-align: center;
     margin-bottom: 0.35rem;
-    letter-spacing: -0.025em;
+    letter-spacing: -0.055em;
     color: var(--text-primary);
 }
 
 .auth-header p {
     color: var(--text-muted);
     font-size: 0.88rem;
+    text-align: center;
     margin: 0;
 }
 
@@ -177,6 +195,7 @@
     color: var(--text-primary) !important;
     font-family: inherit;
     font-size: 0.95rem !important;
+    font-weight: 700;
     padding: 1.9rem 1rem 0.7rem 1rem !important;
     transition: var(--transition-fast) !important;
     outline: none !important;
@@ -201,23 +220,23 @@
 
 .auth-side #email,
 .auth-side #password {
-  padding-top: 1.75rem !important;
-  padding-bottom: 0.5rem !important;
-  padding-left: 1rem !important;
-  padding-right: 1rem !important;
-  font-size: 1rem !important;
+    padding-top: 1.75rem !important;
+    padding-bottom: 0.5rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+    font-size: 1rem !important;
 }
 
 .auth-side #email::placeholder,
 .auth-side #password::placeholder {
-  color: transparent !important;
+    color: transparent !important;
 }
 
 .auth-side #email:focus,
 .auth-side #password:focus {
-  background-color: var(--bg-input-hover) !important;
-  border-color: rgba(255,255,255,0.2) !important;
-  box-shadow: none !important;
+    background-color: var(--bg-input-hover) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    box-shadow: none !important;
 }
 
 .floating-label {
@@ -234,17 +253,16 @@
 
 .form-control:focus,
 .form-control:not(:placeholder-shown) {
-    border-color: rgba(255,255,255,0.2) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
     background-color: var(--bg-input-hover) !important;
     box-shadow: none !important;
 }
 
-.form-control:focus + .floating-label,
-.form-control:not(:placeholder-shown) + .floating-label {
+.form-control:focus+.floating-label,
+.form-control:not(:placeholder-shown)+.floating-label {
     top: 0.6rem !important;
     transform: translateY(0);
     font-size: 0.68rem !important;
-    font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--text-muted);
@@ -382,18 +400,32 @@
    KEYFRAMES
    ========================================================================== */
 @keyframes spin-loader {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ==========================================================================
    RESPONSIVE
    ========================================================================== */
 @media (max-width: 480px) {
-    .layout-container { padding: 1.5rem 1rem; }
-    .auth-side { max-width: 100%; }
+    .layout-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .auth-side {
+        max-width: 100%;
+    }
 }

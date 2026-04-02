@@ -59,6 +59,9 @@ const Login: React.FC = () => {
 
     return (
         <div className="login-dark-theme">
+            <a href="https://irazoquikarateclub.com" className="back-link" title="Volver al inicio">
+                <i className="fa-solid fa-arrow-left"></i>
+            </a>
             {/* Fondo mosaico + glow de branding */}
             <div className="enterprise-bg"></div>
             <div className="ambient-glow"></div>
@@ -79,7 +82,7 @@ const Login: React.FC = () => {
                         {/* Título */}
                         <div className="auth-header">
                             <h2>Iniciar Sesión</h2>
-                            <p>Accede a tu entorno de trabajo seguro</p>
+                            <p>Accede a tu cuenta de IKC</p>
                         </div>
 
                         {/* Formulario */}
