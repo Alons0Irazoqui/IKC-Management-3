@@ -466,7 +466,7 @@ const StudentDetailModal: React.FC<StudentDetailModalProps> = ({
                                                                 <span className="text-sm text-zinc-500">{formatDateDisplay(record.dueDate)}</span>
                                                                 <span className="text-sm font-medium text-zinc-200">{record.concept}</span>
                                                                 <span className="text-sm font-black text-white tabular-nums text-right">
-                                                                    ${(record.amount + record.penaltyAmount).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                                                    ${((record.amount || 0) + (record.penaltyAmount || 0)).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
                                                                 </span>
                                                                 <div className="flex justify-end">
                                                                     <EPaymentBadge status={record.status} />

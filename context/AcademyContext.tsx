@@ -634,8 +634,29 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         const target = classes.find(c => c.id === classId);
         if (!target) return;
 
-        const newModifications = target.modifications.filter(m => m.date !== modification.date);
-        newModifications.push(modification);
+        let finalMod = { ...modification };
+        const currentMods = target.modifications || [];
+
+        // Identificar si la fecha que se quiere editar/cancelar es en realidad una clase previamente movida
+        const existingMove = currentMods.find(m => m.newDate === modification.date && m.type === 'move');
+        
+        if (existingMove) {
+            finalMod.date = existingMove.date; // Re-enrutar a la fecha original
+            
+            if (modification.type === 'cancel') {
+                finalMod.type = 'cancel';
+                finalMod.newDate = undefined;
+            } else if (modification.type === 'move') {
+                finalMod.type = 'move';
+                finalMod.newDate = modification.newDate;
+            } else {
+                finalMod.type = 'move';
+                finalMod.newDate = existingMove.newDate;
+            }
+        }
+
+        const newModifications = currentMods.filter(m => m.date !== finalMod.date);
+        newModifications.push(finalMod);
         const updatedClass = { ...target, modifications: newModifications };
 
         const newClasses = classes.map(c => c.id === classId ? updatedClass : c);
