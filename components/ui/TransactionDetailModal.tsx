@@ -432,7 +432,7 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
                         <div className="flex gap-2 w-full md:w-auto items-center">
                             {role === 'master' && onDelete && (
                                 <button
-                                    onClick={onDelete}
+                                    onClick={() => onDelete()}
                                     className="mr-2 p-2.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-600 hover:text-red-500 hover:bg-red-500/5 transition-all active:scale-95"
                                     title="Eliminar Registro"
                                 >

@@ -194,7 +194,14 @@ BEGIN
         'pending',
         (new.raw_user_meta_data->>'payment_due_date')::date,
         COALESCE(new.raw_user_meta_data->>'payment_concept', 'Mensualidad Inicial'),
-        '{"type": "charge", "description": "Cuota mensual inicial", "category": "Mensualidad", "method": "System", "canBePaidInParts": false}'::jsonb
+        jsonb_build_object(
+          'type', 'charge',
+          'description', 'Cuota mensual inicial',
+          'category', 'Mensualidad',
+          'method', 'System',
+          'canBePaidInParts', false,
+          'month', to_char(CURRENT_DATE, 'YYYY-MM')
+        )
       );
     END IF;
 
