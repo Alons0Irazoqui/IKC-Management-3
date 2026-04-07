@@ -386,7 +386,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
             penaltyAmount: 0,
             dueDate: data.dueDate,
             paymentDate: null,
-            status: 'charged',
+            status: 'pending', // Corrección: Estado válido para la BD
+            month: data.dueDate.substring(0, 7), // Corrección: Campo requerido (YYYY-MM)
             type: 'charge',
             category: data.category,
             method: 'System',
