@@ -236,12 +236,10 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         });
 
         if (recordsUpdated && isMaster) {
-            setRecords(processedRecords);
+            setRecords(prev => prev.map(r => processedRecords.find(pr => pr.id === r.id) || r));
             PulseService.savePayments(processedRecords); // Sync Save
-            // return; // Removed return to allow student updates to also run
         } else if (recordsUpdated) {
-            // For students, we update local state only so they see it red, but don't save to DB (RLS would fail)
-            setRecords(processedRecords);
+            setRecords(prev => prev.map(r => processedRecords.find(pr => pr.id === r.id) || r));
         }
 
         const studentsToUpdate: Student[] = [];
@@ -373,6 +371,10 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     const createManualCharge = async (data: ManualChargeData) => {
         if (currentUser?.role !== 'master') return;
+
+        // Despertar la sesión de Supabase si estuvo inactiva mucho tiempo
+        await PulseService.getCurrentUser();
+
         const finalAmount = Number(data.amount);
         const newRecord: TuitionRecord = {
             id: generateId('chg'),
@@ -385,9 +387,9 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
             originalAmount: finalAmount,
             penaltyAmount: 0,
             dueDate: data.dueDate,
+            month: data.dueDate.substring(0, 7), // Fundamental para el Sync Engine
             paymentDate: null,
-            status: 'pending', // Corrección: Estado válido para la BD
-            month: data.dueDate.substring(0, 7), // Corrección: Campo requerido (YYYY-MM)
+            status: 'pending', // Requerido por el Enum de Postgres
             type: 'charge',
             category: data.category,
             method: 'System',
