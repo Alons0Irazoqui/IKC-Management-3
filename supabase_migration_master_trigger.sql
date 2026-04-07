@@ -123,107 +123,114 @@ DECLARE
   assigned_academy_id uuid;
   req_role text;
 BEGIN
-  -- Determinamos el rol (fallback a student por seguridad)
-  req_role := COALESCE(new.raw_user_meta_data->>'role', 'student');
+  BEGIN
+    -- Determinamos el rol (fallback a student por seguridad)
+    req_role := COALESCE(new.raw_user_meta_data->>'role', 'student');
 
-  IF req_role = 'master' THEN
-    -- Generar IDs para la nueva academia
-    new_academy_id := gen_random_uuid();
-    new_academy_code := 'ACAD-' || floor(1000 + random() * 9000)::text;
+    IF req_role = 'master' THEN
+      -- Generar IDs para la nueva academia
+      new_academy_id := gen_random_uuid();
+      new_academy_code := 'ACAD-' || floor(1000 + random() * 9000)::text;
 
-    -- Insertar academia
-    INSERT INTO public.academies (id, name, code, owner_id, settings)
-    VALUES (
-      new_academy_id,
-      COALESCE(new.raw_user_meta_data->>'academy_name', 'Nueva Academia'),
-      new_academy_code,
-      new.id,
-      '{"modules": {"library": true, "payments": true, "attendance": true}, "paymentSettings": {"currency": "MXN", "taxRate": 0, "lateFeeAmount": 150, "lateFeeDay": 10, "paymentDay": 1, "monthlyTuition": 500}, "ranks": [{"id": "rank-1","name": "Blanca","color": "10 Kyu","order": 1,"requiredAttendance": 0},{"id": "rank-2","name": "Blanca Av.","color": "9 Kyu","order": 2,"requiredAttendance": 20},{"id": "rank-3","name": "Amarilla","color": "8 Kyu","order": 3,"requiredAttendance": 40},{"id": "rank-4","name": "Amarilla Av.","color": "7 Kyu","order": 4,"requiredAttendance": 60},{"id": "rank-5","name": "Verde","color": "6 Kyu","order": 5,"requiredAttendance": 80},{"id": "rank-6","name": "Verde Av.","color": "5 Kyu","order": 6,"requiredAttendance": 100},{"id": "rank-7","name": "Azul","color": "4 Kyu","order": 7,"requiredAttendance": 120},{"id": "rank-8","name": "Azul Av.","color": "3 Kyu","order": 8,"requiredAttendance": 150},{"id": "rank-9","name": "Cafe","color": "2 Kyu","order": 9,"requiredAttendance": 180},{"id": "rank-10","name": "Cafe Av.","color": "1 Kyu","order": 10,"requiredAttendance": 220},{"id": "rank-11","name": "Shodan Ho","color": "Shodan Ho","order": 11,"requiredAttendance": 280},{"id": "rank-12","name": "Negra","color": "Cinta Negra","order": 12,"requiredAttendance": 350}]}'::jsonb
-    );
+      -- Insertar academia
+      INSERT INTO public.academies (id, name, code, owner_id, settings)
+      VALUES (
+        new_academy_id,
+        COALESCE(new.raw_user_meta_data->>'academy_name', 'Nueva Academia'),
+        new_academy_code,
+        new.id,
+        '{"modules": {"library": true, "payments": true, "attendance": true}, "paymentSettings": {"currency": "MXN", "taxRate": 0, "lateFeeAmount": 150, "lateFeeDay": 10, "paymentDay": 1, "monthlyTuition": 500}, "ranks": [{"id": "rank-1","name": "Blanca","color": "10 Kyu","order": 1,"requiredAttendance": 0},{"id": "rank-2","name": "Blanca Av.","color": "9 Kyu","order": 2,"requiredAttendance": 20},{"id": "rank-3","name": "Amarilla","color": "8 Kyu","order": 3,"requiredAttendance": 40},{"id": "rank-4","name": "Amarilla Av.","color": "7 Kyu","order": 4,"requiredAttendance": 60},{"id": "rank-5","name": "Verde","color": "6 Kyu","order": 5,"requiredAttendance": 80},{"id": "rank-6","name": "Verde Av.","color": "5 Kyu","order": 6,"requiredAttendance": 100},{"id": "rank-7","name": "Azul","color": "4 Kyu","order": 7,"requiredAttendance": 120},{"id": "rank-8","name": "Azul Av.","color": "3 Kyu","order": 8,"requiredAttendance": 150},{"id": "rank-9","name": "Cafe","color": "2 Kyu","order": 9,"requiredAttendance": 180},{"id": "rank-10","name": "Cafe Av.","color": "1 Kyu","order": 10,"requiredAttendance": 220},{"id": "rank-11","name": "Shodan Ho","color": "Shodan Ho","order": 11,"requiredAttendance": 280},{"id": "rank-12","name": "Negra","color": "Cinta Negra","order": 12,"requiredAttendance": 350}]}'::jsonb
+      );
 
-    -- Insertar perfil
-    INSERT INTO public.profiles (id, email, name, role, academy_id, avatar_url)
-    VALUES (
-      new.id,
-      new.email,
-      COALESCE(new.raw_user_meta_data->>'display_name', 'Maestro'),
-      'master',
-      new_academy_id,
-      ''
-    );
+      -- Insertar perfil
+      INSERT INTO public.profiles (id, email, name, role, academy_id, avatar_url)
+      VALUES (
+        new.id,
+        new.email,
+        COALESCE(new.raw_user_meta_data->>'display_name', 'Maestro'),
+        'master',
+        new_academy_id,
+        ''
+      );
 
-  ELSIF req_role = 'student' THEN
-    -- IDs para el estudiante
-    assigned_academy_id := (new.raw_user_meta_data->>'academy_id')::uuid;
-    new_student_id := gen_random_uuid();
+    ELSIF req_role = 'student' THEN
+      -- IDs para el estudiante
+      assigned_academy_id := (new.raw_user_meta_data->>'academy_id')::uuid;
+      new_student_id := gen_random_uuid();
 
-    -- Insertar perfil
-    INSERT INTO public.profiles (id, email, name, role, academy_id, avatar_url)
-    VALUES (
-      new.id,
-      new.email,
-      COALESCE(new.raw_user_meta_data->>'display_name', 'Alumno'),
-      'student',
-      assigned_academy_id,
-      COALESCE(new.raw_user_meta_data->>'avatar_url', '')
-    );
+      -- Insertar perfil
+      INSERT INTO public.profiles (id, email, name, role, academy_id, avatar_url)
+      VALUES (
+        new.id,
+        new.email,
+        COALESCE(new.raw_user_meta_data->>'display_name', 'Alumno'),
+        'student',
+        assigned_academy_id,
+        COALESCE(new.raw_user_meta_data->>'avatar_url', '')
+      );
 
-    -- Insertar registro de estudiante con blindaje de monto inicial
-    INSERT INTO public.students (id, user_id, academy_id, name, email, status, rank_id, balance, attendance_data, details)
-    VALUES (
-      new_student_id,
-      new.id,
-      assigned_academy_id,
-      COALESCE(new.raw_user_meta_data->>'display_name', 'Alumno'),
-      new.email,
-      -- Blindaje: Validar existencia y no-vacio antes de cast ::numeric
-      CASE 
-        WHEN new.raw_user_meta_data->>'initial_amount' IS NOT NULL AND new.raw_user_meta_data->>'initial_amount' != '' AND (new.raw_user_meta_data->>'initial_amount')::numeric > 0 
-        THEN 'debtor' 
-        ELSE 'active' 
-      END,
-      null,
-      CASE 
-        WHEN new.raw_user_meta_data->>'initial_amount' IS NOT NULL AND new.raw_user_meta_data->>'initial_amount' != '' AND (new.raw_user_meta_data->>'initial_amount')::numeric > 0 
-        THEN (new.raw_user_meta_data->>'initial_amount')::numeric * -1 
-        ELSE 0 
-      END,
-      '{"total": 0, "history": []}'::jsonb,
-      COALESCE((new.raw_user_meta_data->'student_details'), '{}'::jsonb)
-    );
+      -- Insertar registro de estudiante con blindaje de monto inicial
+      INSERT INTO public.students (id, user_id, academy_id, name, email, status, rank_id, balance, attendance_data, details)
+      VALUES (
+        new_student_id,
+        new.id,
+        assigned_academy_id,
+        COALESCE(new.raw_user_meta_data->>'display_name', 'Alumno'),
+        new.email,
+        -- Blindaje: Validar existencia y no-vacio antes de cast ::numeric
+        CASE 
+          WHEN new.raw_user_meta_data->>'initial_amount' IS NOT NULL AND new.raw_user_meta_data->>'initial_amount' != '' AND (new.raw_user_meta_data->>'initial_amount')::numeric > 0 
+          THEN 'debtor' 
+          ELSE 'active' 
+        END,
+        null,
+        CASE 
+          WHEN new.raw_user_meta_data->>'initial_amount' IS NOT NULL AND new.raw_user_meta_data->>'initial_amount' != '' AND (new.raw_user_meta_data->>'initial_amount')::numeric > 0 
+          THEN (new.raw_user_meta_data->>'initial_amount')::numeric * -1 
+          ELSE 0 
+        END,
+        '{"total": 0, "history": []}'::jsonb,
+        COALESCE((new.raw_user_meta_data->'student_details'), '{}'::jsonb)
+      );
 
-    -- Blindaje: Validar rol y existencia estricta del monto antes de evaluar el número para el pago inicial
-    IF new.raw_user_meta_data->>'initial_amount' IS NOT NULL AND new.raw_user_meta_data->>'initial_amount' != '' THEN
-      IF (new.raw_user_meta_data->>'initial_amount')::numeric > 0 THEN
-        INSERT INTO public.payments (academy_id, student_id, amount, status, due_date, concept, details)
-        VALUES (
-          assigned_academy_id,
-          new_student_id,
-          (new.raw_user_meta_data->>'initial_amount')::numeric,
-          'pending',
-          (new.raw_user_meta_data->>'payment_due_date')::date,
-          COALESCE(new.raw_user_meta_data->>'payment_concept', 'Mensualidad Inicial'),
-          jsonb_build_object(
-            'type', 'charge',
-            'description', 'Cuota mensual inicial',
-            'category', 'Mensualidad',
-            'method', 'System',
-            'canBePaidInParts', false,
-            'month', to_char(CURRENT_DATE, 'YYYY-MM')
-          )
-        );
+      -- Blindaje del pago inicial
+      IF new.raw_user_meta_data->>'initial_amount' IS NOT NULL AND new.raw_user_meta_data->>'initial_amount' != '' THEN
+        IF (new.raw_user_meta_data->>'initial_amount')::numeric > 0 THEN
+          INSERT INTO public.payments (academy_id, student_id, amount, status, due_date, concept, details)
+          VALUES (
+            assigned_academy_id,
+            new_student_id,
+            (new.raw_user_meta_data->>'initial_amount')::numeric,
+            'pending',
+            (new.raw_user_meta_data->>'payment_due_date')::date,
+            COALESCE(new.raw_user_meta_data->>'payment_concept', 'Mensualidad Inicial'),
+            jsonb_build_object(
+              'type', 'charge',
+              'description', 'Cuota mensual inicial',
+              'category', 'Mensualidad',
+              'method', 'System',
+              'canBePaidInParts', false,
+              'month', to_char(CURRENT_DATE, 'YYYY-MM')
+            )
+          );
+        END IF;
       END IF;
+
     END IF;
 
-  END IF;
-
-  RETURN new;
+    RETURN new;
+  EXCEPTION
+    WHEN OTHERS THEN
+      RAISE WARNING 'Error en handle_new_user: %', SQLERRM;
+      RETURN new;
+  END;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- Trigger to execute the function on new user creation
-DROP TRIGGER IF EXISTS on_auth_user_created_master ON auth.users;
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+DROP TRIGGER IF EXISTS on_auth_user_created_master ON auth.users;
+DROP TRIGGER IF EXISTS on_auth_user_created_student ON auth.users;
 
 CREATE TRIGGER on_auth_user_created
 AFTER INSERT ON auth.users
