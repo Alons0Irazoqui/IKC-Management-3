@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { TuitionRecord, ManualChargeData, ChargeCategory, Student, TuitionStatus, Expense } from '../types';
 import { PulseService } from '../services/pulseService';
+import { supabase } from '../src/supabaseClient';
 import { useAuth } from './AuthContext';
 import { useAcademy } from './AcademyContext'; // Need academy settings for billing
 import { useToast } from './ToastContext';
@@ -425,8 +426,21 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         totalAmount: number,
         details: { description: string; amount: number }[]
     ) => {
-        const fakeUrl = file ? URL.createObjectURL(file) : null;
+        // Upload proof to Supabase Storage if a file was provided
+        let proofUrl: string | null = null;
         const proofType = file?.type;
+        if (file) {
+            const fileName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+            const { data: uploadData, error: uploadError } = await supabase.storage
+                .from('payment_proofs')
+                .upload(fileName, file, { upsert: false });
+            if (!uploadError && uploadData) {
+                const { data: publicUrlData } = supabase.storage
+                    .from('payment_proofs')
+                    .getPublicUrl(uploadData.path);
+                proofUrl = publicUrlData?.publicUrl ?? null;
+            }
+        }
         const batchId = generateId('batch');
         const paymentDate = new Date().toISOString();
 
@@ -438,7 +452,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
                     ...r,
                     status: 'in_review' as TuitionStatus,
                     paymentDate: paymentDate,
-                    proofUrl: fakeUrl,
+                    proofUrl: proofUrl,
                     proofType: proofType,
                     method: method,
                     batchPaymentId: batchId,
