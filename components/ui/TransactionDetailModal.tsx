@@ -123,7 +123,7 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
 
     const handleConfirmManualPayment = () => {
         const amountNum = parseFloat(manualAmount);
-        if (isNaN(amountNum) || amountNum <= 0) return;
+        if (isNaN(amountNum) || amountNum < 0) return;
 
         confirm({
             title: 'Confirmar Pago Manual',
@@ -442,7 +442,7 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
 
                             {role === 'student' && (
                                 <>
-                                    {remainingDebt > 0 && onPay && (
+                                    {record.status !== 'paid' && onPay && (
                                         <button
                                             onClick={() => record.status !== 'in_review' && onPay(record)}
                                             disabled={record.status === 'in_review'}
@@ -471,7 +471,7 @@ const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({
 
                             {role === 'master' && (
                                 <>
-                                    {remainingDebt > 0 && (
+                                    {record.status !== 'paid' && (
                                         <button
                                             onClick={() => setIsPayingManual(true)}
                                             className="flex-1 md:flex-none px-6 py-2.5 rounded-lg bg-emerald-600/90 text-white font-bold transition-all flex items-center justify-center gap-2 active:scale-95 text-[11px] uppercase tracking-wider shadow-sm hover:bg-emerald-600"
