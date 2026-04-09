@@ -720,22 +720,20 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     const deleteRecord = async (recordId: string) => {
         setIsDeletingRecord(true);
-        // Espera artificial para UX por 2 segundos antes del borrado de db
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        // Espera artificial para UX por 1 segundo antes del borrado de db
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
         try {
-            // Sincronización pesimista (Borrar BD primero)
             await PulseService.deletePayment(recordId);
-
-            // Una vez eliminado de la BD, quitar de la UI
             setRecords(prev => prev.filter(r => r.id !== recordId));
-
             setIsDeletingRecord(false);
             addToast('Registro eliminado correctamente', 'info');
+            return true; // <-- Importante para indicar éxito
         } catch (error) {
             console.error("Error al eliminar el registro:", error);
             setIsDeletingRecord(false);
             addToast('Error al eliminar el movimiento de la nube', 'error');
+            return false;
         }
     };
 
