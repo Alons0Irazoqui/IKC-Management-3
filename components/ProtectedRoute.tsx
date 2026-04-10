@@ -8,10 +8,10 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles }) => {
-  const { currentUser, loading } = useAuth();
+  const { currentUser, loading, isLoggingOut } = useAuth();
 
-  if (loading) {
-    // Basic loading spinner while checking auth
+  // Show spinner during initial auth check OR during active logout
+  if (loading || isLoggingOut) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-[#08080a]">
         <div className="loader"></div>

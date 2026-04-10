@@ -1,17 +1,16 @@
 
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useStore } from '../../context/StoreContext';
 import { useAuth } from '../../context/AuthContext';
 import './Login.css';
 
 const Login: React.FC = () => {
-    const { login } = useStore();
-    const { currentUser, loading: authLoading } = useAuth(); // Enhanced auth check
+    const { login, currentUser, loading: authLoading } = useAuth();
     const navigate = useNavigate();
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
 
     // Mount Status Ref
     const isMounted = React.useRef(true);
@@ -40,6 +39,12 @@ const Login: React.FC = () => {
         setLoading(true);
 
         try {
+            // Save session persistence preference
+            if (rememberMe) {
+                localStorage.setItem('ikc_keep_session', 'true');
+            } else {
+                localStorage.removeItem('ikc_keep_session');
+            }
             const result = await login(formData.email, formData.password);
             if (result.success && result.user) {
                 if (result.user.role === 'master') navigate('/master/dashboard');
@@ -142,7 +147,7 @@ const Login: React.FC = () => {
 
                             <div className="form-actions">
                                 <label className="checkbox-wrapper">
-                                    <input type="checkbox" id="remember" />
+                                    <input type="checkbox" id="remember" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
                                     <span>Mantener sesión</span>
                                 </label>
                                 <a href="https://wa.me/526682276539?text=Hola,%20buen%20día.%20Quisiera%20recuperar%20el%20acceso%20a%20mi%20cuenta." target="_blank">Recuperar acceso</a>

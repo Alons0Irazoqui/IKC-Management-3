@@ -31,6 +31,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [isLoggingOutState, setIsLoggingOutState] = useState(false);
     // Guard: prevents SIGNED_IN events from firing while logout is in progress
     const isLoggingOut = React.useRef(false);
+    // Tracks the real timestamp of last user activity (survives background tab pausing)
+    const lastActivityTimestamp = React.useRef<number>(Date.now());
     const { addToast } = useToast();
 
     // Initialize Session
@@ -120,25 +122,124 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         const subscriptionPromise = initAuth();
 
+        // Safety: guarantee loading resolves within 8 seconds no matter what
+        const safetyTimeout = setTimeout(() => {
+            if (mounted) {
+                console.warn("AuthContext: Safety timeout — forcing loading=false");
+                setLoading(false);
+            }
+        }, 8000);
+
         // Vigilante de Visibilidad: Refresca sesión al volver a la pestaña
+        // Also checks if inactivity timeout was exceeded while tab was in background
         const handleVisibilityChange = async () => {
-            if (document.visibilityState === 'visible') {
-                console.log("AuthContext: Usuario regresó a la pestaña, verificando sesión...");
-                const { data } = await supabase.auth.getSession();
-                if (data?.session) {
-                    const user = await PulseService.getCurrentUser();
-                    if (user && mounted) setCurrentUser(user);
+            if (document.visibilityState !== 'visible') return;
+            if (isLoggingOut.current) return;
+
+            // Check if inactivity timeout was exceeded while in background
+            const keepSession = localStorage.getItem('ikc_keep_session') === 'true';
+            const TIMEOUT_MS = 20 * 60 * 1000; // 20 minutes
+            const elapsed = Date.now() - lastActivityTimestamp.current;
+
+            if (!keepSession && elapsed >= TIMEOUT_MS) {
+                console.log(`AuthContext: Inactivity timeout exceeded in background (${Math.round(elapsed / 1000)}s). Logging out.`);
+                if (mounted) {
+                    addToast('Tu sesión se cerró por inactividad', 'info');
+                    isLoggingOut.current = true;
+                    setIsLoggingOutState(true);
+                    setCurrentUser(null);
+                    setLoading(false);
+                    localStorage.removeItem('ikc_keep_session');
+                    // Clean browser history so back button won't load protected routes
+                    try { window.history.replaceState(null, '', '/login'); } catch (_e) {}
+                    supabase.auth.signOut().catch(() => {}).finally(() => {
+                        setIsLoggingOutState(false);
+                        setTimeout(() => { isLoggingOut.current = false; }, 500);
+                    });
                 }
+                return;
+            }
+
+            console.log("AuthContext: Tab focused, refreshing session...");
+            try {
+                const { data, error } = await supabase.auth.refreshSession();
+                if (error || !data.session) {
+                    console.log("AuthContext: Session expired on tab return");
+                    if (mounted) {
+                        setCurrentUser(null);
+                        setLoading(false);
+                    }
+                    return;
+                }
+                const user = await PulseService.getCurrentUser();
+                if (mounted && user) setCurrentUser(user);
+            } catch (e) {
+                console.warn("AuthContext: Visibility refresh error (network?):", e);
             }
         };
         document.addEventListener('visibilitychange', handleVisibilityChange);
 
         return () => {
             mounted = false;
+            clearTimeout(safetyTimeout);
             subscriptionPromise.then(sub => sub?.unsubscribe());
             document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
     }, []);
+
+    // --- INACTIVITY AUTO-LOGOUT TIMER (20 min) ---
+    // Uses BOTH setTimeout (for active tabs) AND real timestamps (for background tabs).
+    // The visibilitychange handler above checks lastActivityTimestamp on tab return.
+    useEffect(() => {
+        if (!currentUser) return;
+        if (isLoggingOut.current) return;
+
+        const keepSession = localStorage.getItem('ikc_keep_session') === 'true';
+        if (keepSession) {
+            // Even with keepSession, update the timestamp on activity
+            // so that if they later uncheck it, the timer has fresh data.
+            const updateTimestamp = () => { lastActivityTimestamp.current = Date.now(); };
+            const activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+            activityEvents.forEach(ev => window.addEventListener(ev, updateTimestamp, { passive: true }));
+            return () => {
+                activityEvents.forEach(ev => window.removeEventListener(ev, updateTimestamp));
+            };
+        }
+
+        const TIMEOUT_MS = 20 * 60 * 1000;
+        let timer: ReturnType<typeof setTimeout>;
+
+        const doInactivityLogout = () => {
+            if (isLoggingOut.current) return; // Prevent double-fire
+            addToast('Tu sesión se cerró por inactividad', 'info');
+            isLoggingOut.current = true;
+            setIsLoggingOutState(true);
+            setCurrentUser(null);
+            setLoading(false);
+            localStorage.removeItem('ikc_keep_session');
+            // Clean browser history so back button won't load protected routes
+            try { window.history.replaceState(null, '', '/login'); } catch (_e) {}
+            supabase.auth.signOut().catch(() => {}).finally(() => {
+                setIsLoggingOutState(false);
+                setTimeout(() => { isLoggingOut.current = false; }, 500);
+            });
+        };
+
+        const resetTimer = () => {
+            lastActivityTimestamp.current = Date.now(); // Track real timestamp
+            clearTimeout(timer);
+            timer = setTimeout(doInactivityLogout, TIMEOUT_MS);
+        };
+
+        const activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+        activityEvents.forEach(ev => window.addEventListener(ev, resetTimer, { passive: true }));
+        resetTimer();
+
+        return () => {
+            clearTimeout(timer);
+            activityEvents.forEach(ev => window.removeEventListener(ev, resetTimer));
+        };
+    }, [currentUser, addToast]);
 
     const login = async (email: string, pass: string): Promise<LoginResult> => {
         isLoggingOut.current = false;
@@ -155,29 +256,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     const logout = async () => {
-        // 1. Set guard and expose state to trigger re-render immediately
+        // 1. Set guard to block stale auth events
         isLoggingOut.current = true;
-        setIsLoggingOutState(true);
+        setIsLoggingOutState(true); // Shows spinner in AppRoutes
 
-        // 2. Optimistic Cleanup (Immediate) — loading=true keeps ProtectedRoute in spinner mode
-        //    so the Login page never flashes before the full-page redirect fires.
-        setLoading(true);
+        // 2. Clear user state immediately
         setCurrentUser(null);
+        setLoading(false);
         addToast('Sesión cerrada correctamente', 'info');
 
-        // 3. Server Cleanup — await so the session is fully cleared before next login
+        // 3. Clear session preferences
+        localStorage.removeItem('ikc_keep_session');
+
+        // 4. Clean browser history — prevents back button from reaching protected routes
+        try { window.history.replaceState(null, '', '/login'); } catch (_e) {}
+
+        // 5. Server cleanup with 3s safety timeout
+        // If signOut hangs (network issues), we still release guards
         try {
-            await PulseService.logout();
-            window.location.href = '/login';
+            await Promise.race([
+                supabase.auth.signOut(),
+                new Promise(resolve => setTimeout(resolve, 3000))
+            ]);
         } catch (error) {
-            // Ignore network errors on logout, user is already gone locally.
             console.warn("Supabase signOut error (ignorable):", error);
-            window.location.href = '/login';
-        } finally {
-            // Release the guard after a small buffer so any pending
-            // SIGNED_OUT / stale SIGNED_IN events from Supabase have time to fire and be ignored
-            setTimeout(() => { isLoggingOut.current = false; }, 500);
         }
+
+        // 6. Release guards — spinner disappears, ProtectedRoute redirects to /login
+        setIsLoggingOutState(false);
+        setTimeout(() => { isLoggingOut.current = false; }, 500);
     };
 
     const updateUserProfile = async (updates: Partial<UserProfile>) => {

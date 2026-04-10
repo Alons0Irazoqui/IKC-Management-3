@@ -1,6 +1,6 @@
 
 import React, { memo } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useAcademy } from '../context/AcademyContext';
 import Avatar from './ui/Avatar';
@@ -12,7 +12,6 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
-  const navigate = useNavigate();
   const location = useLocation();
   const { currentUser, logout } = useAuth();
   const { academySettings } = useAcademy();
@@ -40,7 +39,6 @@ const Sidebar: React.FC<SidebarProps> = ({ role, isOpen, onClose }) => {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
   };
 
   return (
