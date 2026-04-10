@@ -1003,8 +1003,17 @@ export const PulseService = {
     },
 
     deletePayment: async (recordId: string) => {
-        const { error } = await supabase.from('payments').delete().eq('id', recordId);
+        const { data, error } = await supabase
+            .from('payments')
+            .delete()
+            .eq('id', recordId)
+            .select();
+            
         if (error) throw error;
+        if (!data || data.length === 0) {
+            throw new Error("Permiso denegado por la base de datos (Posible bloqueo de RLS).");
+        }
+        console.warn(`[Supabase Delete] Se eliminaron ${data.length} registros físicamente. UUID:`, data[0].id);
     },
 
     saveExpense: async (expense: Expense) => {

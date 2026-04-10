@@ -361,13 +361,24 @@ const Finance: React.FC = () => {
   };
 
   const handleDeleteRecord = (record: TuitionRecord) => {
+      const group = groupedTransactions.find(g => g.mainRecord.id === record.id);
       setViewDetailRecord(null);
+      
       confirm({
-          title: 'Eliminar Movimiento',
-          message: 'Esta acción no se puede deshacer.',
+          title: group?.isBatch ? 'Eliminar Lote de Movimientos' : 'Eliminar Movimiento',
+          message: group?.isBatch ? 'Se eliminarán múltiples registros. Esta acción no se puede deshacer.' : 'Esta acción no se puede deshacer.',
           type: 'danger',
           confirmText: 'Eliminar',
-          onConfirm: () => deleteRecord(record.id)
+          onConfirm: async () => {
+              if (group && group.isBatch) {
+                  for (const r of group.records) {
+                      await deleteRecord(r.id);
+                  }
+                  window.location.reload(); // Forzar sincronización UI
+              } else {
+                  await deleteRecord(record.id);
+              }
+          }
       });
   };
 
