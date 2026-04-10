@@ -451,7 +451,7 @@ const StudentPayments: React.FC = () => {
         setIsModalOpen(true);
     };
 
-    const handleConfirmPayment = (
+    const handleConfirmPayment = async (
         recordIds: string[],
         file: File | null,
         method: 'Transferencia' | 'Efectivo',
@@ -460,9 +460,16 @@ const StudentPayments: React.FC = () => {
     ) => {
         if (!file && method === 'Transferencia') return;
         const fileToSend = file || new File([""], "pago_efectivo.txt", { type: "text/plain" });
-        registerBatchPayment(recordIds, fileToSend, method, totalAmount, details);
-        setIsModalOpen(false);
-        setSelectedRecord(null);
+        
+        try {
+            // Esperamos a que el contexto termine de subir el archivo y registrar el lote
+            await registerBatchPayment(recordIds, fileToSend, method, totalAmount, details);
+            setIsModalOpen(false);
+            setSelectedRecord(null);
+        } catch (error) {
+            console.error("Error al confirmar el pago:", error);
+            addToast("Ocurrió un error al procesar el pago", "error");
+        }
     };
 
     const handleDownloadReceipt = (record: TuitionRecord) => {

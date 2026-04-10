@@ -56,7 +56,7 @@ interface FinanceContextType {
         method: 'Transferencia' | 'Efectivo',
         totalAmount: number,
         details: { description: string; amount: number }[]
-    ) => void;
+    ) => Promise<void>;
     updateRecordAmount: (recordId: string, newAmount: number) => void;
     deleteRecord: (recordId: string) => void;
     generateMonthlyBilling: () => void;
@@ -479,6 +479,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         } catch (e) {
             console.error(e);
             addToast('Error al registrar pago', 'error');
+            throw e;
         } finally {
             setIsProcessing(false);
         }
