@@ -120,9 +120,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         const subscriptionPromise = initAuth();
 
+        // Vigilante de Visibilidad: Refresca sesión al volver a la pestaña
+        const handleVisibilityChange = async () => {
+            if (document.visibilityState === 'visible') {
+                console.log("AuthContext: Usuario regresó a la pestaña, verificando sesión...");
+                const { data } = await supabase.auth.getSession();
+                if (data?.session) {
+                    const user = await PulseService.getCurrentUser();
+                    if (user && mounted) setCurrentUser(user);
+                }
+            }
+        };
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
         return () => {
             mounted = false;
             subscriptionPromise.then(sub => sub?.unsubscribe());
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
         };
     }, []);
 

@@ -334,6 +334,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         };
 
         try {
+            setIsLoading(true);
             const initialFee = academySettings.paymentSettings?.monthlyTuition || 500;
             await PulseService.createStudentAccountFromMaster(finalStudent, (student as any).password, initialFee);
 
@@ -348,6 +349,8 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             console.error("Failed to register student", e);
             addToast('Error al crear perfil y cuenta del alumno', 'error');
             throw e;
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -358,12 +361,15 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         const newStudents = students.map(s => s.id === studentWithEligibility.id ? { ...studentWithEligibility, balance: s.balance } : s);
 
         try {
+            setIsLoading(true);
             await PulseService.saveStudents([studentWithEligibility]);
             setStudents(newStudents);
             addToast('Datos del alumno actualizados', 'success');
         } catch (e) {
             console.error(e);
             addToast('Error al actualizar datos del alumno', 'error');
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -415,6 +421,7 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         if (currentUser?.role !== 'master') return;
 
         try {
+            setIsLoading(true);
             await PulseService.deleteFullStudentData(id);
 
             const newStudents = students.filter(s => s.id !== id);
@@ -451,6 +458,8 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
             console.error(e);
             addToast('Error al eliminar alumno', 'error');
             throw e; // Lanza el error para que StudentDetailModal no siga purgando deudas
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -659,10 +668,18 @@ export const AcademyProvider: React.FC<{ children: React.ReactNode }> = ({ child
         newModifications.push(finalMod);
         const updatedClass = { ...target, modifications: newModifications };
 
-        const newClasses = classes.map(c => c.id === classId ? updatedClass : c);
-        setClasses(newClasses);
-        await PulseService.saveClasses([updatedClass]);
-        addToast('Sesión modificada', 'success');
+        try {
+            setIsLoading(true);
+            const newClasses = classes.map(c => c.id === classId ? updatedClass : c);
+            setClasses(newClasses);
+            await PulseService.saveClasses([updatedClass]);
+            addToast('Sesión modificada', 'success');
+        } catch (e) {
+            console.error("Error modifying class session", e);
+            addToast('Error al modificar sesión', 'error');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const deleteClass = async (id: string) => {

@@ -39,6 +39,8 @@ interface FinanceContextType {
     rollingRevenueData: RevenueData[];
     stats: FinanceStats;
     isFinanceLoading: boolean;
+    isProcessing: boolean;
+    isDeletingRecord: boolean;
 
     // Actions
     refreshFinance: () => void;
@@ -86,6 +88,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
     const [expenses, setExpenses] = useState<Expense[]>([]);
     const [isFinanceLoading, setIsFinanceLoading] = useState(true);
     const [isDeletingRecord, setIsDeletingRecord] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     // Stats State
     const [monthlyRevenueData, setMonthlyRevenueData] = useState<RevenueData[]>([]);
@@ -376,6 +379,7 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         // Despertar la sesión de Supabase si estuvo inactiva mucho tiempo
         await PulseService.getCurrentUser();
 
+        setIsProcessing(true);
         const finalAmount = Number(data.amount);
         const newRecord: TuitionRecord = {
             id: generateId('chg'),
@@ -406,6 +410,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         } catch (e: any) {
             console.error('Failed to create charge:', e);
             addToast(`Error al generar cargo: ${e.message}`, 'error');
+        } finally {
+            setIsProcessing(false);
         }
     };
 
@@ -466,12 +472,15 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         });
 
         try {
+            setIsProcessing(true);
             await PulseService.savePayments(updatedRecords);
             setRecords(newRecords);
             addToast('Pago registrado y enviado a revisión', 'success');
         } catch (e) {
             console.error(e);
             addToast('Error al registrar pago', 'error');
+        } finally {
+            setIsProcessing(false);
         }
     };
 
@@ -726,14 +735,14 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         try {
             await PulseService.deletePayment(recordId);
             setRecords(prev => prev.filter(r => r.id !== recordId));
-            setIsDeletingRecord(false);
             addToast('Registro eliminado correctamente', 'info');
             return true; // <-- Importante para indicar éxito
         } catch (error) {
             console.error("Error al eliminar el registro:", error);
-            setIsDeletingRecord(false);
             addToast('Error al eliminar el movimiento de la nube', 'error');
             return false;
+        } finally {
+            setIsDeletingRecord(false);
         }
     };
 
@@ -837,6 +846,8 @@ export const FinanceProvider: React.FC<{ children: React.ReactNode }> = ({ child
             rollingRevenueData,
             stats,
             isFinanceLoading,
+            isProcessing,
+            isDeletingRecord,
             refreshFinance: loadFinanceData,
             createManualCharge,
             createRecord,
