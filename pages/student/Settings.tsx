@@ -2,6 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { useStore } from '../../context/StoreContext';
 import { useToast } from '../../context/ToastContext';
+import { PulseService } from '../../services/pulseService';
 import { RankColor, Rank, Student } from '../../types';
 import ConfirmationModal from '../../components/ConfirmationModal';
 import EmergencyCard from '../../components/ui/EmergencyCard';
@@ -99,16 +100,30 @@ const Settings: React.FC = () => {
         addToast('Configuración guardada exitosamente', 'success');
     };
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setProfileData(prev => ({ ...prev, avatarUrl: reader.result as string }));
-                updateUserProfile({ avatarUrl: reader.result as string });
-                addToast('Foto de perfil actualizada', 'success');
-            };
-            reader.readAsDataURL(file);
+        if (file && currentUser?.id) {
+            try {
+                if (typeof addToast === 'function') {
+                    addToast('Subiendo foto de perfil...', 'info');
+                }
+                
+                // 1. Subir al Storage y obtener el link corto
+                const publicUrl = await PulseService.uploadAvatar(currentUser.id, file);
+                
+                // 2. Actualizar el UI y disparar el guardado oficial a la base de datos
+                setProfileData(prev => ({ ...prev, avatarUrl: publicUrl }));
+                await updateUserProfile({ avatarUrl: publicUrl });
+                
+                if (typeof addToast === 'function') {
+                    addToast('Foto de perfil actualizada exitosamente', 'success');
+                }
+            } catch (error) {
+                console.error("Error subiendo avatar:", error);
+                if (typeof addToast === 'function') {
+                    addToast('Error al procesar la imagen.', 'error');
+                }
+            }
         }
     };
     const triggerFileInput = () => fileInputRef.current?.click();
